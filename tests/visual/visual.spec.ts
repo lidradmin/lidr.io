@@ -42,7 +42,11 @@ for (const slug of ENABLED) {
         readFileSync(`capture/screens/${slug}-${bp.name}.png`)
       );
       const actual = PNG.sync.read(readFileSync(actualPath));
-      const width = Math.min(expected.width, actual.width);
+      expect(
+        actual.width,
+        "viewport width mismatch vs reference — regenerate captures or check breakpoints"
+      ).toBe(expected.width);
+      const width = expected.width;
       const height = Math.max(expected.height, actual.height);
       // pad both to same canvas so height drift shows up as diff pixels
       const pad = (src: PNG) => {
