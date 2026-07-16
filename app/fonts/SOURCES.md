@@ -66,24 +66,55 @@ from the local brand-guide source above using a woff2 compressor
 (e.g. `fonttools`'s `fonttools varLib.instancer` / `woff2_compress`, not
 installed in this environment).
 
-## Google Fonts (Mulish, Inter, Inter Tight, Lora, Montserrat) — OFL
+## Montserrat (self-hosted) — OFL
 
-The live site loads these dynamically via Google Fonts `@import`/`<link>`
-(`fonts.googleapis.com/css2?family=...`), which in turn references
-`fonts.gstatic.com` font binaries. All Google Fonts are licensed under the
-SIL Open Font License (OFL) — free to self-host and redistribute.
+| File                              | Weights                 | Source |
+| --------------------------------- | ----------------------- | ------ |
+| `Montserrat-Variable-latin.woff2` | variable `wght` 100–900 | `https://fonts.gstatic.com/s/montserrat/v31/JTUSjIg1_i6t8kCHKm459WlhyyTh89Y.woff2` (latin subset, fetched 2026-07-16 via the css2 API `https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap` with a Chrome 126 User-Agent) |
 
-None of these were copied into `app/fonts/` in this task. During capture,
-the only font binaries actually requested for these families came back as
-plain `.ttf` (not `.woff2`) from `fonts.gstatic.com` — an artifact of the
-capture browser's format negotiation, not a reflection of what Google
-actually serves modern browsers (Google Fonts serve woff2 as the primary
-format). Rather than harvest and hand-manage stale/incorrectly-negotiated
-`.ttf` copies, the recommended path for later tasks is to self-host these
-via `next/font/google`, which fetches the correct woff2 subsets at build
-time and inlines them with zero runtime request to Google. See
-`capture/raw-assets/*.ttf` (gitignored) if a manual reference copy of the
-Montserrat/Lora glyphs-as-requested is ever needed for comparison.
+**License: SIL Open Font License (OFL)** — free to self-host and
+redistribute.
+
+Montserrat is the site's true body font: the computed `body` font stack is
+`Montserrat, -apple-system, system-ui, …` and the rendered-text census
+(`capture/tokens-report.json` → `fontCensus`) shows Montserrat painting the
+vast majority of visible body text at weights **400 / 500 / 600 / 700**.
+During live capture the browser fetched exactly four Montserrat static-ttf
+instances (weights 400/500/600/700 — mapped via the css2 API); the css2 API
+serves a single variable woff2 covering all four for modern browsers, so
+one file is hosted here. Verified in a headless browser that the file
+renders distinct weights (variable axis works). Only the latin subset is
+hosted — the captured pages are English-only (latin covers U+0000–00FF,
+incl. `£` used on pricing).
+
+Loaded via `next/font/local` in `app/layout.tsx` as `--font-montserrat`
+(no `next/font/google`, per the no-build-time-third-party-dependency
+requirement).
+
+## Families declared but never rendered (NOT self-hosted)
+
+The live CSS declares/imports many additional families — **Lora, Mulish,
+Inter, Inter Tight, Archivo, Manrope, Oswald, EB Garamond, Clash Display,
+Cabinet Grotesk, DM Serif Text…** — but `capture/assets.json` (all 10
+pages × 3 viewports) shows **no font binary was ever fetched** for any of
+them, and the rendered-text census across home/about/features/pricing/
+contact-us found zero visible text computed to these families. A browser
+only fetches a font when visible text needs it, so these families render
+nothing on the pages in scope. They are deliberately **not** self-hosted.
+
+Notes:
+
+- **Lora**: 26 `font-family: 'Lora' !important` rules exist in inline page
+  CSS, but they match no visible element — no Lora binary appears in
+  `capture/assets.json` and no rendered text computes to Lora.
+- **Inter**: appears in the heading fallback chain
+  (`'Amenti', Inter, serif`) — kept as a fallback name in
+  `--font-heading` (styles/tokens.css) but never loaded, matching live
+  behavior (live also never fetches an Inter binary since Amenti always
+  resolves).
+- If a later task adds a page/component whose text genuinely renders one
+  of these families, self-host it then (all the Google families are OFL;
+  Clash Display / Cabinet Grotesk are Fontshare-licensed).
 
 ## Clash Display (Fontshare)
 

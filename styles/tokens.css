@@ -1,0 +1,181 @@
+/**
+ * Design tokens for the Lidr.io rebuild.
+ *
+ * Sourced from live computed styles (scripts/capture/extract-tokens.mjs →
+ * capture/tokens-report.json, sampled across home/about/features/pricing/
+ * contact-us at 1440px) plus the live combined CSS (Blocksy theme vars).
+ * Values are normalized only where visually imperceptible; every
+ * normalization is noted inline as  live → token.
+ */
+:root {
+  /* ------------------------------------------------------------------ *
+   * Color palette
+   * Blocksy theme palette (live CSS --theme-palette-color-1..8) plus
+   * colors observed in computed styles on every sampled page.
+   * ------------------------------------------------------------------ */
+  --color-dark-1: #1f1f1f; /* theme palette 1 — near-black (buttons, text on light) */
+  --color-dark-2: #212121; /* theme palette 2 — near-black (button/link hover) */
+  --color-text: #2a2a2a; /* theme palette 3 — body text (computed body color) */
+  --color-brand: #192c27; /* theme palette 4 — dark green: headings, nav links */
+  --color-white: #ffffff; /* theme palette 5-8 — body bg, cards, text on dark */
+
+  --color-primary: var(--color-brand);
+  --color-heading: var(--color-brand);
+  --color-bg: var(--color-white); /* computed body background (live CSS declares
+                                     #f3f3f3 but a later rule overrides to #fff) */
+
+  --color-slate: #3f444e; /* footer + dark section backgrounds, cookie button */
+  --color-text-muted: #555555; /* hero/lead paragraphs (rgb(85,85,85)) */
+  --color-accent: #f2e32b; /* yellow accent (feature icons / app UI) */
+
+  /* Grays (near-identical live values merged where noted) */
+  --color-gray-100: #f5f5f5; /* light section bg; also rgba(243,244,245,.83) base */
+  --color-gray-200: #eeeeee; /* borders / light fills — merges live #ececec,
+                                #efefef, #eeeeee (≤3 RGB units apart) */
+  --color-gray-300: #e4e4e4; /* borders (observed once, home) */
+  --color-gray-500: #808080; /* mid-gray borders (cookie decline) */
+  --color-gray-800: #262626; /* dark text variant — near palette-3 but kept:
+                                appears as its own computed value */
+  --color-black: #000000; /* pricing card text, some headings */
+
+  /* Translucent surfaces (sticky header pill, overlays) */
+  --color-surface-glass: rgba(255, 255, 255, 0.83);
+  --color-surface-glass-muted: rgba(243, 244, 245, 0.83);
+
+  /* ------------------------------------------------------------------ *
+   * Typography — families
+   * Headings: live rule  h1,h2,h3,h4,h5,h6 { font-family:'Amenti',Inter,serif !important }
+   *   (Inter is declared but never fetched/rendered on any captured page;
+   *    kept only as the live fallback chain.)
+   * Body: computed body font — Montserrat + Blocksy system stack.
+   * System: Blocksy --theme-font-stack-default (cookie banner, form labels,
+   *   footer copyright render in this stack, NOT Montserrat).
+   * The --font-amenti / --font-montserrat vars are injected by
+   * next/font/local in app/layout.tsx.
+   * ------------------------------------------------------------------ */
+  --font-heading: var(--font-amenti), Inter, serif;
+  --font-body: var(--font-montserrat), -apple-system, "system-ui", "Segoe UI",
+    Roboto, Oxygen-Sans, Ubuntu, Cantarell, "Helvetica Neue", sans-serif;
+  --font-system: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+    Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji",
+    "Segoe UI Symbol";
+
+  /* Weights actually rendered on the live pages:
+     Amenti 500/700 (500 also serves computed 300/400 requests — only the
+     500 & 700 faces exist); Montserrat 400/500/600/700. */
+  --font-normal: 400;
+  --font-medium: 500;
+  --font-semibold: 600;
+  --font-bold: 700;
+
+  /* ------------------------------------------------------------------ *
+   * Typography — sizes (desktop, 1440px)
+   * Body sizes from computed styles; heading base scale from the Blocksy
+   * theme defaults (h1 40 / h2 35 / h3 30 / h4 25 / h5 20 / h6 16, all
+   * line-height 1.5) which match observed non-hero headings. Hero display
+   * sizes observed: 50px (home h1), 45/46px (about/features section heroes).
+   * ------------------------------------------------------------------ */
+  --text-xs: 12px; /* pricing feature list items */
+  --text-sm: 13px; /* pill buttons, small labels */
+  --text-md: 14px; /* card meta (h5 in testimonial cards) */
+  --text-nav: 15px; /* header nav links */
+  --text-base: 16px; /* body default */
+  --text-lg: 17px; /* lead / main paragraphs */
+  --text-xl: 18px; /* FAQ triggers, card names */
+
+  --text-h6: 16px;
+  --text-h5: 20px;
+  --text-h4: 25px;
+  --text-h3: 30px;
+  --text-h2: 35px;
+  --text-h1: 40px;
+  --text-display-sm: 45px; /* about/features hero headings (live 45px & 46px) */
+  --text-display: 50px; /* home hero h1 */
+
+  /* Line heights */
+  --leading-none: 1;
+  --leading-tight: 1.12; /* home hero h1: 56px/50px */
+  --leading-heading: 1.5; /* Blocksy heading default (observed on h2-h5) */
+  --leading-relaxed: 1.6; /* main paragraphs: 27.2px/17px */
+  --leading-normal: 1.65; /* body: 26.4px/16px */
+
+  /* Letter spacing */
+  --tracking-tight: -1px; /* home hero h1 */
+  --tracking-snug: -0.5px; /* features h2 */
+  --tracking-normal: normal;
+
+  /* ------------------------------------------------------------------ *
+   * Spacing scale — px-valued steps observed live (section paddings
+   * 150/100/60/40/10, button paddings 8x30 & 10x20), regularized onto a
+   * 4/8 grid only where unobserved gaps needed filling.
+   * ------------------------------------------------------------------ */
+  --space-4: 4px;
+  --space-8: 8px;
+  --space-10: 10px;
+  --space-12: 12px;
+  --space-16: 16px;
+  --space-20: 20px;
+  --space-24: 24px;
+  --space-30: 30px;
+  --space-32: 32px;
+  --space-40: 40px;
+  --space-60: 60px;
+  --space-80: 80px;
+  --space-100: 100px; /* section padding-bottom (features) */
+  --space-150: 150px; /* section padding-top (home/features) */
+
+  /* Semantic aliases */
+  --space-xs: var(--space-8);
+  --space-sm: var(--space-12);
+  --space-md: var(--space-16);
+  --space-lg: var(--space-24);
+  --space-xl: var(--space-40);
+  --space-section: var(--space-100);
+  --space-section-lg: var(--space-150);
+
+  /* ------------------------------------------------------------------ *
+   * Radii — observed values, most-used first: 50px (46×), 20px, 99px,
+   * 10px, 8px, 22px, 15px, 5px, 50%. 43px/99px pills normalized to
+   * --radius-pill / --radius-full (identical rendering on elements
+   * shorter than 2× the radius).
+   * ------------------------------------------------------------------ */
+  --radius-xs: 5px;
+  --radius-sm: 8px;
+  --radius-md: 10px;
+  --radius-lg: 15px;
+  --radius-xl: 20px;
+  --radius-card: 22px; /* features cards */
+  --radius-pill: 50px; /* header buttons */
+  --radius-full: 999px; /* live 99px on 40px-tall pills — visually identical */
+  --radius-circle: 50%;
+
+  /* ------------------------------------------------------------------ *
+   * Shadows — copied verbatim from computed styles (frequency order).
+   * ------------------------------------------------------------------ */
+  --shadow-btn: rgba(0, 0, 0, 0.2) 0px 4px 10px 0px,
+    rgba(0, 0, 0, 0.56) 0px -3px 0px 0px inset; /* dark pill CTA */
+  --shadow-card: rgba(34, 56, 101, 0.15) 0px 5px 30px -5px;
+  --shadow-sm: rgba(0, 0, 0, 0.1) 0px 2px 10px 0px;
+  --shadow-subtle: rgba(0, 0, 0, 0.03) 2px 2px 9px 0px;
+
+  /* ------------------------------------------------------------------ *
+   * Layout
+   * Live containers: width 90% of viewport; custom sections cap at
+   * max-width 1250px (most common declared cap), Blocksy content
+   * container caps at 1199px (legal pages, footer).
+   * ------------------------------------------------------------------ */
+  --container-width: 90%;
+  --container-max: 1250px;
+  --container-content-max: 1199px;
+
+  /* ------------------------------------------------------------------ *
+   * Breakpoints (reference only — CSS vars cannot be used in @media).
+   * Blocksy theme (dominant on live site):
+   *   mobile   ≤ 689.98px
+   *   tablet   690px – 999.98px
+   *   desktop  ≥ 1000px
+   * Also present in live CSS (third-party/custom rules): 479.98px,
+   * 600px, 767px/768px, 1024px.
+   * Capture reference viewports: 390 / 768 / 1440.
+   * ------------------------------------------------------------------ */
+}
