@@ -28,13 +28,17 @@
   /* Button-specific tokens: the live CTA/button background is
      --color-dark-1 (#1f1f1f), NOT --color-primary/brand green.
      --color-primary aliases the brand green used for headings/nav links only. */
-  --color-btn-bg: var(--color-dark-1);
-  --color-btn-bg-hover: var(--color-dark-2); /* hover: verify against live in Task 6 —
-    no isolated computed-style evidence of the CTA's own hover background was
-    found in capture/tokens-report.json or capture/dom/home.html (the live
-    button's computed background-color resolves to transparent, with the
-    visible fill painted by a wrapper/pseudo-element/gradient); using the
-    theme's palette-2 hover color (#212121) as the best available default. */
+  --color-btn-bg: var(--color-dark-1); /* flat fallback only — the real CTA
+    fill is --btn-gradient (below) */
+  --color-btn-bg-hover: var(--color-dark-2); /* flat fallback for the
+    verified hover gradient (--btn-gradient-hover) */
+
+  /* Verified live (2026-07-16, Playwright computed styles on the
+     https://lidr.io/ header CTAs): the visible button fill is a vertical
+     gradient, not a flat color, and hover swaps the gradient + scales
+     (scale 1.05 primary / 1.08 secondary — set in Button.module.css). */
+  --btn-gradient: linear-gradient(180deg, #141820 0%, #525151 100%);
+  --btn-gradient-hover: linear-gradient(180deg, #1e2430 0%, #5e5e5e 100%);
 
   --color-slate: #3f444e; /* footer + dark section backgrounds, cookie button */
   --color-text-muted: #555555; /* hero/lead paragraphs (rgb(85,85,85)) */
@@ -170,6 +174,8 @@
    * ------------------------------------------------------------------ */
   --shadow-btn: rgba(0, 0, 0, 0.2) 0px 4px 10px 0px,
     rgba(0, 0, 0, 0.56) 0px -3px 0px 0px inset; /* dark pill CTA */
+  --shadow-btn-hover: rgba(0, 0, 0, 0.25) 0px 6px 14px 0px,
+    rgba(0, 0, 0, 0.56) 0px -3px 0px 0px inset; /* verified live CTA hover */
   --shadow-card: rgba(34, 56, 101, 0.15) 0px 5px 30px -5px;
   --shadow-sm: rgba(0, 0, 0, 0.1) 0px 2px 10px 0px;
   --shadow-subtle: rgba(0, 0, 0, 0.03) 2px 2px 9px 0px;

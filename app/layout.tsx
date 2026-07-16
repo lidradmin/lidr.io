@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import localFont from "next/font/local";
 import "../styles/tokens.css";
 import "../styles/globals.css";
+import { Header } from "../components/Header/Header";
+import { Footer } from "../components/Footer/Footer";
 
 // Heading face. Live site loads Amenti 500 + 700 (see app/fonts/SOURCES.md);
 // computed weights 300/400 also resolve to the 500 face, as on the live site.
@@ -44,7 +46,9 @@ export default function RootLayout({
         <a className="skip-link" href="#main">
           Skip to content
         </a>
-        {children}
+        <Header />
+        <main id="main">{children}</main>
+        <Footer />
       </body>
     </html>
   );

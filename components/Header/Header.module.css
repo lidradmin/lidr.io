@@ -1,0 +1,209 @@
+/*
+ * Sticky pill header + mobile offcanvas menu.
+ * All values verified against live computed styles (https://lidr.io/,
+ * Playwright, 2026-07-16) at 1440 / 768 / 390. The live header swaps to the
+ * mobile layout below the Blocksy desktop breakpoint (1000px).
+ */
+
+.header {
+  position: sticky;
+  top: 20px; /* live: pinned 20px below the viewport top, incl. at scroll 0 */
+  z-index: 50; /* live #header z-index */
+  width: var(--container-width); /* 90% */
+  margin: 0 auto;
+  border-radius: var(--radius-pill);
+  box-shadow: var(--shadow-subtle);
+}
+
+/* Translucent glass pill. The glass surface lives on a ::before pseudo:
+   backdrop-filter on .bar itself would make it the containing block for the
+   position: fixed mobile panel (a descendant), trapping it inside the pill. */
+.bar {
+  position: relative;
+  padding: 13px 20px;
+  border-radius: var(--radius-pill);
+}
+
+.bar::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: var(--color-surface-glass-muted); /* rgba(243,244,245,.83) */
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+  border-radius: inherit;
+}
+
+.inner {
+  display: flex;
+  align-items: center;
+}
+
+.logo {
+  display: block;
+  flex-shrink: 0;
+}
+
+.logo svg {
+  width: 100px; /* live rendered size: 100 x 25.2 */
+  height: auto;
+  display: block;
+  fill: var(--color-black);
+}
+
+.nav {
+  margin-left: 20px; /* live gap between logo and first nav item box */
+}
+
+.navList {
+  display: flex;
+  gap: 15px;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.navList li {
+  display: flex;
+  align-items: center;
+}
+
+.navList a {
+  display: flex;
+  align-items: center;
+  padding: 0 17.5px 0 5px; /* live per-link padding */
+  font-size: var(--text-nav); /* 15px */
+  font-weight: var(--font-normal);
+  color: var(--color-text);
+  transition: color 0.3s;
+}
+
+.navList a:hover,
+.navLinkActive.navLinkActive {
+  color: var(--color-brand); /* live: current + hovered links go brand green */
+}
+
+.actions {
+  display: flex;
+  align-items: center;
+  /* live: 10px margin between buttons + ~4px rendered word-space */
+  gap: 14px;
+  margin-left: auto;
+}
+
+/* ------------------------------------------------------------------ *
+ * Mobile header controls (hamburger + panel)
+ * ------------------------------------------------------------------ */
+
+.mobileMenu {
+  display: flex;
+  align-items: center;
+}
+
+.menuToggle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  margin-left: 10px;
+  padding: 0;
+  border: 0;
+  background: none;
+  cursor: pointer;
+}
+
+.burger {
+  display: block;
+  fill: var(--color-text); /* live rects render #2a2a2a */
+}
+
+/* Full-screen white glass overlay, as the live offcanvas */
+.menuPanel {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  background: rgba(255, 255, 255, 0.94);
+  -webkit-backdrop-filter: blur(50px);
+  backdrop-filter: blur(50px);
+  overflow-y: auto;
+}
+
+.menuClose {
+  position: absolute;
+  top: 10px;
+  right: 9px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 38px;
+  height: 38px;
+  padding: 0;
+  border: 0;
+  border-radius: var(--radius-pill);
+  background: rgba(240, 240, 240, 0.43);
+  cursor: pointer;
+}
+
+.menuClose svg {
+  fill: var(--color-black);
+}
+
+.menuList {
+  list-style: none;
+  margin: 0;
+  padding: 48px 20px 20px; /* live: first link box at y=48, x=20 */
+}
+
+.menuList a {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 5px 0;
+  font-size: 33px;
+  font-weight: var(--font-normal);
+  line-height: var(--leading-normal); /* 1.65 */
+  color: var(--color-black);
+}
+
+/* ------------------------------------------------------------------ *
+ * Breakpoints (Blocksy: desktop >= 1000px)
+ * ------------------------------------------------------------------ */
+
+@media (min-width: 1000px) {
+  .mobileMenu {
+    display: none;
+  }
+}
+
+@media (max-width: 999.98px) {
+  .header {
+    top: 5px;
+    width: 100%;
+    padding: 0 5px;
+  }
+
+  .bar {
+    padding: 9px 15px;
+    border-radius: var(--radius-md); /* 10px */
+  }
+
+  .bar::before {
+    background: rgba(255, 255, 255, 0.89); /* live mobile bar surface */
+  }
+
+  .nav {
+    display: none; /* inline nav replaced by the offcanvas panel */
+  }
+
+  .actions a {
+    font-size: 12px; /* live mobile Login font size */
+  }
+
+  .actions .downloadBtn {
+    /* live hides the Download App button on mobile/tablet; doubled
+       specificity so this beats .button { display: inline-flex } */
+    display: none;
+  }
+}

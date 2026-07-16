@@ -1,0 +1,179 @@
+/*
+ * Site footer (dark slate, 3 rows: brand/socials, link columns, copyright).
+ * All values verified against live computed styles (https://lidr.io/,
+ * Playwright, 2026-07-16) at 1440 / 390. Columns stack centered below the
+ * Blocksy desktop breakpoint (1000px), as in the 768/390 captures.
+ */
+
+.footer {
+  background: var(--color-slate);
+  padding: 50px 10px 20px;
+}
+
+.container {
+  width: var(--container-width); /* 90% */
+  margin: 0 auto;
+}
+
+/* Row 1: brand + socials, divided from the columns by a grey rule */
+.top {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 50px;
+  padding-bottom: 15px;
+  margin-bottom: 15px;
+  border-bottom: 1px solid var(--color-gray-500);
+}
+
+.brand img {
+  width: 150px;
+  height: auto;
+  margin-bottom: 10px;
+}
+
+.socials {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  /* live: 15px flex gap + 15px svg margin-left = 51px icon pitch */
+  gap: 30px;
+}
+
+.socials a {
+  display: flex;
+}
+
+.socials svg {
+  width: 21px;
+  height: 21px;
+  fill: var(--color-white);
+}
+
+/* Row 2: Contact / Quick Links / Legal */
+.columns {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 50px;
+  padding-top: 30px;
+}
+
+/* Flex column, as live: keeps the menus' trailing 10px li margins inside
+   the column height (a plain block would collapse them away). */
+.column {
+  display: flex;
+  flex-direction: column;
+}
+
+.columnTitle {
+  /* live computed font-weight 300 resolves to the Amenti 500 face
+     (only 500/700 exist), so declare 500 directly */
+  font-size: var(--text-h5); /* 20px */
+  font-weight: var(--font-medium);
+  line-height: var(--leading-heading);
+  color: var(--color-white);
+  margin: 0 0 15px;
+}
+
+.contactList {
+  list-style: none;
+  margin: 0 0 15px; /* live .othemrians__consmin23 bottom margin */
+  padding: 0;
+}
+
+.contactList li + li {
+  margin-top: 15px;
+}
+
+.contactList a {
+  display: flex;
+  align-items: center;
+  font-size: var(--text-nav); /* 15px */
+  line-height: var(--leading-normal);
+  color: var(--color-white);
+  opacity: 0.7;
+}
+
+.contactList svg {
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+  margin-right: 5px;
+  fill: var(--color-white);
+}
+
+.menu {
+  list-style: none;
+  /* 9px top offset matches the live gap between titles and menu lists */
+  margin: 9px 0 0;
+  padding: 0;
+}
+
+.menu li {
+  margin-bottom: 10px;
+  font-size: var(--text-base);
+  line-height: var(--leading-normal); /* li line box 26.4px, as live */
+}
+
+.menu a {
+  font-size: var(--text-nav); /* 15px */
+  color: var(--color-white);
+  opacity: 0.7;
+}
+
+/* Row 3: copyright */
+.bottom {
+  padding-top: 50px;
+}
+
+.copyright {
+  max-width: var(--container-content-max); /* 1199px */
+  margin: 0 auto;
+  text-align: center;
+  font-family: var(--font-system); /* live renders the system stack here */
+  font-size: 16px;
+  line-height: 1.3;
+  color: var(--color-white);
+  opacity: 0.8;
+}
+
+/* ------------------------------------------------------------------ *
+ * Stacked, centered layout below the Blocksy desktop breakpoint
+ * ------------------------------------------------------------------ */
+@media (max-width: 999.98px) {
+  .top {
+    grid-template-columns: 1fr;
+    gap: 15px;
+    padding-bottom: 40px;
+  }
+
+  .brand img {
+    margin: 0 auto 10px;
+  }
+
+  .socials {
+    justify-content: center;
+    /* live mobile: 15px gap + 10px svg margin = 46px icon pitch */
+    gap: 25px;
+  }
+
+  .columns {
+    grid-template-columns: 1fr;
+  }
+
+  .columnTitle {
+    text-align: center;
+  }
+
+  .contactList a {
+    justify-content: center;
+  }
+
+  .menu {
+    text-align: center;
+  }
+
+  .copyright {
+    font-size: 14px;
+    padding: 20px 0 30px;
+  }
+}
