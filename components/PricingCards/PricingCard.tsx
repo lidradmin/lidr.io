@@ -3,6 +3,7 @@
 import { useState } from "react";
 import styles from "./PricingCards.module.css";
 import type { Plan } from "./plans";
+import type { RevealMode } from "../Reveal/RevealManager";
 
 /** Chevron used by the live "See All Features" toggle (path verbatim). */
 function ChevronIcon() {
@@ -42,7 +43,7 @@ export function PricingCard({
 }: {
   plan: Plan;
   /** scroll-reveal participation (see components/Reveal/RevealManager) */
-  reveal?: string;
+  reveal?: RevealMode;
   /** live mobile highlight: most-visible card below 801px */
   scrollActive?: boolean;
 }) {

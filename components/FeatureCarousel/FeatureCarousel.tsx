@@ -6,7 +6,9 @@ import { ArrowLeftIcon, ArrowRightIcon } from "../icons/Arrows";
 import { SLIDES } from "./slides";
 
 /**
- * "Clarity From Every Capture" carousel (shared: home + features pages).
+ * "Clarity From Every Capture" carousel (HOME page only — the features page
+ * builds the same-titled section as a position:sticky scroll-driven card
+ * stack, a different mechanic; see components/features/).
  * Mirrors the live implementation exactly: a transform-driven strip on
  * desktop (Swiper on the live site) and a native scroll-snap strip with
  * arrow buttons on tablet/mobile — two DOM variants toggled by media query,

@@ -4,6 +4,7 @@ import { useRef, useState } from "react";
 import styles from "./Testimonials.module.css";
 import { ArrowLeftIcon, ArrowRightIcon } from "../icons/Arrows";
 import { REVIEWS } from "./reviews";
+import type { RevealMode } from "../Reveal/RevealManager";
 
 /** Quote glyph, paths verbatim from the live DOM (widget 24f904c). */
 function QuoteIcon() {
@@ -27,7 +28,16 @@ function QuoteIcon() {
  * Client component: the arrows drive the scroller. Initial render matches
  * the captured state (scroll 0, prev disabled).
  */
-export function Testimonials() {
+export function Testimonials({
+  reveal = "max1024",
+}: {
+  /**
+   * Section-level reveal mode (see RevealManager). Default = the set
+   * measured on HOME (whole band re-arms below 1025px); other pages pass
+   * their own measured mode.
+   */
+  reveal?: RevealMode;
+} = {}) {
   const [index, setIndex] = useState(0);
   const viewportRef = useRef<HTMLDivElement>(null);
 
@@ -52,13 +62,13 @@ export function Testimonials() {
   };
 
   return (
-    // data-reveal: on the live site the whole reviews band re-arms its AOS
-    // reveal below 1025px — the tablet/mobile references show it hidden
-    // until scrolled into view (see RevealManager).
+    // data-reveal: on the live site the reviews band re-arms its AOS reveal
+    // (home: below 1025px) — those references show it hidden until scrolled
+    // into view (see RevealManager).
     <section
       className={styles.section}
       aria-labelledby="reviews-heading"
-      data-reveal="max1024"
+      data-reveal={reveal}
     >
       <div className={styles.header}>
         <div className={styles.headerRow}>

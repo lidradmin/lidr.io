@@ -3,6 +3,13 @@
 import { useEffect } from "react";
 
 /**
+ * The three reveal participation modes RevealManager understands (see the
+ * component doc below). Every `reveal` prop / data-reveal attribute is typed
+ * with this union so typos fail the build instead of silently never firing.
+ */
+export type RevealMode = "always" | "max1024" | "max767";
+
+/**
  * Scroll-reveal runtime, mirroring the live site's AOS behavior as actually
  * captured (AOS.init({ once: true }) + the site's custom
  * `.aos-init { filter: blur(10px) }` hidden state).

@@ -5,11 +5,13 @@
  * CSS module (each section skins the badges differently on the live site),
  * so this component only takes classNames.
  */
+import type { RevealMode } from "../Reveal/RevealManager";
+
 type Props = {
   className?: string;
   imgClassName?: string;
   /** scroll-reveal participation (see components/Reveal/RevealManager) */
-  reveal?: string;
+  reveal?: RevealMode;
 };
 
 export function AppStoreBadges({ className, imgClassName, reveal }: Props) {
