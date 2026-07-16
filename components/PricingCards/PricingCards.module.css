@@ -89,7 +89,7 @@
   font-family: var(--font-heading);
   font-size: 30px; /* live: 30px */
   font-weight: var(--font-bold);
-  line-height: normal;
+  line-height: 36px; /* live: normal → 36px rendered box */
   text-align: left;
   color: var(--color-black);
 }
@@ -142,17 +142,19 @@
 /* live: .why__bg ul li */
 .item {
   display: flex;
+  align-items: flex-start; /* live: bullets top-aligned on wrapped rows */
   margin-bottom: 5px; /* live: 5px */
   font-size: var(--text-md);
   line-height: 20px; /* live: 20px */
 }
 
-/* live: .why__bg ul li b */
+/* live: .why__bg ul li b — flex: 0 0 14px keeps the icon column rigid */
 .bullet {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 14px; /* live: 14px */
+  flex: 0 0 14px; /* live: 14px */
+  width: 14px;
   min-height: 22px; /* live: 22px */
   margin: 1px 10px 0 0; /* live: 1px top, 10px right */
 }
@@ -313,6 +315,7 @@
   .price {
     margin-bottom: 3px; /* live: 3px */
     font-size: var(--text-h4); /* live: 24px */
+    line-height: 29px; /* live: normal → 29px rendered box */
   }
 
   .planDesc {
