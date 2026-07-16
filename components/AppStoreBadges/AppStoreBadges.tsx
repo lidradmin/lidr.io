@@ -8,11 +8,13 @@
 type Props = {
   className?: string;
   imgClassName?: string;
+  /** scroll-reveal participation (see components/Reveal/RevealManager) */
+  reveal?: string;
 };
 
-export function AppStoreBadges({ className, imgClassName }: Props) {
+export function AppStoreBadges({ className, imgClassName, reveal }: Props) {
   return (
-    <div className={className}>
+    <div className={className} data-reveal={reveal}>
       <a
         href="https://apps.apple.com/app/id6759912615"
         target="_blank"

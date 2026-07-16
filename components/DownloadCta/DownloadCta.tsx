@@ -12,18 +12,31 @@ export function DownloadCta() {
       <div className={styles.container}>
         <div className={styles.copy}>
           <div className={styles.copyInner}>
-            <h2 id="download-heading" className={styles.heading}>
+            {/* data-reveal: on the live site these five blocks are the ones
+                whose AOS reveal re-arms after load at every breakpoint —
+                the reference captures show them blurred-out until scrolled
+                into view (see RevealManager). */}
+            <h2
+              id="download-heading"
+              className={styles.heading}
+              data-reveal="always"
+            >
               Download The Lidr.io App
             </h2>
-            <p className={styles.sub}>Transform Photo Documentation.</p>
-            <p className={styles.offer}>Get 14 Day Free Trial.</p>
+            <p className={styles.sub} data-reveal="always">
+              Transform Photo Documentation.
+            </p>
+            <p className={styles.offer} data-reveal="always">
+              Get 14 Day Free Trial.
+            </p>
             <AppStoreBadges
               className={styles.badges}
               imgClassName={styles.badgeImg}
+              reveal="always"
             />
           </div>
         </div>
-        <div className={styles.image}>
+        <div className={styles.image} data-reveal="always">
           <img
             src="/images/lidrlaptop.webp"
             srcSet="/images/lidrlaptop-half.webp 1859w, /images/lidrlaptop.webp 3718w"

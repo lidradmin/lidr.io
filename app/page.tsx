@@ -7,6 +7,7 @@ import { BuiltForConfidence } from "../components/home/BuiltForConfidence";
 import { PricingCards } from "../components/PricingCards/PricingCards";
 import { Testimonials } from "../components/Testimonials/Testimonials";
 import { DownloadCta } from "../components/DownloadCta/DownloadCta";
+import { RevealManager } from "../components/Reveal/RevealManager";
 
 export const metadata: Metadata = {
   title: "Smart, Scalable Solutions to Simplify Your Workflow | LIDR.IO",
@@ -17,6 +18,7 @@ export const metadata: Metadata = {
 export default function Home() {
   return (
     <div className={styles.page}>
+      <RevealManager />
       <Hero />
       <QrCta />
       {/* Live: Elementor container .elementor-element-5db0e7d wrapping every

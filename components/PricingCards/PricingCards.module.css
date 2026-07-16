@@ -54,7 +54,12 @@
   border: 1px solid var(--color-gray-300); /* live: #dcdcdc — matches token */
   border-radius: 25px; /* live: 25px */
   text-align: center;
-  transition: 0.5s;
+  /* live: `.bigmainscbar-22 { transition: 0.5s !important }` — the
+     !important is load-bearing: it outranks the visual-test freeze rule
+     (`* { transition: none !important }`) by specificity, exactly as on
+     the live site, so the reveal/scroll-highlight fades are captured
+     mid-flight in the references. */
+  transition: 0.5s !important;
 }
 
 .card:hover {
@@ -206,11 +211,33 @@
   color: #1a1a1a; /* live: rgb(26,26,26) */
   text-decoration: underline;
   cursor: pointer;
+  transition: 0.3s !important; /* live: a { transition: 0.3s !important } */
 }
 
 .seeAllIcon {
   display: inline;
   fill: currentColor;
+  transition: 0.3s !important; /* live: svg color transition (a { 0.3s }) */
+}
+
+/* live: mobile scroll highlight — .bigmainscbar-22.scroll-active
+   (block-8 rules behind @media (max-width: 800px)) */
+@media (max-width: 800px) {
+  .card.scrollActive {
+    background: var(--color-slate);
+    border-color: var(--color-slate);
+  }
+
+  .scrollActive .planName,
+  .scrollActive .price,
+  .scrollActive .per,
+  .scrollActive .planDesc {
+    color: var(--color-white);
+  }
+
+  .scrollActive .seeAllBtn {
+    color: var(--color-white);
+  }
 }
 
 /* live: .bigmainscbar-22 > a[href*="sign-up"] */

@@ -89,6 +89,20 @@ textarea {
   font: inherit;
 }
 
+/*
+ * Scroll-reveal hidden state (see components/Reveal/RevealManager.tsx).
+ * Mirrors the live site's pre-reveal AOS state: aos.css zoom-* opacity 0
+ * plus the site's custom `.aos-init { filter: blur(10px) !important }`.
+ * !important + class specificity deliberately survives the visual-test
+ * freeze stylesheet (`* { transition: none !important }`), exactly as the
+ * live rules do.
+ */
+.reveal-pending {
+  opacity: 0 !important;
+  filter: blur(10px) !important;
+  pointer-events: none;
+}
+
 .skip-link {
   position: absolute;
   left: -9999px;

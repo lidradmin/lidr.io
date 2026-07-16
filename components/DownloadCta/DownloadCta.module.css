@@ -128,9 +128,10 @@
   }
 
   .badges {
+    /* live: the 370px box itself stays left (margin 0); only its content
+       centers */
     justify-content: center;
     align-items: center;
-    margin: 0 auto;
     padding-bottom: var(--space-40); /* live: 40px */
   }
 

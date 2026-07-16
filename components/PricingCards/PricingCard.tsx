@@ -35,10 +35,27 @@ function FeatureItem({ text, extra }: { text: string; extra?: boolean }) {
  * Single pricing card with the live "See All Features" expander (the extra
  * features render collapsed, exactly like the captured initial state).
  */
-export function PricingCard({ plan }: { plan: Plan }) {
+export function PricingCard({
+  plan,
+  reveal,
+  scrollActive = false,
+}: {
+  plan: Plan;
+  /** scroll-reveal participation (see components/Reveal/RevealManager) */
+  reveal?: string;
+  /** live mobile highlight: most-visible card below 801px */
+  scrollActive?: boolean;
+}) {
   const [open, setOpen] = useState(false);
+  const cls = [
+    styles.card,
+    open && styles.cardOpen,
+    scrollActive && styles.scrollActive,
+  ]
+    .filter(Boolean)
+    .join(" ");
   return (
-    <div className={open ? `${styles.card} ${styles.cardOpen}` : styles.card}>
+    <div className={cls} data-reveal={reveal}>
       <h3 className={styles.planName}>{plan.name}</h3>
       <p className={styles.price}>
         {plan.price}

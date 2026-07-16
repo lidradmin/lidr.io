@@ -248,8 +248,10 @@
   }
 
   .image img {
+    /* live: a "text-align: center" override for this img sits in a typo'd
+       "@media (max-width: 801x)" block that browsers drop — the image stays
+       right-aligned (margin-left auto) at every width. */
     width: 100%;
-    margin: 0 auto; /* live: text-align center */
   }
 }
 

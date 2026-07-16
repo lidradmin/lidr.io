@@ -52,7 +52,14 @@ export function Testimonials() {
   };
 
   return (
-    <section className={styles.section} aria-labelledby="reviews-heading">
+    // data-reveal: on the live site the whole reviews band re-arms its AOS
+    // reveal below 1025px — the tablet/mobile references show it hidden
+    // until scrolled into view (see RevealManager).
+    <section
+      className={styles.section}
+      aria-labelledby="reviews-heading"
+      data-reveal="max1024"
+    >
       <div className={styles.header}>
         <div className={styles.headerRow}>
           <h2 id="reviews-heading" className={styles.heading}>

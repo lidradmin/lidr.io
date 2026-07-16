@@ -1,6 +1,5 @@
 import styles from "./PricingCards.module.css";
-import { PricingCard } from "./PricingCard";
-import { PLANS } from "./plans";
+import { PricingCardList } from "./PricingCardList";
 
 /**
  * "Clear Pricing" section (shared: home + pricing pages).
@@ -19,11 +18,7 @@ export function PricingCards() {
           enterprise operations — no hidden fees or long-term contracts.
         </p>
       </div>
-      <div className={styles.cards}>
-        {PLANS.map((plan) => (
-          <PricingCard key={plan.name} plan={plan} />
-        ))}
-      </div>
+      <PricingCardList />
     </section>
   );
 }
