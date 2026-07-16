@@ -43,6 +43,7 @@
 /* live: .otherside__symbolss */
 .arrows {
   display: flex;
+  flex-shrink: 0; /* live: fixed-size buttons; the heading wraps */
 }
 
 /* live: button.mr-arrow-btn */
@@ -61,6 +62,11 @@
   transition: opacity 0.2s ease;
 }
 
+/* live: button.mr-arrow-btn + button.mr-arrow-btn { margin-left: 8px } */
+.arrowBtn + .arrowBtn {
+  margin-left: var(--space-8);
+}
+
 .arrowBtn:disabled {
   opacity: 0.3; /* live: 0.3 */
   cursor: default;
@@ -73,8 +79,9 @@
   fill: var(--color-white);
 }
 
-/* live: .mobile-reviews-carousel */
+/* live: .mobile-reviews-carousel (inside .bigside__maincontent, pt 24px) */
 .viewport {
+  padding-top: 24px; /* live: .bigside__maincontent padding-top */
   overflow-x: auto;
   -webkit-overflow-scrolling: touch;
   scrollbar-width: none;

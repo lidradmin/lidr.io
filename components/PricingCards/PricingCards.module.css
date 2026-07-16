@@ -12,6 +12,7 @@
 /* live: .maincontent---goodas */
 .intro {
   margin: 0 auto;
+  padding-bottom: var(--space-20); /* live: 20px below 1024px */
   text-align: center;
 }
 
@@ -246,6 +247,7 @@
 
   .intro {
     padding-top: 5px; /* live: 5px */
+    padding-bottom: 0;
   }
 
   .introTitle {

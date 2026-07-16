@@ -50,6 +50,7 @@
 /* live: .otherside__symbolss */
 .dArrows {
   display: flex;
+  flex-shrink: 0;
 }
 
 /* live: .swiper-button-prev/-next */
@@ -194,6 +195,7 @@
 
 .mArrows {
   display: flex;
+  flex-shrink: 0; /* live: the 34px svgs can't shrink; the text wraps */
 }
 
 /* live: .mobile-carousel-prev/-next (plain divs; buttons here) */
@@ -212,8 +214,9 @@
   fill: #474747; /* live: #474747 */
 }
 
-/* live: .mobile-carousel */
+/* live: .mobile-carousel (inside .bigside__maincontent, padding-top 24px) */
 .mCarousel {
+  padding-top: 24px; /* live: .bigside__maincontent padding-top */
   overflow-x: auto;
   -webkit-overflow-scrolling: touch;
   scroll-snap-type: x mandatory;

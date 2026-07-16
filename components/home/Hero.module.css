@@ -224,6 +224,7 @@
   .card {
     border-right: 0;
     margin-right: 0;
+    margin-bottom: 15px; /* live: 15px */
     padding-right: 0;
   }
 
