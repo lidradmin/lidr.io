@@ -41,6 +41,6 @@ yarn-error.log*
 next-env.d.ts
 
 # ground-truth captures (large, regenerable)
-capture/
-test-results/
-playwright-report/
+/capture/
+/test-results/
+/playwright-report/
