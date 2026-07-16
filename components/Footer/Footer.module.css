@@ -8,6 +8,10 @@
 .footer {
   background: var(--color-slate);
   padding: 50px 10px 20px;
+  /* live: Blocksy footer border-top 1px solid #eeeeee — without it every
+     row below shifts up 1px and the bottom-anchored final capture chunk
+     misaligns by a row */
+  border-top: 1px solid var(--color-gray-200);
 }
 
 .container {

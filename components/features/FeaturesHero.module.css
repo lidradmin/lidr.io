@@ -109,6 +109,18 @@
   object-fit: contain;
 }
 
+/* Pin the FULL-size files' aspect ratios (what the live page loaded): the
+   -half srcset candidates have odd-pixel dimensions whose intrinsic ratio
+   differs by ~0.03%, which otherwise shifts everything below the hero by a
+   fraction of a pixel at capture widths. */
+.images img:first-child {
+  aspect-ratio: 1735 / 2931; /* live: feature1.png */
+}
+
+.images img + img {
+  aspect-ratio: 1684 / 2931; /* live: features2.png */
+}
+
 /* live: .row.flexbox is a centered flex row from 750px up */
 @media (min-width: 750px) {
   .row {
