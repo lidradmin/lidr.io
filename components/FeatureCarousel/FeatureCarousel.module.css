@@ -1,0 +1,291 @@
+/*
+ * "Clarity From Every Capture" carousel. Values verified against the
+ * captured live DOM (capture/dom/home.html widgets 800f215/21a6ddd) at
+ * 1440/768/390. Live breakpoints: desktop variant >=1025px (Elementor
+ * hidden-tablet/mobile), scroll variant below; 767px Elementor mobile.
+ */
+
+/* ------------------------------------------------------------------ *
+ * Desktop variant (live: .sjhort__m.sjhort__desktop)
+ * ------------------------------------------------------------------ */
+
+.desktop {
+  overflow: hidden; /* live: clips the slide strip at the section edge */
+}
+
+/* live: .short__blocks */
+.dHeader {
+  max-width: var(--container-max);
+  margin: 0 auto;
+  padding: var(--space-20) 0 var(--space-10);
+}
+
+@media (min-width: 802px) {
+  .dHeader {
+    max-width: var(--container-width); /* live: 90% overrides 1250px */
+  }
+}
+
+/* live: .leftside__contents */
+.dRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+/* live: .leftside__b2 h3 */
+.dHeading {
+  margin-bottom: 5px; /* live: 5px */
+  font-size: 42px; /* live: 42px */
+  font-weight: var(--font-medium);
+}
+
+/* live: .leftside__b2 p */
+.dLede {
+  max-width: 550px; /* live: 550px */
+  margin-bottom: 27px; /* live: default p margin 1.5em */
+  font-size: var(--text-xl);
+}
+
+/* live: .otherside__symbolss */
+.dArrows {
+  display: flex;
+}
+
+/* live: .swiper-button-prev/-next */
+.dArrowBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 45px; /* live: 45px */
+  height: 45px;
+  margin-left: var(--space-10);
+  padding: var(--space-8);
+  border: 1px solid var(--color-slate); /* live: 1px #3f444e */
+  border-radius: var(--radius-circle);
+  background: transparent;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.dArrowBtn svg {
+  display: block;
+  width: 34px; /* live: 34px, shrunk to the 27px content box */
+  height: 34px;
+  max-width: 100%;
+  fill: var(--color-black);
+}
+
+.dArrowBtn:disabled svg {
+  fill: var(--color-slate); /* live: disabled arrow #3f444e */
+}
+
+.dArrowBtn:hover {
+  background: var(--color-slate);
+  transform: scale(1.1);
+}
+
+.dArrowBtn:hover svg {
+  fill: var(--color-white);
+}
+
+/* live: .features.swiper */
+.dTrack {
+  position: relative;
+  z-index: 1;
+  padding-left: 5vw; /* live: 5vw */
+}
+
+/* live: .swiper-wrapper */
+.dSlides {
+  display: flex;
+}
+
+/* live: .swiper-slide */
+.dSlide {
+  flex-shrink: 0;
+  width: 280px; /* live: 280px */
+  margin-right: var(--space-10);
+}
+
+/* live: .othermains__image */
+.dCard {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  height: 100%;
+  padding: var(--space-10);
+  background: linear-gradient(120deg, #f4f4f4, #f5f5f5); /* live */
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+}
+
+/* live: .mains__cogn h3 */
+.dCardTitle {
+  max-width: 200px; /* live: 200px */
+  min-height: 68px; /* live: 68px */
+  margin: 0;
+  padding-bottom: var(--space-20);
+  font-size: 21px; /* live: 21px */
+  font-weight: var(--font-medium);
+  line-height: 24px; /* live: 24px */
+  text-align: center;
+}
+
+/* live: .image__uur */
+.dImgWrap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.dImgWrap img {
+  display: block;
+  width: auto;
+  height: auto;
+  max-width: 100%;
+  max-height: 50dvh; /* live: 50dvh (450px at the 900px viewport) */
+  object-fit: contain;
+}
+
+@media (max-width: 1024.98px) {
+  .desktop {
+    display: none; /* live: elementor-hidden-tablet/mobile */
+  }
+}
+
+/* ------------------------------------------------------------------ *
+ * Tablet/mobile variant (live: widget 21a6ddd)
+ * ------------------------------------------------------------------ */
+
+@media (min-width: 1025px) {
+  .mobile {
+    display: none; /* live: elementor-hidden-desktop */
+  }
+}
+
+/* live: .short__blocks (non-desktop overrides) */
+.mHeader {
+  max-width: var(--container-max);
+  margin: 0 auto;
+  padding-top: var(--space-20);
+}
+
+/* live: .leftside__contents at <=801px (align-items unset) */
+.mRow {
+  display: flex;
+  justify-content: space-between;
+}
+
+.mHeading {
+  margin-bottom: 5px; /* live: 5px */
+  font-size: 24px; /* live: 24px */
+  line-height: 30px; /* live: 30px */
+  text-align: left;
+}
+
+.mLede {
+  max-width: 550px;
+  margin-bottom: 5px; /* live: 5px */
+  font-size: var(--text-sm);
+  line-height: 20px; /* live: 20px */
+  text-align: left;
+}
+
+.mArrows {
+  display: flex;
+}
+
+/* live: .mobile-carousel-prev/-next (plain divs; buttons here) */
+.mArrowBtn {
+  margin-left: var(--space-10);
+  padding: 0;
+  border: 0;
+  background: none;
+  cursor: pointer;
+}
+
+.mArrowBtn svg {
+  display: block;
+  width: 34px; /* live: 34px */
+  height: 34px;
+  fill: #474747; /* live: #474747 */
+}
+
+/* live: .mobile-carousel */
+.mCarousel {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  scroll-snap-type: x mandatory;
+  scrollbar-width: none;
+}
+
+.mCarousel::-webkit-scrollbar {
+  display: none;
+}
+
+/* live: .mobile-carousel-track */
+.mTrack {
+  display: flex;
+  gap: var(--space-12);
+  padding: 0 calc(50vw - 140px); /* live */
+}
+
+/* live: .mobile-carousel-slide */
+.mSlide {
+  flex: 0 0 280px; /* live */
+  scroll-snap-align: center;
+  scroll-snap-stop: always;
+}
+
+/* live: .othermains__image (base 25px padding) */
+.mCard {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  height: 100%;
+  padding: 25px; /* live: 25px */
+  background: linear-gradient(120deg, #f4f4f4, #f5f5f5); /* live */
+  border-radius: var(--radius-lg);
+}
+
+/* live: .mains__cogn h3 (<=801px: max-width 250, min-height 70) */
+.mCardTitle {
+  max-width: 250px; /* live: 250px */
+  min-height: 70px; /* live: 70px */
+  margin: 0;
+  padding-bottom: var(--space-20);
+  font-size: 21px; /* live: 21px */
+  font-weight: var(--font-medium);
+  line-height: 24px; /* live: 24px */
+  text-align: center;
+}
+
+/* live: .image__uur (base: fixed 500px box, width 250 at <=801px) */
+.mImgWrap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 250px; /* live: 250px */
+  height: 500px; /* live: 500px */
+}
+
+.mImgWrap img {
+  display: block;
+  width: 300px; /* live: img.mainimage-1 300px, capped by max-width */
+  max-width: 100%;
+  height: auto;
+  object-fit: contain;
+}
+
+@media (max-width: 767.98px) {
+  .mImgWrap {
+    height: auto;
+    max-height: 55dvh; /* live: 55dvh */
+  }
+
+  .mImgWrap img {
+    width: auto;
+    max-height: 50dvh; /* live: 50dvh (422px at the 844px viewport) */
+  }
+}

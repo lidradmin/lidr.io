@@ -1,0 +1,269 @@
+/*
+ * Home hero. Values verified against the captured live DOM rendered offline
+ * in Chromium (capture/dom/home.html) at 1440/768/390. Live selectors noted
+ * per rule. Breakpoints follow the live sheet: 801px custom bp, 767px
+ * (Elementor mobile).
+ */
+
+.hero {
+  position: relative;
+  margin-top: -80px; /* live: div#shoftgradient { margin-top: -80px } */
+  padding-top: var(--space-150);
+  /* live: Elementor classic bg image on #shoftgradient (343-1.jpg) */
+  background: url("/images/343-1.webp") 0 0 / cover no-repeat;
+}
+
+/* live: #shoftgradient::before — translucent light wash over the photo */
+.hero::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  background: var(--color-gray-100);
+  opacity: 0.77; /* live: 0.77 */
+}
+
+/* live: #shoftgradient::after — app-collage overlay at 35% */
+.hero::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  background: url("/images/mainimage1-scaled_1000x.webp") 0 0 / 100% no-repeat;
+  opacity: 0.35; /* live: 0.35 */
+}
+
+/* live: .big__clipimage */
+.clip {
+  position: relative;
+  z-index: 1;
+  display: flex;
+}
+
+/* live: .photo-management-section */
+.content {
+  width: 45%; /* live: 45% */
+}
+
+/* live: h1#hero-heading */
+.title {
+  max-width: 620px; /* live: 620px */
+  margin-bottom: var(--space-10);
+  font-size: var(--text-display);
+  font-weight: var(--font-normal); /* live computed 400 → Amenti 500 face */
+  line-height: 56px; /* live: 56px (1.12) */
+  letter-spacing: -0.02em; /* live: -1px @50px, -0.64px @32px */
+}
+
+/* live: .hero-subtitle */
+.subtitle {
+  max-width: 520px; /* live: 520px */
+  margin-top: var(--space-20);
+  margin-bottom: var(--space-30);
+  font-size: var(--text-lg);
+  line-height: var(--leading-relaxed);
+  color: var(--color-text-muted);
+}
+
+/* live: .button-group */
+.buttons {
+  display: flex;
+}
+
+/* live: .button-group .button (both) */
+.btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 47px; /* live: theme button min-height */
+  margin-right: 15px; /* live: 15px */
+  padding: 7px 30px; /* live: 7px 30px */
+  border-radius: var(--radius-full);
+  font-size: var(--text-nav);
+  font-weight: var(--font-medium);
+  text-align: center;
+  transition: 0.3s;
+}
+
+.btnPrimary {
+  background: var(--btn-gradient);
+  color: var(--color-white);
+  box-shadow: var(--shadow-btn);
+}
+
+.btnPrimary:hover {
+  background: var(--btn-gradient-hover);
+  transform: scale(1.05);
+  box-shadow: var(--shadow-btn-hover);
+}
+
+.btnSecondary {
+  background: var(--color-white);
+  color: #1a1a1a; /* live: rgb(26,26,26) */
+  border: 1px solid #efefef; /* live: #efefef */
+  box-shadow: rgba(0, 0, 0, 0.1) 0px 2px 10px 0px; /* live */
+}
+
+.btnSecondary:hover {
+  background: var(--btn-gradient);
+  color: var(--color-white);
+  border-color: transparent;
+  box-shadow: var(--shadow-btn);
+}
+
+/* live: .features-container */
+.features {
+  display: flex;
+  min-width: 700px; /* live: 700px (overflows the 45% column) */
+  margin-top: var(--space-40);
+}
+
+/* live: .feature-card */
+.card {
+  width: 33.3333%;
+  margin-right: 15px; /* live: 15px */
+  padding-right: 15px; /* live: 15px */
+  border-right: 1px solid rgba(31, 29, 29, 0.12); /* live: #1f1d1d1f */
+}
+
+.card:last-child {
+  border-right: 0;
+  margin-right: 0;
+  padding-right: 0;
+}
+
+/* live: .feature-icon */
+.icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px; /* live: 48px */
+  height: 48px;
+  margin-bottom: var(--space-12);
+}
+
+.icon svg {
+  display: block;
+  width: 48px;
+  height: 48px;
+  overflow: visible;
+}
+
+/* live: h3.feature-title (rendered here as <p> — not a document heading) */
+.cardTitle {
+  margin: 5px 0; /* live: 5px */
+  padding-top: 5px; /* live: 5px */
+  font-family: var(--font-heading);
+  font-size: var(--text-lg);
+  font-weight: var(--font-bold);
+  line-height: 20px; /* live: 20px */
+  color: var(--color-heading);
+}
+
+/* live: p.feature-description */
+.cardDesc {
+  margin-top: 1px; /* live: 1px */
+  font-size: var(--text-md);
+  line-height: 20px; /* live: 20px */
+  opacity: 0.8; /* live: 0.8 */
+}
+
+/* live: .side__imagecontent */
+.image {
+  width: 55%; /* live: 55% */
+  margin-top: -85px; /* live: -85px */
+}
+
+.image img {
+  display: block;
+  max-width: 85%; /* live: 85% */
+  height: auto;
+  margin-left: auto; /* live: text-align right (img computed inline) */
+}
+
+/* Desktop-only container clamp — live: min-width 801px overrides */
+@media (min-width: 802px) {
+  .clip {
+    max-width: var(--container-width); /* live: 90% */
+    margin: 0 auto;
+  }
+}
+
+@media (max-width: 801px) {
+  .clip {
+    display: block;
+    z-index: 3; /* live: 3 below 801px */
+  }
+
+  .content {
+    width: auto; /* live: 100% */
+    padding: 0 var(--space-20); /* live: 0 20px */
+  }
+
+  .title {
+    margin-bottom: 0;
+    font-size: 32px; /* live: 32px */
+    line-height: 37px; /* live: 37px */
+    text-align: center;
+  }
+
+  .buttons {
+    display: block;
+  }
+
+  .btn {
+    margin-right: 0;
+    margin-bottom: var(--space-10);
+  }
+
+  .features {
+    min-width: 0;
+    margin-top: var(--space-40);
+  }
+
+  .card {
+    border-right: 0;
+    margin-right: 0;
+    padding-right: 0;
+  }
+
+  .icon {
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .cardTitle {
+    font-size: var(--text-nav);
+    font-weight: 300; /* live computed 300 → Amenti 500 face */
+    text-align: center;
+  }
+
+  .cardDesc {
+    display: none; /* live: hidden below 801px */
+  }
+
+  .image {
+    width: auto; /* live: 100% */
+  }
+
+  .image img {
+    width: 100%;
+    margin: 0 auto; /* live: text-align center */
+  }
+}
+
+/* Elementor mobile breakpoint */
+@media (max-width: 767.98px) {
+  .hero {
+    padding-top: 120px; /* live: Elementor mobile padding 120px */
+  }
+
+  .image {
+    margin-top: -40px; /* live: -40px */
+    overflow: hidden;
+  }
+
+  .image img {
+    transform: translateX(4.5%); /* live: translateX(4.5%) */
+  }
+}

@@ -1,0 +1,24 @@
+/*
+ * Home page shell.
+ * All values verified against the captured live DOM rendered offline in
+ * Chromium (capture/dom/home.html + its own CSS) at 1440/768/390 — see the
+ * per-rule "live:" notes.
+ */
+
+.page {
+  /* live: Blocksy's .entry-content leaves a 4px strip above the hero's
+     negative pull and below the last section (hero rect y = header bottom
+     + 4px − 80px at all three breakpoints). The padding also stops the
+     hero's -80px margin collapsing through <main>. */
+  padding: 4px 0; /* live: measured 4px entry-content strip */
+}
+
+/* Live: .elementor-element-5db0e7d — flex column container for every
+   section from the feature carousel down to the download CTA. */
+.sections {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-20); /* live: 20px container gap */
+  padding: var(--space-10); /* live: 10px */
+  background: var(--color-bg);
+}

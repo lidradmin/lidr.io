@@ -1,0 +1,118 @@
+/*
+ * "Built for Confidence" band. Values verified against the captured live
+ * DOM (capture/dom/home.html section#bfc-section) at 1440/768/390.
+ */
+
+.section {
+  max-width: var(--container-max);
+  margin: 27px auto 25px; /* live: 27px top, 25px bottom */
+  padding: var(--space-40);
+  background: var(--color-slate);
+  border-radius: var(--radius-xl);
+}
+
+@media (min-width: 802px) {
+  .section {
+    max-width: var(--container-width); /* live: 90% overrides 1250px */
+  }
+}
+
+/* live: h2.bfc-main-title */
+.title {
+  margin-bottom: var(--space-30);
+  font-size: var(--text-h2);
+  font-weight: var(--font-medium);
+  color: var(--color-white);
+}
+
+/* live: .bfc-grid */
+.grid {
+  display: flex;
+  gap: 15px; /* live: 15px */
+}
+
+/* live: .bfc-card */
+.card {
+  width: 25%;
+  padding: var(--space-20);
+  border: 1px solid rgba(255, 255, 255, 0.29); /* live: #ffffff4a */
+  border-radius: var(--radius-lg);
+  transition: 0.3s;
+}
+
+.card:hover {
+  background: var(--color-white);
+}
+
+.card:hover svg {
+  fill: var(--color-black);
+}
+
+.card:hover h3,
+.card:hover p {
+  color: var(--color-black);
+}
+
+/* live: .bfc-icon-wrapper */
+.iconWrap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 55px; /* live: 55px */
+  height: 55px;
+  border: 2px solid yellow; /* live: yellow */
+  border-radius: var(--radius-pill);
+}
+
+.iconWrap svg {
+  display: block;
+  width: 27px; /* live: 27px */
+  height: 27px;
+  fill: var(--color-white);
+}
+
+/* live: h3.bfc-card-title */
+.cardTitle {
+  margin-top: var(--space-10);
+  margin-bottom: 0;
+  padding: 5px 0; /* live: 5px 0 */
+  font-size: 22px; /* live: 22px */
+  font-weight: var(--font-medium);
+  color: var(--color-white);
+}
+
+/* live: p.bfc-card-text */
+.cardText {
+  margin-bottom: 5px; /* live: 5px */
+  color: var(--color-white);
+  opacity: 0.9; /* live: 0.9 */
+}
+
+@media (max-width: 801px) {
+  .section {
+    margin: 0 0 25px; /* live: margin-top 0 below 801px */
+    padding: var(--space-20);
+  }
+
+  .title {
+    font-size: 24px; /* live: 24px */
+    text-align: center;
+  }
+
+  .grid {
+    display: block;
+  }
+
+  .card {
+    width: auto; /* live: 100% */
+    margin-bottom: 15px; /* live: 15px */
+  }
+
+  .cardTitle {
+    font-size: var(--text-base); /* live: 16px */
+  }
+
+  .cardText {
+    font-size: var(--text-md); /* live: 14px */
+  }
+}

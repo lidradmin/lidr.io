@@ -1,0 +1,141 @@
+/*
+ * QR download CTA band. Values verified against the captured live DOM
+ * (capture/dom/home.html section#lidr-download-section) at 1440/768/390.
+ */
+
+.section {
+  margin-top: -55px; /* live: -55px pulls the band over the hero */
+}
+
+/* live: .lidr-content-wrapper */
+.wrapper {
+  position: relative;
+  z-index: 11; /* live: 11 */
+  display: flex;
+  max-width: var(--container-max);
+  margin: 0 auto;
+  background: var(--color-slate);
+  border-radius: var(--radius-xl);
+}
+
+/* live: .top__banners */
+.banners {
+  width: 50%; /* live: 50% */
+  margin-top: -179px; /* live: -179px (phones overlap the hero) */
+}
+
+.banners img {
+  display: block;
+  max-width: 450px; /* live: 450px */
+  height: auto;
+  margin: 0 auto; /* live: text-align center (img computed inline) */
+}
+
+/* live: .lidr-cta-content */
+.content {
+  width: 60%; /* live: 60% */
+  padding: var(--space-40);
+  text-align: center;
+}
+
+/* live: h2.lidr-heading */
+.heading {
+  padding-bottom: 5px; /* live: 5px */
+  border-bottom: 1px solid rgba(255, 255, 255, 0.3); /* live: #ffffff4d */
+  font-size: 36px; /* live: 36px */
+  font-weight: var(--font-normal); /* live computed 400 → Amenti 500 face */
+  letter-spacing: var(--tracking-snug);
+  color: var(--color-white);
+}
+
+/* live: p.lidr-subheadline */
+.sub {
+  margin-bottom: var(--space-10);
+  padding-top: 15px; /* live: 15px */
+  color: var(--color-white);
+}
+
+/* live: p.lidr-offer */
+.offer {
+  margin-bottom: var(--space-20);
+  font-weight: var(--font-bold);
+  color: var(--color-white);
+}
+
+/* live: .lidr-download-buttons */
+.badges {
+  display: flex;
+  max-width: 370px; /* live: 370px */
+  margin: 0 auto;
+}
+
+.badges a {
+  display: block;
+  margin: 0 5px; /* live: 0 5px */
+}
+
+/* live: .lidr-download-buttons img */
+.badgeImg {
+  display: block;
+  max-width: 100%;
+  height: auto;
+  padding: 2px; /* live: 2px */
+  border-radius: var(--radius-md);
+  background: linear-gradient(180deg, #000000 0%, #000000 100%); /* live */
+  transition: 0.3s;
+}
+
+.badgeImg:hover {
+  transform: scale(1.05);
+  background: linear-gradient(180deg, #0e1013 0%, #393939 100%); /* live */
+}
+
+@media (min-width: 802px) {
+  .wrapper {
+    max-width: var(--container-width); /* live: 90% overrides 1250px */
+  }
+}
+
+@media (max-width: 801px) {
+  .section {
+    margin-top: -10px; /* live: -10px */
+  }
+
+  .banners {
+    margin-top: 0;
+    padding-left: var(--space-20); /* live: 20px */
+  }
+
+  .banners img {
+    max-width: 100%;
+    margin-top: -30px; /* live: -30px */
+  }
+
+  .content {
+    padding: var(--space-20);
+  }
+
+  .heading {
+    padding-bottom: var(--space-10);
+    font-size: 13px; /* live: 13px */
+  }
+
+  .sub {
+    display: none; /* live: hidden below 801px */
+  }
+
+  .offer {
+    margin-bottom: var(--space-10);
+    padding-top: var(--space-10);
+    font-size: 8px; /* live: 8px */
+  }
+
+  .badges {
+    align-items: center;
+    margin: 0;
+  }
+
+  .badgeImg {
+    border-radius: var(--radius-xs); /* live: 5px */
+  }
+}
