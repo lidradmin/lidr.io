@@ -19,10 +19,22 @@
   --color-brand: #192c27; /* theme palette 4 — dark green: headings, nav links */
   --color-white: #ffffff; /* theme palette 5-8 — body bg, cards, text on dark */
 
-  --color-primary: var(--color-brand);
+  --color-primary: var(--color-brand); /* brand green — NOT the button background;
+                                          buttons use --color-btn-bg */
   --color-heading: var(--color-brand);
   --color-bg: var(--color-white); /* computed body background (live CSS declares
                                      #f3f3f3 but a later rule overrides to #fff) */
+
+  /* Button-specific tokens: the live CTA/button background is
+     --color-dark-1 (#1f1f1f), NOT --color-primary/brand green.
+     --color-primary aliases the brand green used for headings/nav links only. */
+  --color-btn-bg: var(--color-dark-1);
+  --color-btn-bg-hover: var(--color-dark-2); /* hover: verify against live in Task 6 —
+    no isolated computed-style evidence of the CTA's own hover background was
+    found in capture/tokens-report.json or capture/dom/home.html (the live
+    button's computed background-color resolves to transparent, with the
+    visible fill painted by a wrapper/pseudo-element/gradient); using the
+    theme's palette-2 hover color (#212121) as the best available default. */
 
   --color-slate: #3f444e; /* footer + dark section backgrounds, cookie button */
   --color-text-muted: #555555; /* hero/lead paragraphs (rgb(85,85,85)) */
@@ -108,6 +120,8 @@
    * Spacing scale — px-valued steps observed live (section paddings
    * 150/100/60/40/10, button paddings 8x30 & 10x20), regularized onto a
    * 4/8 grid only where unobserved gaps needed filling.
+   * Usage rule: components use numeric steps (--space-N = Npx, from live
+   * evidence); semantic aliases (--space-xs..xl) are for generic gaps only.
    * ------------------------------------------------------------------ */
   --space-4: 4px;
   --space-8: 8px;
@@ -138,6 +152,8 @@
    * 10px, 8px, 22px, 15px, 5px, 50%. 43px/99px pills normalized to
    * --radius-pill / --radius-full (identical rendering on elements
    * shorter than 2× the radius).
+   * Usage rule: prefer --radius-pill for pill buttons; --radius-full only
+   * where live computed 99px matters for diffing.
    * ------------------------------------------------------------------ */
   --radius-xs: 5px;
   --radius-sm: 8px;

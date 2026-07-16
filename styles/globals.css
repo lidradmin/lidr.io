@@ -28,6 +28,8 @@ body {
   /* Live site (Blocksy) sets both — affects glyph rendering weight */
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  /* live-faithful; must stay on body (propagates to viewport) — moving it
+     to a wrapper would break position: sticky */
   overflow-x: hidden;
   overflow-wrap: break-word;
 }
@@ -73,6 +75,8 @@ h6 {
   font-size: var(--text-h6);
 }
 
+/* Verified live (2026-07-16, Playwright against https://lidr.io/): nav link,
+   footer link, and in-text/CTA link all compute text-decoration-line: none. */
 a {
   color: inherit;
   text-decoration: none;
