@@ -16,6 +16,7 @@
 // scroll-linked JS/CSS. It is intentionally generic (no site-specific
 // selectors) so the diff harness can call the exact same function against
 // the rebuilt local site and get an apples-to-apples reference.
+import { writeFileSync } from "node:fs";
 import { PNG } from "pngjs";
 
 const SETTLE_MS = 150;
@@ -78,11 +79,31 @@ export async function captureFullPage(page, filePath) {
       });
 
     const actualY = await page.evaluate(() => window.scrollY);
-    if (actualY === lastActualY) break; // can't scroll further; avoid infinite loop
+    if (actualY === lastActualY) {
+      // Can't scroll further; avoid infinite loop. If part of the document
+      // below what we've already stitched is still unpainted, warn loudly —
+      // silently truncating a full-page capture is worse than a noisy log,
+      // since the caller (capture.mjs / the diff harness) has no other
+      // signal that the output image is missing content.
+      const unstitchedHeight = docHeight - (lastActualY + viewportHeight);
+      if (unstitchedHeight > 0) {
+        console.warn(
+          `captureFullPage: scroll stalled at y=${lastActualY} on ${page.url()}; ` +
+            `${unstitchedHeight * width} unpainted pixels (${unstitchedHeight}px of height) below the last captured chunk will be missing from the stitched image`
+        );
+      }
+      break;
+    }
     lastActualY = actualY;
 
     const shot = await page.screenshot({ fullPage: false });
     const png = PNG.sync.read(shot);
+
+    if (chunks.length === 0 && png.width !== width) {
+      throw new Error(
+        `chunk width ${png.width} != viewport width ${width}; captureFullPage requires deviceScaleFactor: 1`
+      );
+    }
 
     const remaining = docHeight - actualY;
     if (remaining <= viewportHeight) {
@@ -107,6 +128,5 @@ export async function captureFullPage(page, filePath) {
 
   await page.evaluate(() => window.scrollTo(0, 0));
 
-  const { writeFileSync } = await import("node:fs");
   writeFileSync(filePath, PNG.sync.write(stitched));
 }
