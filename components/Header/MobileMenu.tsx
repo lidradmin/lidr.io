@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import styles from "./Header.module.css";
 
 /**
@@ -18,6 +19,16 @@ export function MobileMenu({
   const [open, setOpen] = useState(false);
   const panelRef = useRef<HTMLDivElement>(null);
   const toggleRef = useRef<HTMLButtonElement>(null);
+  const pathname = usePathname();
+
+  // Close on any route change (covers back/forward navigation while open).
+  // State-adjustment-during-render pattern per react.dev
+  // ("You Might Not Need an Effect") rather than a setState-in-effect.
+  const [prevPathname, setPrevPathname] = useState(pathname);
+  if (pathname !== prevPathname) {
+    setPrevPathname(pathname);
+    setOpen(false);
+  }
 
   useEffect(() => {
     if (!open) return;
@@ -33,6 +44,8 @@ export function MobileMenu({
         return;
       }
       if (e.key === "Tab" && panelRef.current) {
+        // The panel only contains links + the close button; extend this
+        // selector if other focusable elements are ever added.
         const f = panelRef.current.querySelectorAll<HTMLElement>("a, button");
         if (f.length === 0) return;
         const first = f[0];
@@ -61,7 +74,7 @@ export function MobileMenu({
         type="button"
         aria-expanded={open}
         aria-label={open ? "Close menu" : "Open menu"}
-        onClick={() => setOpen(!open)}
+        onClick={() => setOpen((o) => !o)}
         className={styles.menuToggle}
       >
         {/* Hamburger icon, verbatim from the live trigger SVG */}

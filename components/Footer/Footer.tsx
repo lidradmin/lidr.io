@@ -1,13 +1,9 @@
 import Link from "next/link";
 import styles from "./Footer.module.css";
+import { NAV_ITEMS } from "../../lib/nav-items";
 
-const QUICK_LINKS = [
-  { href: "/", label: "Home" },
-  { href: "/about/", label: "About Us" },
-  { href: "/features/", label: "Features" },
-  { href: "/pricing/", label: "Pricing" },
-  { href: "/contact-us/", label: "Contact" },
-];
+// Live footer "Quick Links" mirror the main nav exactly.
+const QUICK_LINKS = NAV_ITEMS;
 
 const LEGAL_LINKS = [
   { href: "/privacy-policy/", label: "Privacy Policy" },
@@ -50,6 +46,7 @@ export function Footer() {
     <footer className={styles.footer}>
       <div className={`${styles.container} ${styles.top}`}>
         <div className={styles.brand}>
+          {/* eslint-disable-next-line @next/next/no-img-element -- local SVG; project pre-optimizes assets and uses plain <img> (next.config images.unoptimized) */}
           <img src="/icons/footer_logo.svg" alt="Lidr.io" width={150} height={60} />
         </div>
         <div className={styles.socials}>

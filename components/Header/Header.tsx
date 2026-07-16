@@ -3,14 +3,7 @@ import styles from "./Header.module.css";
 import { NavList } from "./NavList";
 import { MobileMenu } from "./MobileMenu";
 import { Button } from "../Button/Button";
-
-export const NAV_ITEMS = [
-  { href: "/", label: "Home" },
-  { href: "/about/", label: "About Us" },
-  { href: "/features/", label: "Features" },
-  { href: "/pricing/", label: "Pricing" },
-  { href: "/contact-us/", label: "Contact" },
-];
+import { NAV_ITEMS } from "../../lib/nav-items";
 
 /**
  * Lidr.io wordmark, inlined verbatim from the live header SVG

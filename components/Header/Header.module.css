@@ -81,7 +81,9 @@
 
 .navList a:hover,
 .navLinkActive.navLinkActive {
-  color: var(--color-brand); /* live: current + hovered links go brand green */
+  /* live: current + hovered links go brand green; class doubled so this
+     beats .navList a { color } regardless of source order */
+  color: var(--color-brand);
 }
 
 .actions {
