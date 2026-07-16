@@ -85,8 +85,15 @@ components/
   PricingCard/
   Button/
   ContactForm/
-  LegalPage/            # shared shell for the 5 policy pages
+  LegalLayout/          # shared UI shell for the 5 policy pages
   ...                   # further shared sections as repetition emerges
+content/
+  legal/                # policy page text as content modules, not UI
+    privacy.tsx
+    gdpr.tsx
+    terms.tsx
+    fair-use.tsx
+    complaints.tsx
 styles/
   tokens.css
   globals.css
@@ -102,11 +109,23 @@ Each component: one directory, `ComponentName.tsx` + `ComponentName.module.css`.
 **Clean, semantic class names throughout** — no Elementor class names
 (`elementor-widget-*`, `e-con-*`, etc.) survive into the rebuild.
 
+Legal pages are **content, not UI**: the policy text lives in `content/legal/`
+modules rendered through the single `LegalLayout` shell — not baked into
+components.
+
+**Client/server component policy:** server components by default; `"use
+client"` only where interaction requires it — the mobile menu toggle and the
+contact form. Everything else ships as static HTML with minimal runtime JS.
+
 ## Method
 
 1. **Capture ground truth.** For each of the 10 pages: full-page Playwright
-   screenshots at all 3 breakpoints, rendered HTML snapshot, and the asset list
-   actually requested (images, fonts, icons). Stored in a `capture/` working
+   screenshots at all 3 breakpoints, a **serialized DOM snapshot taken after
+   hydration and network idle** (some Elementor elements are JS-initialized),
+   and the asset list actually requested (images, fonts, icons) **captured from
+   production responses and verified against rendered usage** — not assumed to
+   live under `/uploads`. Also crawl the live site to build a full URL
+   inventory (pages, assets, canonicals). Stored in a `capture/` working
    directory (gitignored, kept for the duration of the project).
 2. **Extract design tokens.** Read the live CSS to derive the token set: color
    palette, font families/sizes/weights/line-heights, spacing scale, radii,
@@ -131,13 +150,21 @@ Each component: one directory, `ComponentName.tsx` + `ComponentName.module.css`.
   `<picture>`/`srcset`, explicit `width`/`height` to prevent CLS. Note: Next
   `<Image>` does **not** optimize at build time under `output: 'export'`, so we
   pre-generate variants and use plain `<img>`/`<picture>`.
-- **LCP:** the LCP image per page is `<link rel="preload">`-ed and never
-  lazy-loaded; all below-fold images `loading="lazy"`.
-- **Fonts:** self-hosted. Amenti from the WP export; Google fonts (Manrope,
-  DM Serif Text, Inter, and any others actually rendered) downloaded as woff2,
-  subset where safe, loaded via `next/font/local` (or `@font-face` with
-  `font-display: swap`). Zero third-party font requests.
+- **LCP:** LCP assets are identified through Lighthouse traces per page and
+  **only confirmed LCP assets are selectively preloaded** (guessed preloads can
+  compete with HTML/CSS downloads). LCP images are never lazy-loaded;
+  below-fold images use `loading="lazy"`.
+- **Fonts:** self-hosted, loaded exclusively via **`next/font/local`** for all
+  fonts (automatic preload handling, no FOIT/FOUT, integrates with Next
+  metadata — no hand-rolled `@font-face`, no mixed approaches). Amenti from the
+  WP export; Google fonts (Manrope, DM Serif Text, Inter, and any others
+  actually rendered) downloaded as woff2 and subset where safe. Only fonts
+  critical above the fold are preloaded. Zero third-party font requests.
 - Favicon set reproduced from the current site.
+- **Licensing:** confirm usage rights for all migrated assets — stock
+  photography, illustrations, icons, and fonts (Google fonts are OFL; **Amenti
+  is a commercial font — owner to confirm the license permits self-hosted web
+  embedding**). Flag anything unverifiable before launch.
 
 ## Contact form
 
@@ -145,6 +172,10 @@ Same visual form as the current FluentForm. Wired to **Web3Forms** (free tier,
 no branding on submissions), scaffolded with a placeholder access key for the
 owner to swap in. Swapping to Formspree later is a one-component change. Client-side validation matching current fields, accessible error
 messages, success/failure states. No backend.
+
+**Spam protection:** invisible honeypot field (Web3Forms `botcheck`) by
+default. If spam volume warrants it post-launch, escalate to Cloudflare
+Turnstile (natively supported by Web3Forms) — invisible, no user friction.
 
 ## SEO — parity checklist (per page)
 
@@ -169,8 +200,11 @@ messages, success/failure states. No backend.
   owner to confirm after cutover.
 - **Redirects: none custom.** `.htaccess` contains only stock WordPress + HTTPS
   rules. URL parity (including trailing slashes) means no redirect map is
-  needed. `/sign-up/` will 404 after cutover — acceptable per owner decision to
-  drop it (optional: host-level 301 `/sign-up/ → /` at deploy time).
+  needed. `/sign-up/` is dropped per owner decision; because the URL may live
+  on in old emails, backlinks, browser history, and search indexes, the deploy
+  config ships a **permanent 301 `/sign-up/ → /`** (host-level redirect rule)
+  rather than a 404. Owner may downgrade this to an intentional 404 if
+  preferred.
 
 ## Accessibility (explicit deliverable)
 
@@ -202,18 +236,33 @@ messages, success/failure states. No backend.
 ## Testing / verification
 
 1. **Visual:** Playwright screenshot diff, rebuild vs. live capture, 10 pages ×
-   3 breakpoints.
-2. **Functional:** nav links, mobile menu open/close, contact form validation
+   3 breakpoints. **Pass thresholds:** pixel difference < 1% of page area; no
+   structural differences (missing/moved elements); differences attributable to
+   font anti-aliasing/hinting resolved by manual review, not by loosening the
+   threshold.
+2. **Browser matrix:** Chromium is the primary engine for pixel diffing (same
+   engine for live capture and rebuild, so diffs measure our work, not engine
+   variance). Firefox and WebKit each get a functional pass plus manual visual
+   spot-check of every page at all 3 breakpoints — watching flexbox, font,
+   form-control, and SVG rendering differences.
+3. **URL crawl comparison:** crawl the live site (pre-launch) and the static
+   build, diff the URL inventories — missing pages, broken assets, unexpected
+   URLs, canonical mismatches. Catches what screenshots can't.
+4. **Functional:** nav links, mobile menu open/close, contact form validation
    and submission (mocked service), all internal links resolve.
-3. **Quality gates:** Lighthouse CI against the targets above; `next build`
+5. **Quality gates:** Lighthouse CI against the targets above; `next build`
    with zero type errors.
 
 ## Acceptance criteria
 
 - All 10 pages visually match live site at 3 breakpoints per the pixel-perfect
-  definition
-- Zero Elementor/WordPress artifacts in the codebase or shipped HTML/CSS
+  definition and thresholds above
+- Zero Elementor/WordPress artifacts in the codebase or shipped output — no
+  Elementor **class names, CSS selectors, JS dependencies, inline styles, or
+  DOM structure**
 - Static export deploys as plain files; no server required
-- SEO parity checklist complete for every page
+- SEO parity checklist complete for every page; URL crawl comparison clean
 - Lighthouse targets met
-- Contact form works end-to-end with a real service key
+- Contact form works end-to-end with a real service key, honeypot active
+- `/sign-up/ → /` 301 present in deploy config
+- Asset licensing confirmed (or flagged) for everything shipped
