@@ -3,6 +3,17 @@
 Self-hosted font files in this directory, where each came from, and its
 license status.
 
+> **Note on `capture/raw-assets/manifest.json`:** the URL→filename manifest
+> written by `scripts/capture/harvest-assets.mjs` is an ephemeral audit
+> artifact under gitignored `capture/` — it is NOT present in a fresh
+> checkout. Regenerate it with `node scripts/capture/harvest-assets.mjs`
+> if you need the live-URL→local-file mapping.
+>
+> **Image naming convention:** optimized images live at
+> `public/images/<original-basename>.webp`; sources wider than 800px also
+> get a `<original-basename>-half.webp` at 50% width for `srcset` use
+> (see `scripts/optimize-images.mjs`).
+
 ## Amenti (commercial — flag for owner license confirmation)
 
 | File                 | Weight | Source                                                                                   |
