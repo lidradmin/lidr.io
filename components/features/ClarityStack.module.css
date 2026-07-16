@@ -1,0 +1,292 @@
+/*
+ * "Clarity From Every Capture" sticky card stack (features page).
+ * Values are the RESOLVED live cascade — the live sheet layers a generic
+ * cfc-* widget style plus several site-custom override blocks (many
+ * !important); each rule below notes the winning live declaration,
+ * verified against the captured DOM rendered in Chromium at 1440/768/390.
+ * Live breakpoints: 801px (site custom) and 560px (cfc widget).
+ */
+
+/* live: .cfc-section { width:100%; padding:60px 16px 0 } */
+.section {
+  width: 100%;
+  padding: 60px 16px 0;
+}
+
+/* live: .cfc-scroll-area — height is set inline by the scroll script
+   (cards × 500px + viewport height) at every width */
+.scrollArea {
+  position: relative;
+}
+
+/* live: .cfc-sticky-frame { position:sticky; top:20% (final override);
+   height/overflow unset } */
+.stickyFrame {
+  position: sticky;
+  top: 20%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+/* live: .cfc-heading — clamp() font, weight 500 !important override */
+.heading {
+  margin-bottom: 48px;
+  font-size: clamp(22px, 4vw, 38px);
+  font-weight: var(--font-medium);
+  letter-spacing: var(--tracking-snug); /* live: -0.5px */
+  text-align: center;
+}
+
+/* live: .cfc-stack + div#cfcStack { max-width:1000px; width:100% } and
+   .cfc-stack { height:400px !important } */
+.stack {
+  position: relative;
+  width: 100%;
+  max-width: 1000px;
+  height: 400px;
+}
+
+/* live: .cfc-ghost overrides — flat #F5F5F5 with #e4e4e4 border */
+.ghost {
+  position: absolute;
+  inset: 0;
+  background: var(--color-gray-100);
+  border: 1px solid var(--color-gray-300);
+  border-radius: 18px; /* live: var(--cfc-radius) 18px */
+}
+
+.ghost1 {
+  transform: translateY(-30px) scale(0.9);
+}
+.ghost2 {
+  transform: translateY(-50px) scale(0.85);
+}
+.ghost3 {
+  transform: translateY(-70px) scale(0.8);
+}
+
+/* live: .cfc-card — absolutely stacked, hidden until scroll-activated */
+.card {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  gap: 32px;
+  padding: 32px 36px;
+  background: var(--color-gray-100); /* live: #F5F5F5 override */
+  border: 1px solid var(--color-gray-300); /* live: #e4e4e4 */
+  border-radius: 18px;
+  opacity: 0;
+  transform: translateY(40px) scale(0.97);
+  pointer-events: none;
+  transition:
+    opacity 0.45s cubic-bezier(0.4, 0, 0.2, 1),
+    transform 0.45s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Active/exit states only exist while the deck is sticky (>801px) — below
+   that the live sheet forces every card visible with !important. */
+@media (min-width: 802px) {
+  .card.cardActive {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+    pointer-events: auto;
+  }
+
+  .card.cardExit {
+    opacity: 0;
+    transform: translateY(-30px) scale(0.96);
+  }
+}
+
+/* live: .cfc-phone-wrap overrides — 350px flat tile, no border */
+.phoneWrap {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 350px;
+  padding: 30px 10px;
+  background: rgba(220, 220, 220, 0.46); /* live: #dcdcdc75 */
+  border-radius: var(--radius-card); /* live: 22px */
+  overflow: hidden;
+}
+
+.phoneWrap img {
+  width: 100%;
+  max-width: 150px; /* live: 150px !important, height unset (auto) */
+  height: auto;
+}
+
+/* live: .cfc-card-body */
+.cardBody {
+  flex: 1;
+  min-width: 0;
+}
+
+/* live: .cfc-card-title — weight 400 (renders the Amenti 500 face, as live),
+   size 30px !important override */
+.cardTitle {
+  margin-bottom: var(--space-10);
+  font-size: var(--text-h3); /* live: 30px */
+  font-weight: var(--font-normal);
+  letter-spacing: -0.3px; /* live: -0.3px */
+}
+
+/* live: .cfc-card-desc — 15px !important beats the 14px in the same block */
+.cardDesc {
+  margin-bottom: 14px; /* live: 14px */
+  font-size: 15px;
+  line-height: 20px; /* live: 20px */
+  color: var(--color-text-muted);
+}
+
+/* live: .cfc-bullets (ul padding zeroed by override) */
+.bullets {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px 16px;
+  margin-bottom: var(--space-20);
+  padding: 0;
+  list-style: none;
+}
+
+.bullets li {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: var(--text-md); /* live: 14px */
+  line-height: 20px;
+  color: var(--color-text-muted);
+}
+
+/* live: .cfc-card-footer */
+.cardFooter {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: var(--space-10);
+}
+
+/* live: .cfc-btn — dark gradient pill (final site-custom override) */
+.btn {
+  display: inline-block;
+  padding: 10px 22px;
+  background: var(--btn-gradient);
+  color: var(--color-white);
+  border-radius: var(--radius-full); /* live: 99px */
+  box-shadow: var(--shadow-btn);
+  font-size: var(--text-sm);
+  font-weight: var(--font-semibold);
+  transition: 0.3s;
+}
+
+.btn:hover {
+  background: var(--btn-gradient-hover);
+  transform: scale(1.05);
+  box-shadow: var(--shadow-btn-hover);
+}
+
+/* live: .cfc-meta */
+.meta {
+  display: flex;
+  align-items: center;
+  gap: var(--space-8);
+  font-size: var(--text-xs); /* live: 12px */
+  color: var(--color-text-muted);
+}
+
+/* live: .cfc-meta > span { border-radius:10px; background:#ececec; padding:5px } */
+.metaIcon {
+  display: block;
+  padding: 5px;
+  background: var(--color-gray-200);
+  border-radius: var(--radius-md);
+}
+
+/* live: .meta__bar span { display:block } */
+.metaBar span {
+  display: block;
+}
+
+/* live: .meta__bar .cfc-stars { color:#f2e32b; font-size:20px } */
+.stars {
+  color: var(--color-accent);
+  font-size: var(--text-h5); /* live: 20px */
+  line-height: normal;
+}
+
+/* live: .cfc-footer-space { height: 80px } */
+.footerSpace {
+  height: 80px;
+}
+
+/* live 801px block: the deck un-sticks and cards render as a plain list */
+@media (max-width: 801px) {
+  .section {
+    padding: var(--space-10); /* live: 10px !important */
+  }
+
+  .scrollArea {
+    height: unset !important; /* live: !important beats the JS inline height */
+  }
+
+  .stickyFrame {
+    position: static; /* live: position unset */
+    top: 0;
+  }
+
+  .heading {
+    margin-bottom: 15px; /* live: 15px !important */
+    padding-bottom: var(--space-10); /* live: 10px (final override) */
+    font-size: 24px; /* live: 24px !important */
+  }
+
+  .stack {
+    height: unset;
+  }
+
+  .ghost {
+    display: none;
+  }
+
+  .card {
+    display: block;
+    position: static;
+    margin-bottom: var(--space-24); /* live: 24px */
+    opacity: 1;
+    transform: translateY(0) scale(1);
+    pointer-events: auto;
+  }
+
+  .phoneWrap {
+    width: 100%;
+  }
+
+  .cardTitle {
+    font-size: 21px; /* live: 21px !important */
+  }
+
+  .cardDesc {
+    font-size: var(--text-md); /* live: 14px !important */
+  }
+
+  .footerSpace {
+    display: none;
+  }
+}
+
+/* live 560px block (cfc widget's own mobile styles) */
+@media (max-width: 560px) {
+  .card {
+    padding: 24px 20px;
+    gap: 20px;
+  }
+
+  .bullets {
+    grid-template-columns: 1fr;
+  }
+}

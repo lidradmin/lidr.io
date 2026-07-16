@@ -1,0 +1,171 @@
+/*
+ * Features hero. Values verified against the captured live DOM rendered in
+ * Chromium (capture/dom/features.html) at 1440/768/390; live selectors
+ * noted per rule. Breakpoints follow the live sheet: 950px (theme button),
+ * 801px (site custom), 767px (Elementor mobile), 750px (grid flexbox).
+ */
+
+/* live: Elementor container 79e035f (#shoftgradient) — flex row, centered,
+   padding 150/0/100, -80px pull under the header, 343.jpg cover bg */
+.hero {
+  position: relative;
+  display: flex;
+  align-items: center;
+  margin-top: -80px; /* live: div#shoftgradient { margin-top: -80px } */
+  padding: var(--space-150) 0 var(--space-100);
+  background: url("/images/343.webp") no-repeat 0 0 / cover;
+}
+
+/* live: #shoftgradient::before — Elementor overlay (opacity 0.77) */
+.hero::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  background: var(--color-gray-100);
+  opacity: 0.77; /* live: --overlay-opacity 0.77 */
+}
+
+/* live: #shoftgradient::after — app-collage overlay at 35% */
+.hero::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  background: url("/images/mainimage1-scaled_1000x.webp") 0 0 / 100% no-repeat;
+  opacity: 0.35; /* live: 0.35 */
+}
+
+/* live: .mains__goodcontainer { position:relative; z-index:1 } */
+.container {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+}
+
+/* live: .mains__goodcontainer .row.flexbox — 90% cap, flex >=750px */
+.row {
+  max-width: var(--container-width); /* live: 90% */
+  margin: auto;
+}
+
+/* live: .col-sm-6 { padding: 0 15px; width: 50% >=768px } */
+.colText,
+.colImages {
+  position: relative;
+  padding: 0 15px;
+}
+
+/* live: .flipcontemin23 h3 — 46px/50px, computed weight 400 (renders the
+   Amenti 500 face, as live) */
+.title {
+  margin-bottom: 23.8px; /* live computed (Blocksy h3 default margin) */
+  font-size: 46px;
+  font-weight: var(--font-normal);
+  line-height: 50px;
+}
+
+/* live: .flipcontemin23 p { font-size: 19px } (body 1.65 line-height) */
+.lead {
+  margin-bottom: 1.5em; /* live: 28.5px @19px, 24px @16px */
+  font-size: 19px;
+}
+
+/* live: .othermians--23 .button — dark gradient pill pair */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 47px; /* live: theme button min-height */
+  margin-right: 15px; /* live: 15px */
+  padding: 5px 20px; /* live: theme button padding */
+  background: var(--btn-gradient);
+  color: var(--color-white);
+  border-radius: var(--radius-full); /* live: 99px */
+  box-shadow: var(--shadow-btn);
+  font-size: var(--text-nav); /* live: 15px */
+  font-weight: var(--font-medium);
+  text-align: center;
+  transition: 0.3s;
+}
+
+.btn:hover {
+  background: var(--btn-gradient-hover);
+  transform: scale(1.05);
+  box-shadow: var(--shadow-btn-hover);
+}
+
+/* live: .goodmains__content.features-hero-images — two phones side by side */
+.images {
+  display: flex;
+  align-items: center;
+  gap: 15px; /* live: 15px */
+  text-align: center;
+}
+
+.images img {
+  width: calc(50% - 8px); /* live: calc(50% - 8px) */
+  height: auto;
+  object-fit: contain;
+}
+
+/* live: .row.flexbox is a centered flex row from 750px up */
+@media (min-width: 750px) {
+  .row {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+}
+
+@media (min-width: 768px) {
+  .colText,
+  .colImages {
+    width: 50%; /* live: .col-sm-6 */
+  }
+}
+
+/* live: theme button shrinks below 951px */
+@media (max-width: 950px) {
+  .btn {
+    padding: 6px 15px; /* live: 6px 15px !important */
+    font-size: var(--text-md); /* live: 14px !important */
+  }
+}
+
+@media (max-width: 801px) {
+  .row {
+    max-width: 100%; /* live: 100% !important */
+  }
+
+  /* live: .mains__goodcontainer .col-sm-6 + .col-sm-6 { padding: 0 } */
+  .colImages {
+    padding: 0;
+  }
+
+  .title {
+    margin-bottom: 19px; /* live computed at 768/390 */
+    font-size: 30px; /* live: 30px !important */
+    line-height: 40px; /* live: 40px !important */
+  }
+
+  .lead {
+    font-size: var(--text-base); /* live: 16px !important */
+  }
+
+  .images {
+    margin-top: var(--space-40); /* live: 40px !important */
+  }
+
+  /* live: .goodmains__content img { transform: scale(1.14) } */
+  .images img {
+    transform: scale(1.14);
+  }
+}
+
+/* Elementor mobile breakpoint */
+@media (max-width: 767.98px) {
+  .hero {
+    padding: 120px 0 30px; /* live: Elementor mobile padding */
+  }
+}

@@ -242,3 +242,69 @@
     scroll-snap-stop: always;
   }
 }
+
+/*
+ * FEATURES-page variant (see Testimonials.tsx). The live features page
+ * renders this band as a real Swiper widget (lidr-features-90bebe7) whose
+ * metrics differ from home's custom scroller; verified against
+ * capture/dom/features.html at 1440/768/390.
+ */
+
+/* live: Swiper spaceBetween 10 (inline margin-right on every slide) */
+.features .track {
+  gap: 10px;
+}
+
+/* live: .class__contents height follows its own content (no equalizing) */
+.features .card {
+  height: auto;
+}
+
+/* live: .swiper-button-prev/next inside .otherside__symbolss —
+   45px circle, 1px white border, 10px gaps */
+.features .arrowBtn {
+  width: 45px;
+  height: 45px;
+  border: 1px solid var(--color-white);
+}
+
+.features .arrowBtn + .arrowBtn {
+  margin-left: var(--space-10); /* live: 10px */
+}
+
+/* live: swiper-button-disabled { opacity: .35 } (Swiper default) */
+.features .arrowBtn:disabled {
+  opacity: 0.35;
+}
+
+/* live: .otherside__symbolss svg { width/height 34px } — max-width clamps
+   it to the button's content box, scaling the glyph like the live markup */
+.features .arrowBtn svg {
+  width: 34px;
+  height: 34px;
+}
+
+@media (max-width: 801px) {
+  /* live: .bigside__maincontent .swiper-slide { width: 300px } (final
+     override, applies on phones too — no 767px re-size, no centering) */
+  .features .slide {
+    flex: 0 0 300px;
+    scroll-snap-align: unset;
+    scroll-snap-stop: unset;
+  }
+
+  .features .track {
+    gap: 10px;
+    padding: 0;
+  }
+
+  .features .viewport {
+    scroll-snap-type: none;
+  }
+
+  /* live: .swiper-button-prev/next { width/height 35px } */
+  .features .arrowBtn {
+    width: 35px;
+    height: 35px;
+  }
+}

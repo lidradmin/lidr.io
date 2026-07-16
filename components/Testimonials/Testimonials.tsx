@@ -3,7 +3,7 @@
 import { useRef, useState } from "react";
 import styles from "./Testimonials.module.css";
 import { ArrowLeftIcon, ArrowRightIcon } from "../icons/Arrows";
-import { REVIEWS } from "./reviews";
+import { REVIEWS, type Review } from "./reviews";
 import type { RevealMode } from "../Reveal/RevealManager";
 
 /** Quote glyph, paths verbatim from the live DOM (widget 24f904c). */
@@ -30,6 +30,8 @@ function QuoteIcon() {
  */
 export function Testimonials({
   reveal = "max1024",
+  reviews = REVIEWS,
+  variant = "home",
 }: {
   /**
    * Section-level reveal mode (see RevealManager). Default = the set
@@ -37,6 +39,19 @@ export function Testimonials({
    * their own measured mode.
    */
   reveal?: RevealMode;
+  /**
+   * Review cards. Default = the home page's set; the features page passes
+   * its own (same quotes/people, different live company names).
+   */
+  reviews?: Review[];
+  /**
+   * Live-widget metrics variant. The FEATURES page renders this band as a
+   * real Swiper with different metrics than home's custom scroller:
+   * 10px slide gap (home 15px), 300px slides below 802px (home 400/280),
+   * no phone-centering track padding, content-height cards (home: full
+   * height), and thin 45px/35px arrow buttons (home: 44px, 2px border).
+   */
+  variant?: "home" | "features";
 } = {}) {
   const [index, setIndex] = useState(0);
   const viewportRef = useRef<HTMLDivElement>(null);
@@ -54,8 +69,9 @@ export function Testimonials({
       slide.getBoundingClientRect().left -
       viewport.getBoundingClientRect().left +
       viewport.scrollLeft;
-    // live behavior: center the target slide on phones
-    if (window.innerWidth <= 767) {
+    // live behavior: home's scroller centers the target slide on phones
+    // (the features Swiper aligns slides to the container edge)
+    if (variant === "home" && window.innerWidth <= 767) {
       offset = offset - viewport.offsetWidth / 2 + slide.offsetWidth / 2;
     }
     viewport.scrollTo({ left: Math.max(0, offset), behavior: "smooth" });
@@ -66,7 +82,11 @@ export function Testimonials({
     // (home: below 1025px) — those references show it hidden until scrolled
     // into view (see RevealManager).
     <section
-      className={styles.section}
+      className={
+        variant === "features"
+          ? `${styles.section} ${styles.features}`
+          : styles.section
+      }
       aria-labelledby="reviews-heading"
       data-reveal={reveal}
     >
@@ -89,7 +109,7 @@ export function Testimonials({
               type="button"
               className={styles.arrowBtn}
               aria-label="Next review"
-              disabled={index >= REVIEWS.length - 1}
+              disabled={index >= reviews.length - 1}
               onClick={() => slideTo(index + 1)}
             >
               <ArrowRightIcon />
@@ -99,7 +119,7 @@ export function Testimonials({
       </div>
       <div className={styles.viewport} ref={viewportRef}>
         <div className={styles.track}>
-          {REVIEWS.map((r) => (
+          {reviews.map((r) => (
             <div key={r.name} className={styles.slide}>
               <div className={styles.card}>
                 <div className={styles.quote}>

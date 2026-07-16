@@ -1,0 +1,23 @@
+/*
+ * Features page shell — the Elementor flex-column container that wraps
+ * every section below the hero. Unlike home, the live features page has
+ * NO 4px entry-content strip: measured hero top = header bottom − 80px
+ * exactly at 1440/768/390 (capture/dom/features.html).
+ */
+
+.page {
+  /* BFC so the hero's -80px margin can't collapse through <main>
+     (the home page uses its live 4px padding for this instead) */
+  display: flow-root;
+}
+
+/* Live: Elementor container 940a559 — flex column (20px gap, 10px padding,
+   white bg) wrapping the sticky stack + grid widget, the reviews band and
+   the download CTA. */
+.sections {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-20); /* live: 20px container gap */
+  padding: var(--space-10); /* live: 10px */
+  background: var(--color-bg);
+}

@@ -1,0 +1,74 @@
+/*
+ * "Everything Your Project Needs, In One Place" benefit grid (features
+ * page). Values verified against the captured live DOM rendered in
+ * Chromium at 1440/768/390; live selectors noted per rule. Breakpoints:
+ * 801px (site custom), 768px (grid columns, min-width).
+ */
+
+/* live: .bigmains__min23 { max-width:90%; margin:auto } */
+.section {
+  max-width: var(--container-width);
+  margin: auto;
+}
+
+/* live: .bigmains__min23 h2 — grey top rule + centered Amenti 500 */
+.heading {
+  padding: var(--space-40) 0 15px; /* live: 40px 0 15px */
+  border-top: 1px solid var(--color-gray-500); /* live: 1px solid grey */
+  margin-bottom: 20.5px; /* live computed (Blocksy h2 default margin) */
+  font-size: var(--text-h2); /* live: 35px */
+  font-weight: var(--font-medium);
+  text-align: center;
+}
+
+/* live: .bigmains__min23 .row { display:flex; flex-wrap:wrap } */
+.grid {
+  display: flex;
+  flex-wrap: wrap;
+}
+
+/* live: .col-sm-4 { padding:10px !important } + width 33.3333% >=768px */
+.col {
+  width: 100%;
+  padding: var(--space-10);
+}
+
+/* live: .othemias--flip */
+.card {
+  height: 100%;
+  padding: var(--space-20);
+  background: var(--color-gray-100); /* live: #F5F5F5 */
+  border-radius: var(--radius-md); /* live: 10px */
+}
+
+/* live: .icon__block — inline 56px svg leaves an 8.4px baseline strut gap
+   below; globals.css makes svg display:block, so the measured 64.4px
+   block height is pinned here instead. */
+.icon {
+  height: 64.4px;
+}
+
+/* live: .othemias--flip h4 { font-size:21px; font-weight:500; margin-bottom:5px } */
+.cardTitle {
+  margin-bottom: 5px; /* live: 5px */
+  font-size: 21px;
+  font-weight: var(--font-medium);
+}
+
+/* live: .othemias--flip p { margin-bottom: 0 } (body 16px/1.65) */
+.cardText {
+  margin: 0;
+}
+
+@media (min-width: 768px) {
+  .col {
+    width: 33.3333%; /* live: .col-sm-4 */
+  }
+}
+
+@media (max-width: 801px) {
+  .heading {
+    margin-bottom: 17.5px; /* live computed at 768/390 */
+    font-size: 25px; /* live: 25px !important */
+  }
+}
