@@ -7,6 +7,7 @@
 import { chromium } from "playwright";
 import { mkdirSync, writeFileSync } from "node:fs";
 import { LIVE_ORIGIN, PAGES, BREAKPOINTS } from "./pages.mjs";
+import { captureFullPage } from "./screenshot.mjs";
 
 for (const d of ["capture/screens", "capture/dom", "capture/meta"])
   mkdirSync(d, { recursive: true });
@@ -32,9 +33,16 @@ async function settle(page) {
     });
   });
   await page.waitForLoadState("networkidle");
-  // freeze animations for stable screenshots
+  // freeze animations for stable screenshots, and hide the live site's
+  // cookie-consent banner (Blocksy theme: .cookie-notification). The
+  // rebuild ships no cookie banner at all (the site sets no tracking
+  // cookies), so references should exclude it rather than bake in a
+  // transient overlay that has no equivalent to diff against. We hide via
+  // CSS instead of clicking "Accept"/"Decline" so we don't set cookies or
+  // otherwise change page state during capture.
   await page.addStyleTag({
-    content: `*,*::before,*::after{animation:none!important;transition:none!important;caret-color:transparent!important}`,
+    content: `*,*::before,*::after{animation:none!important;transition:none!important;caret-color:transparent!important}
+.cookie-notification{display:none!important}`,
   });
 }
 
@@ -49,10 +57,7 @@ for (const { slug, path } of PAGES) {
     page.on("requestfinished", (r) => assetLog[slug].add(r.url()));
     await page.goto(LIVE_ORIGIN + path, { waitUntil: "load", timeout: 60000 });
     await settle(page);
-    await page.screenshot({
-      path: `capture/screens/${slug}-${bp.name}.png`,
-      fullPage: true,
-    });
+    await captureFullPage(page, `capture/screens/${slug}-${bp.name}.png`);
     if (bp.name === "desktop") {
       writeFileSync(`capture/dom/${slug}.html`, await page.content());
       const meta = await page.evaluate(() => ({
