@@ -192,9 +192,14 @@ Turnstile (natively supported by Web3Forms) — invisible, no user friction.
 
 - **Analytics: none.** No GA/GTM/Plausible/Fathom/Meta/LinkedIn/Hotjar on the
   live site. Nothing to migrate. (Owner can add later; keep it out of scope.)
-- **Cookie consent: none.** No consent plugin installed, none in output. The
-  site sets no tracking cookies, and the rebuild adds none, so no banner is
-  required. Nothing to migrate.
+- **Cookie consent: correction (2026-07-16).** The live site DOES show a
+  cookie banner — the Blocksy theme's built-in cookie notification
+  (JS-rendered; missed by the initial static-HTML audit). However, the site
+  runs no analytics and the rebuild sets no tracking cookies, so the rebuild
+  **does not ship a banner**; capture references exclude it (hidden during
+  screenshot) and pixel comparison is against the banner-dismissed steady
+  state. If the owner later adds analytics, a consent tool must be added with
+  it.
 - **Search Console/Bing verification: no meta tags** in the HTML — ownership is
   DNS- or file-based. Domain is unchanged, so verification survives; flag to
   owner to confirm after cutover.
