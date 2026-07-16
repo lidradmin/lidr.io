@@ -7,7 +7,8 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "capture": "node scripts/capture/capture.mjs"
+    "capture": "node scripts/capture/capture.mjs",
+    "test:visual": "next build && playwright test tests/visual --project=chromium"
   },
   "dependencies": {
     "next": "16.2.10",
@@ -17,6 +18,7 @@
   "devDependencies": {
     "@playwright/test": "^1.61.1",
     "@types/node": "^20",
+    "@types/pngjs": "^6.0.5",
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "eslint": "^9",
