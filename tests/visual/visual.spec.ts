@@ -4,19 +4,16 @@ import pixelmatch from "pixelmatch";
 import { readFileSync, mkdirSync, writeFileSync } from "node:fs";
 // Typed via the sibling scripts/capture/screenshot.d.mts declaration file.
 import { captureFullPage } from "../../scripts/capture/screenshot.mjs";
+// Typed via the sibling scripts/capture/pages.d.mts declaration file.
+// Single source of truth shared with the live-site capture script, so the
+// rebuild's page slugs/paths and breakpoints can never drift from the
+// reference set the diffs are compared against.
+import { PAGES as PAGE_LIST, BREAKPOINTS } from "../../scripts/capture/pages.mjs";
 import { ENABLED } from "./enabled-pages";
 
-const PAGES: Record<string, string> = {
-  home: "/", about: "/about/", features: "/features/", pricing: "/pricing/",
-  "contact-us": "/contact-us/", "privacy-policy": "/privacy-policy/",
-  "gdpr-policy": "/gdpr-policy/", "terms-of-service": "/terms-of-service/",
-  "fair-use-policy": "/fair-use-policy/", "complaints-policy": "/complaints-policy/",
-};
-const BREAKPOINTS = [
-  { name: "desktop", width: 1440, height: 900 },
-  { name: "tablet", width: 768, height: 1024 },
-  { name: "mobile", width: 390, height: 844 },
-];
+const PAGES: Record<string, string> = Object.fromEntries(
+  PAGE_LIST.map((p) => [p.slug, p.path])
+);
 const THRESHOLD = 0.01; // <1% of page area
 
 for (const slug of ENABLED) {
