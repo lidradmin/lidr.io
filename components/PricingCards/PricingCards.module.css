@@ -54,11 +54,12 @@
   border: 1px solid var(--color-gray-300); /* live: #dcdcdc — matches token */
   border-radius: 25px; /* live: 25px */
   text-align: center;
-  /* live: `.bigmainscbar-22 { transition: 0.5s !important }` — the
-     !important is load-bearing: it outranks the visual-test freeze rule
-     (`* { transition: none !important }`) by specificity, exactly as on
-     the live site, so the reveal/scroll-highlight fades are captured
-     mid-flight in the references. */
+  /* live: the stylesheet declares `.bigmainscbar-22 { transition: ... }`
+     twice at equal specificity, both !important — 0.3s first, then 0.5s;
+     the later declaration wins, so the live cascade resolves to 0.5s.
+     (The `.enabled .bigmainscbar-22` 0.3s rules match nothing in the live
+     DOM.) The !important is kept as a faithful transcription of the live
+     cascade. */
   transition: 0.5s !important;
 }
 
@@ -406,13 +407,11 @@
 .pricingVariant .card {
   background: var(--color-white);
   border: 0;
-  /* live: the sheet declares both 0.3s and 0.5s !important for the card
-     transition. The PRICING references consistently freeze the highlight
-     fades ~40 RGB units further along than the HOME references (same
-     harness timing), i.e. the pricing page rendered the shorter end of the
-     declared pair: calibrated to 0.35s against pricing-{tablet,mobile}.png
-     (home's 0.5s renders those fades ~46% instead of the references' ~67%). */
-  transition: 0.35s !important;
+  /* No transition override here: the live pricing page resolves the card
+     transition exactly like home — `.bigmainscbar-22 { transition }` is
+     declared twice at equal specificity, both !important (0.3s first, then
+     0.5s; capture/dom/pricing.html carries the identical pair), so the
+     later 0.5s wins. The shared .card rule above already sets it. */
 }
 
 .pricingVariant .card:hover {
