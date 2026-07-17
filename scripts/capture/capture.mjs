@@ -19,6 +19,17 @@ const urlInventory = {};
 async function settle(page) {
   await page.waitForLoadState("networkidle");
   await page.evaluate(() => document.fonts.ready);
+  // Kill smooth scrolling BEFORE any programmatic scrolling below (the same
+  // generic override captureFullPage applies for its own chunk scrolls —
+  // see scripts/capture/screenshot.mjs). The live WordPress theme sets
+  // html { scroll-behavior: smooth }, which turns every scrollTo() here
+  // into an animated glide: the pre-scroll's "return to top" was observed
+  // still mid-flight hundreds of ms later (scrollY ~557 instead of 0), and
+  // the reveal-quiesce wait below would otherwise evaluate against
+  // transient mid-glide positions instead of the bottom of the page.
+  await page.addStyleTag({
+    content: `html{scroll-behavior:auto!important}`,
+  });
   // scroll through to trigger lazy loads & JS-initialized Elementor widgets
   await page.evaluate(async () => {
     await new Promise((done) => {
@@ -32,6 +43,48 @@ async function settle(page) {
       step();
     });
   });
+  await page.waitForLoadState("networkidle");
+  // Quiesce scroll reveals before chunked screenshotting. The live site
+  // runs AOS with { once: true }: an element revealed once stays revealed.
+  // But AOS applies the reveal class asynchronously — its scroll handler is
+  // throttled AND data-aos-delay is honored in JS (a setTimeout before the
+  // class lands), so a reveal near the page bottom can land AFTER the last
+  // chunk's screenshot, flipping that chunk's state run to run (observed
+  // ~50/50 on the features page's bottom app mockup). Deterministic fix:
+  // park at the bottom and wait — state-based — until every [data-aos]
+  // element whose trigger point is inside the viewport (AOS default offset
+  // 120px) has actually received .aos-animate. With once:true those states
+  // then persist through the whole chunk pass, so no chunk can race them.
+  // (The diff harness needs no equivalent: the rebuild's RevealManager
+  // applies reveal classes synchronously in its scroll handler.)
+  await page.evaluate(() =>
+    window.scrollTo(0, document.documentElement.scrollHeight)
+  );
+  await page
+    .waitForFunction(
+      () => {
+        // Only judge once we are actually AT the bottom — never against a
+        // transient mid-scroll position.
+        const max =
+          document.documentElement.scrollHeight - window.innerHeight;
+        if (window.scrollY < max - 2) return false;
+        const vpBottom = window.scrollY + window.innerHeight;
+        return Array.from(
+          document.querySelectorAll("[data-aos].aos-init:not(.aos-animate)")
+        ).every(
+          (el) =>
+            el.getBoundingClientRect().top + window.scrollY >= vpBottom - 120
+        );
+      },
+      undefined,
+      { timeout: 5000, polling: 100 }
+    )
+    .catch(() => {
+      /* best-effort: an element whose trigger sits below max scroll can
+         legitimately never reveal — don't hang the capture on it */
+    });
+  await page.evaluate(() => window.scrollTo(0, 0));
+  await page.waitForTimeout(500);
   await page.waitForLoadState("networkidle");
   // Freeze animations for stable screenshots, and hide the live site's
   // cookie-consent banner (Blocksy theme: .cookie-notification). The
