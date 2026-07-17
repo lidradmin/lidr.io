@@ -39,7 +39,7 @@ Executed via subagent-driven development with two-stage review per task
 | 6. Header/Footer/layout | ✅ Done + reviewed | 8f060c2, 028864a (Sign Up dropped; Download App → App Store URL from live evidence) |
 | 7. Home page | ✅ Done + reviewed | 4783e08 — 0.11/0.04/0.16% diff |
 | 8. Features page | ✅ Done + reviewed | e44e926, 77e35ad — 0.08/0.06/0.14%; real cfc sticky stack transcribed |
-| 9. Pricing page | 🔶 Built; rework in flight | b7c7a42 built it (0.15/0.26/0.26%), but spec review found harness-tuned timing → root-cause rework: 84a775c, 3b0f07e, f691f9a, 10008d8 + settle() quiesce fix. **See TASK-STATE.md (repo root) for exact resume point.** |
+| 9. Pricing page | ✅ Done + reviewed | b7c7a42 built it; spec review found harness-tuned timing → root-cause rework 84a775c, 3b0f07e, f691f9a, 10008d8, 192effa (smooth-scroll override + bottom reveal-quiesce). Determinism verified 2026-07-17: double capture 28/30 pixel-identical at gate tolerance (worst content diff 0.028%, home 1–2px height jitter only; features-desktop REVEALED both runs); gate ×2 → 9 passed both. |
 | 10. About page | ⬜ Not started | |
 | 11. Contact page + form | ⬜ Not started | |
 | 12. Legal pages ×5 | ⬜ Not started | |
@@ -49,9 +49,8 @@ Executed via subagent-driven development with two-stage review per task
 | 16. A11y/browsers/Lighthouse | ⬜ Not started | |
 | 17. Deploy config + README | ⬜ Not started | |
 
-**Resume protocol:** finish Task 9's rework per `TASK-STATE.md` (re-capture 2×,
-pixel-compare runs at gate tolerance, gate ×2 with "9 passed"), then proceed
-Task 10 onward per this plan. References in `capture/` are gitignored and
+**Resume protocol:** proceed Task 10 onward per this plan (Task 9 rework
+completed 2026-07-17; TASK-STATE.md deleted). References in `capture/` are gitignored and
 regenerable via `npm run capture` (live site must be up). The visual gate is
 `npm run test:visual`.
 
