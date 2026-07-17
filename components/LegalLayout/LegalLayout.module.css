@@ -1,0 +1,120 @@
+/*
+ * Legal page layout — reproduces the Blocksy "single_page" template.
+ * Live source: capture/dom/privacy-policy.html (representative of all 5 pages)
+ *
+ * Key live structure:
+ *   <div class="ct-container-full" data-content="normal" data-vertical-spacing="top:bottom">
+ *     <article>
+ *       <div class="hero-section is-width-constrained" data-type="type-1">
+ *         <header class="entry-header"><h1 class="page-title">...</h1></header>
+ *       </div>
+ *       <div class="entry-content is-layout-constrained">
+ *         <div> ...content... </div>
+ *       </div>
+ *     </article>
+ *   </div>
+ *
+ * Blocksy customizer for single_page:
+ *   --theme-block-max-width defaults to 728px (Blocksy "Boxed" content width)
+ *   padding-top on entry-header: 40px (wp-custom-css: .page-id-1755 .entry-header)
+ *   Blocksy h1 page-title: uses Amenti heading font, theme defaults
+ *   is-layout-constrained children: max-width: var(--theme-block-max-width);
+ *                                    margin-left: auto; margin-right: auto;
+ *   Content spacing: var(--theme-content-spacing) ≈ 1.65em between blocks
+ */
+
+.page {
+}
+
+.article {
+  max-width: 728px;
+  margin: 0 auto;
+  padding: 0 15px;
+  box-sizing: border-box;
+}
+
+.header {
+  padding-top: 40px;
+}
+
+.title {
+  font-family: var(--font-heading);
+  font-weight: var(--font-medium);
+  color: var(--color-heading);
+  line-height: var(--leading-heading);
+  margin-top: 0;
+  margin-bottom: 20px;
+}
+
+.content {
+  padding-bottom: 60px;
+  color: var(--color-text);
+  font-size: var(--text-base);
+  line-height: var(--leading-normal);
+}
+
+.content h2 {
+  font-family: var(--font-heading);
+  font-weight: var(--font-medium);
+  color: var(--color-heading);
+  line-height: var(--leading-heading);
+  margin-top: 1.5em;
+  margin-bottom: 0.5em;
+}
+
+.content h3 {
+  font-family: var(--font-heading);
+  font-weight: var(--font-medium);
+  color: var(--color-heading);
+  line-height: var(--leading-heading);
+  margin-top: 1.5em;
+  margin-bottom: 0.5em;
+}
+
+.content h4 {
+  font-family: var(--font-heading);
+  font-weight: var(--font-medium);
+  color: var(--color-heading);
+  line-height: var(--leading-heading);
+  margin-top: 1.2em;
+  margin-bottom: 0.4em;
+}
+
+.content p {
+  margin-top: 0;
+  margin-bottom: 1em;
+}
+
+.content ul,
+.content ol {
+  margin-top: 0;
+  margin-bottom: 1em;
+  padding-left: 2em;
+}
+
+.content li {
+  margin-bottom: 0.3em;
+}
+
+.content li p {
+  margin-bottom: 0.3em;
+}
+
+.content a {
+  color: var(--color-heading);
+  text-decoration: underline;
+}
+
+.content strong {
+  font-weight: var(--font-bold);
+}
+
+@media (max-width: 801px) {
+  .header {
+    padding-top: 20px;
+  }
+
+  .content {
+    padding-bottom: 40px;
+  }
+}
