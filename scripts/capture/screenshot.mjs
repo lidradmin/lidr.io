@@ -78,6 +78,36 @@ export async function captureFullPage(page, filePath) {
         /* best-effort settle; fall through and use whatever scrollY is now */
       });
 
+    // Wait for lazy-loaded images to fully arrive before shooting the
+    // chunk. Scrolling a chunk into view is what triggers the site's
+    // lazyloader (data-src swap / low-res blur-up placeholder / progressive
+    // decode), so right after a scroll an <img> can be absent, blurry, or
+    // half-decoded — a race that intermittently corrupts single chunks
+    // (observed run-to-run on the live site's "Download the app" laptop
+    // render). Condition: every <img> with a source is complete AND the
+    // set of image sources has been stable for two consecutive polls (so a
+    // placeholder→full-res src swap in progress keeps us waiting). Purely
+    // state-based — no timing constants tied to any particular page.
+    await page
+      .waitForFunction(
+        () => {
+          const imgs = Array.from(document.images);
+          const sig = imgs
+            .map((i) => `${i.currentSrc}|${i.complete ? 1 : 0}`)
+            .join(";");
+          const settled =
+            window.__cfpImgSig === sig &&
+            imgs.every((i) => !i.currentSrc || (i.complete && i.naturalWidth > 0));
+          window.__cfpImgSig = sig;
+          return settled;
+        },
+        undefined,
+        { timeout: 10000, polling: 100 }
+      )
+      .catch(() => {
+        /* best-effort: never hang a capture on a broken image */
+      });
+
     const actualY = await page.evaluate(() => window.scrollY);
     if (actualY === lastActualY) {
       // Can't scroll further; avoid infinite loop. If part of the document
