@@ -126,7 +126,29 @@ export async function captureFullPage(page, filePath) {
     }
     lastActualY = actualY;
 
-    const shot = await page.screenshot({ fullPage: false });
+    // Shoot the chunk only once the rendered pixels have stopped changing:
+    // take viewport screenshots until two consecutive frames are
+    // byte-identical. Scroll-triggered work (reveal-on-scroll classes,
+    // lazyload swaps, decodes) runs on its own schedule after our scroll,
+    // and no DOM-side condition can enumerate every such effect — but all
+    // of them end in a stable frame. Observed without this: the features
+    // page's bottom reveal raced the final chunk roughly 50/50 run to run.
+    // Bounded retries keep a pathological page (e.g. genuinely infinite
+    // animation that slipped past the freeze CSS) from hanging the capture
+    // — after the cap we take the last frame and move on.
+    let shot = await page.screenshot({ fullPage: false });
+    for (let attempt = 0; attempt < 8; attempt++) {
+      await page.waitForTimeout(150);
+      const next = await page.screenshot({ fullPage: false });
+      const stable = next.equals(shot);
+      shot = next;
+      if (stable) break;
+      if (attempt === 7) {
+        console.warn(
+          `captureFullPage: frame never stabilized at y=${actualY} on ${page.url()}; using last frame`
+        );
+      }
+    }
     const png = PNG.sync.read(shot);
 
     if (chunks.length === 0 && png.width !== width) {
