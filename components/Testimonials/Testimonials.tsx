@@ -117,7 +117,7 @@ export function Testimonials({
           </div>
         </div>
       </div>
-      <div className={styles.viewport} ref={viewportRef}>
+      <div className={styles.viewport} ref={viewportRef} tabIndex={0} role="region" aria-label="Testimonials">
         <div className={styles.track}>
           {reviews.map((r) => (
             <div key={r.name} className={styles.slide}>
