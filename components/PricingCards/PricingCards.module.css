@@ -363,3 +363,69 @@
     font-size: var(--text-lg); /* live: 17px */
   }
 }
+
+/* ------------------------------------------------------------------ *
+ * Pricing-page variant (live: the same widget with the extra
+ * .pricingpagemainss class — capture/dom/pricing.html). Kept at the end
+ * of the file so the all-widths overrides win over the desktop block
+ * above, exactly like the live !important rules outrank the block-8 ones.
+ * ------------------------------------------------------------------ */
+
+/* live: .pricing__modals.pricingpagemainss */
+.pricingVariant {
+  position: relative; /* live: relative; z-index 1 — sits above the section
+                         background overlays (app/pricing/page.module.css) */
+  z-index: 1;
+  padding: 0 10px; /* live: 0px 10px !important (kills the desktop 10px
+                      top/bottom padding, adds side gutters at all widths) */
+}
+
+/* live: .pricing__modals.pricingpagemainss .maincontent---goodas */
+.pricingVariant .intro {
+  padding-bottom: 15px; /* live: 15px !important (all widths) */
+}
+
+/* live: .pricing__modals.pricingpagemainss h3 (rendered as h1 here) */
+.pricingVariant .introTitle {
+  max-width: 100%; /* live: 100% !important — keeps the heading on one
+                      line at 768px where the shared 550px cap would wrap */
+}
+
+/* live: body.page-id-1624 .bigmainscbar-22 { background: white !important;
+   border: 0px !important } — pricing-page cards are white and borderless
+   (the inner "What's Included" panel disappears against them, as live).
+   The page-id selector also outranks the theme's desktop :hover darkening,
+   so pricing cards do NOT darken on hover — reproduced here by cascade
+   order (this rule sits after .card:hover, same specificity). */
+.pricingVariant .card {
+  background: var(--color-white);
+  border: 0;
+}
+
+.pricingVariant .card:hover {
+  background: var(--color-white);
+}
+
+/* live: the .scroll-active rules live in wp-custom-css (after the page-id
+   rule in the cascade) and win — restore them over the white variant. */
+@media (max-width: 800px) {
+  .pricingVariant .card.scrollActive,
+  .pricingVariant .card.scrollActive:hover {
+    background: var(--color-slate);
+    border: 1px solid var(--color-slate); /* live: 1px solid #3F444E */
+  }
+}
+
+@media (min-width: 1024px) {
+  /* Live pricing renders the heading 4px lower relative to the cards than
+     home's shared 50px/15px pair produces (measured against
+     capture/screens/pricing-desktop.png: heading glyphs y=212, card top
+     y=278). The extra 4px sits between band top and heading. */
+  .pricingVariant .intro {
+    padding-bottom: 11px; /* measured (see note above) */
+  }
+
+  .pricingVariant .introTitle {
+    padding-top: 54px; /* measured (see note above) */
+  }
+}

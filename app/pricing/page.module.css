@@ -1,0 +1,52 @@
+/*
+ * Pricing page shell. Like features, the live pricing page has no
+ * entry-content strip: the band starts at header bottom − 80px exactly
+ * (capture/dom/pricing.html renders <main> → elementor root directly).
+ */
+
+.page {
+  /* BFC so the band's -80px margin can't collapse through <main> */
+  display: flow-root;
+}
+
+/*
+ * Live: Elementor container 79e035f (#shoftgradient, pricing variant) —
+ * same construction as the home/features heroes (mountains photo + light
+ * wash + app-collage arcs) but with a stronger wash: the pricing band's
+ * background computes ~12% photo show-through vs the heroes' 23%
+ * (fitted against capture/screens/pricing-desktop.png edges; see
+ * ::before). Paddings measured from the references at 1440/768/390.
+ */
+.pricingBand {
+  position: relative;
+  margin-top: -80px; /* live: div#shoftgradient { margin-top: -80px } */
+  padding: 156px 0 12px; /* measured: cards top 278 / band end 852 @1440 */
+  background: url("/images/343-1.webp") 0 0 / cover no-repeat;
+}
+
+/* live: #shoftgradient::before — light wash over the photo */
+.pricingBand::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  background: var(--color-gray-100);
+  opacity: 0.88; /* fitted against the reference background (home uses 0.77) */
+}
+
+/* live: #shoftgradient::after — app-collage arcs overlay at 35% */
+.pricingBand::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  background: url("/images/mainimage1-scaled_1000x.webp") 0 0 / 100% no-repeat;
+  opacity: 0.35; /* live: 0.35 */
+}
+
+/* live: Elementor tablet/mobile padding on the container */
+@media (max-width: 1024px) {
+  .pricingBand {
+    padding: 150px 0 30px; /* measured: cards top 190 @768 / 224 @390 */
+  }
+}

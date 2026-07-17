@@ -1,0 +1,193 @@
+/*
+ * Pricing FAQ ("Commonly Asked Questions"). Values verified against the
+ * captured live DOM (capture/dom/pricing.html inline stylesheets, selectors
+ * noted per rule) at 1440/768/390. Live breakpoint: 801px.
+ *
+ * Note on colors: the live rules reference var(--lidr-black)/--lidr-muted/
+ * --lidr-border, none of which are defined anywhere in the captured CSS —
+ * they are invalid at computed-value time, so color falls back to the
+ * inherited body color and the list border-top never renders. Reproduced
+ * here as the *computed* result (body text color, no border).
+ */
+
+.section {
+  padding-bottom: 50px; /* measured: 51px between the FAQ inner and the
+                           footer at 1440 (Elementor container spacing) */
+  background: var(--color-bg);
+}
+
+/* live: h2.lidr-faq-heading — theme h2 (35px, Amenti) + widget overrides */
+.heading {
+  padding-top: var(--space-40); /* live: 40px !important */
+  padding-bottom: 5px; /* live: 5px !important (overrides earlier 20px) */
+  margin-bottom: 20.5px; /* live computed (Blocksy h2 default margin) */
+  text-align: center;
+  font-weight: var(--font-normal); /* live: 400 !important → Amenti 500 face */
+}
+
+/* live: .lidr-faq-inner { display:flex; max-width:90%; margin:auto } */
+.inner {
+  display: flex;
+  max-width: var(--container-width); /* live: 90% */
+  margin: auto;
+}
+
+/* live: .lidr-faq-left { width:70%; padding-right:25px } */
+.left {
+  width: 70%;
+  padding-right: 25px;
+}
+
+/* live: ul#lidr-faq-list { list-style:none; padding:0 } */
+.list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+/* live: .lidr-faq-item — gray card rows, 15px gutter */
+.item {
+  padding: 15px; /* live: 15px !important */
+  margin-bottom: 15px; /* live: 15px !important */
+  background: var(--color-gray-100); /* live: #F5F5F5 !important */
+  border-radius: var(--radius-md); /* live: 10px !important */
+}
+
+.item:last-child {
+  margin-bottom: 0; /* live: 0 !important */
+}
+
+/* live: button.lidr-faq-trigger — Amenti 18px/500, inherits body color */
+.trigger {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px; /* live: 12px */
+  width: 100%;
+  padding: 0; /* live: 0 !important */
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-family: var(--font-heading); /* live: 'Amenti', Inter, serif !important */
+  font-size: var(--text-xl); /* live: 18px !important */
+  font-weight: var(--font-medium); /* live: 500 !important */
+  line-height: var(--leading-normal); /* live: inherited body 1.65 */
+  text-align: left;
+  color: var(--color-text); /* live: inherited body color (see header note) */
+}
+
+/* live: span.lidr-faq-icon (+ svg 14px) */
+.icon {
+  display: flex;
+  align-items: center;
+}
+
+.icon svg {
+  width: 14px; /* live: 14px !important */
+  height: 14px;
+}
+
+/* live: .lidr-faq-panel — collapsed until the item is open */
+.panel {
+  max-height: 0;
+  overflow: hidden;
+  transition:
+    max-height 0.3s ease,
+    padding 0.3s ease;
+}
+
+/* live: .lidr-faq-item.lidr-faq-open .lidr-faq-panel */
+.open .panel {
+  max-height: 300px;
+}
+
+/* live: .lidr-faq-answer */
+.answer {
+  padding-bottom: 5px; /* live: 5px !important (overrides earlier 18px) */
+  font-size: var(--text-nav); /* live: 15px */
+  line-height: var(--leading-normal); /* live: 1.65 */
+  color: var(--color-text); /* live: inherited body color (see header note) */
+}
+
+/* live: div#lidr-faq-visual — gray card, mockup pinned to its bottom edge */
+.visual {
+  position: relative;
+  display: flex; /* live: flex !important (wp-custom-css) */
+  flex-direction: column;
+  justify-content: flex-end;
+  width: 30%;
+  overflow: hidden;
+  background: var(--color-gray-100); /* live: #F5F5F5 !important */
+  border-radius: var(--radius-md); /* live: 10px !important */
+  text-align: center;
+}
+
+/* live: .short_bmains — logo badge pinned top-right */
+.badge {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+}
+
+.badge img {
+  max-width: 50px; /* live: 50px !important */
+  height: auto;
+}
+
+/* live: div#lidr-faq-visual .gadn23-s */
+.mockup {
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  margin-top: auto;
+  overflow: hidden;
+}
+
+/* live: div#lidr-faq-visual .gadn23-s img */
+.mockup img {
+  width: 100%;
+  max-width: 340px; /* live: 340px !important */
+  height: auto;
+  margin: 0 auto;
+  transform: translateX(4.5%); /* live: 4.5% (right edge crops) */
+}
+
+/* live: @media (max-width: 801px) — stacked layout */
+@media (max-width: 801px) {
+  /* live: section#lidr-faq-section { padding:10px; padding-top:30px } */
+  .section {
+    padding: 30px 10px 10px;
+  }
+
+  .heading {
+    padding-top: 15px; /* live: 15px !important */
+    padding-bottom: var(--space-20); /* live: 20px !important */
+    font-size: 26px; /* live: 26px !important */
+    line-height: 31px; /* live: 31px !important */
+  }
+
+  .inner {
+    display: block; /* live: block !important (max-width 90% still applies) */
+  }
+
+  .left {
+    width: 100%; /* live: 100% !important */
+    padding-right: 0; /* live: 0 !important */
+  }
+
+  .trigger {
+    font-size: var(--text-base); /* live: 16px !important */
+    line-height: 20px; /* live: 20px !important */
+  }
+
+  .answer {
+    padding-top: 5px; /* live: 5px !important */
+    font-size: var(--text-md); /* live: 14px !important */
+    line-height: 20px; /* live: 20px !important */
+  }
+
+  .visual {
+    width: 100%;
+    margin-top: 15px; /* live: 15px !important */
+  }
+}

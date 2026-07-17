@@ -12,6 +12,11 @@ import type { RevealMode } from "../Reveal/RevealManager";
  * transparent plans…" copy), so it passes `intro={null}`.
  * `cardReveal` forwards a page-measured per-card reveal set to
  * PricingCardList (default = home's set, see that file).
+ * `variant="pricing"` adds the live pricing page's extra widget class
+ * (.pricing__modals.pricingpagemainss) overrides — see the module CSS.
+ * `headingAs` lets the pricing page promote the section heading to its h1
+ * (the live pricing page has no h1 at all; this heading is its visual
+ * page title). Styling is identical either way.
  */
 export function PricingCards({
   intro = (
@@ -21,16 +26,24 @@ export function PricingCards({
     </p>
   ),
   cardReveal,
+  variant = "home",
+  headingAs: Heading = "h2",
 }: {
   intro?: React.ReactNode;
   cardReveal?: (RevealMode | undefined)[];
+  variant?: "home" | "pricing";
+  headingAs?: "h1" | "h2";
 } = {}) {
+  const cls =
+    variant === "pricing"
+      ? `${styles.section} ${styles.pricingVariant}`
+      : styles.section;
   return (
-    <section className={styles.section} aria-labelledby="pricing-heading">
+    <section className={cls} aria-labelledby="pricing-heading">
       <div className={styles.intro}>
-        <h2 id="pricing-heading" className={styles.introTitle}>
+        <Heading id="pricing-heading" className={styles.introTitle}>
           Clear Pricing. Built for Construction Teams.
-        </h2>
+        </Heading>
         {intro}
       </div>
       <PricingCardList reveal={cardReveal} />

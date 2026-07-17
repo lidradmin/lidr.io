@@ -39,22 +39,16 @@ function FeatureItem({ text, extra }: { text: string; extra?: boolean }) {
 export function PricingCard({
   plan,
   reveal,
-  scrollActive = false,
 }: {
   plan: Plan;
   /** scroll-reveal participation (see components/Reveal/RevealManager) */
   reveal?: RevealMode;
-  /** live mobile highlight: most-visible card below 801px */
-  scrollActive?: boolean;
 }) {
   const [open, setOpen] = useState(false);
-  const cls = [
-    styles.card,
-    open && styles.cardOpen,
-    scrollActive && styles.scrollActive,
-  ]
-    .filter(Boolean)
-    .join(" ");
+  // The live mobile scroll highlight (styles.scrollActive) is applied
+  // imperatively by PricingCardList, exactly like the live inline script's
+  // classList mutation — see the timing note there.
+  const cls = [styles.card, open && styles.cardOpen].filter(Boolean).join(" ");
   return (
     <div className={cls} data-reveal={reveal}>
       <h3 className={styles.planName}>{plan.name}</h3>
