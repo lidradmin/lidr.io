@@ -1,0 +1,118 @@
+/*
+ * Contact page layout.
+ * Live source: capture/dom/contact-us.html
+ *
+ * Key live rules:
+ *   #shoftgradient — same bg (343-1, overlay, arcs) as about/pricing heroes
+ *                     margin-top:-80px
+ *   .othermains__gridblocm--2m3 { position:relative; z-index:1; overflow:hidden }
+ *   .mains__blocwsd { max-width:90%; margin:auto; display:flex;
+ *                      align-items:flex-end }
+ *   .flipmians__blocks { width:55% }
+ *   .mains__contenmin23 h3 { font-size:40px; font-weight:400; padding-bottom:30px }
+ *   .bigblock--m23 { margin-bottom:45px }
+ *   .right__conten23 { width:50%; line-height:0; margin-bottom:-3px; overflow:hidden }
+ *   .right__conten23 img { transform:translateX(4.5%) }
+ *
+ * Mobile @media (max-width:801px):
+ *   .mains__contenmin23 h3 { font-size:31px; text-align:center }
+ *   .flipmians__blocks { width:100% }
+ *   .mains__blocwsd { display:block }
+ *   .right__conten23 { width:100% }
+ */
+
+.page {
+}
+
+.section {
+  margin-top: -80px;
+  position: relative;
+  background: url("/images/343-1.webp") 0 0 / cover no-repeat;
+}
+
+.section::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  background: var(--color-gray-100);
+  opacity: 0.92;
+}
+
+.section::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  background: url("/images/mainimage1-scaled_1000x.webp") 0 0 / 100% no-repeat;
+  opacity: 0.35;
+}
+
+.inner {
+  position: relative;
+  z-index: 1;
+  overflow: hidden;
+}
+
+.row {
+  max-width: 90%;
+  margin: 0 auto;
+  display: flex;
+  align-items: flex-end;
+}
+
+.heading {
+  font-size: 40px;
+  font-weight: var(--font-normal);
+  padding-top: 140px;
+  padding-bottom: 30px;
+  margin-top: 0;
+  margin-bottom: 0;
+  color: var(--color-heading);
+  line-height: var(--leading-heading);
+}
+
+.formCol {
+  width: 55%;
+}
+
+.formWrap {
+  margin-bottom: 45px;
+}
+
+.imageCol {
+  width: 50%;
+  line-height: 0;
+  margin-bottom: -3px;
+  overflow: hidden;
+}
+
+.imageCol img {
+  width: 100%;
+  height: auto;
+  display: block;
+  transform: translateX(4.5%);
+}
+
+/* ── Responsive ── */
+@media (max-width: 801px) {
+  .heading {
+    font-size: 31px;
+    text-align: center;
+    padding-top: 110px;
+    padding-bottom: 20px;
+  }
+
+  .row {
+    display: block;
+    max-width: 100%;
+  }
+
+  .formCol {
+    width: 100%;
+  }
+
+  .imageCol {
+    width: 100%;
+  }
+}

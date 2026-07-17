@@ -1,0 +1,147 @@
+/*
+ * Contact form — FluentForms replica.
+ * Live source: capture/dom/contact-us.html
+ *
+ * Key live rules:
+ *   .bigblock--m23 { background:#ffffff94; padding:25px; border-radius:15px;
+ *                     margin-bottom:45px }
+ *   .bigblock--m23 input/textarea { background:white; border:0 }
+ *   Form labels: font-weight:400 (FluentForms default)
+ *   .ff-t-container { display:table; width:100% }
+ *   .ff-t-cell { display:table-cell; padding:0 15px }
+ *   .ff-t-cell:first-child { padding-left:0 }
+ *   .ff-t-cell:last-child { padding-right:0 }
+ *   .ff-el-group { margin-bottom:20px }
+ *   .ff-el-form-control { border:1px solid #e7e7e7; padding:14px 20px;
+ *                          box-shadow:0 0 4px #0000000a; font-size:15px }
+ *   button.ff-btn { padding:10px 40px; background:#3d444e; border-radius:50px }
+ */
+
+.card {
+  background: rgba(255, 255, 255, 0.58);
+  padding: 25px;
+  border-radius: 15px;
+}
+
+.honeypot {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+  width: 0;
+  height: 0;
+}
+
+.nameRow {
+  display: table;
+  width: 100%;
+}
+
+.nameRow > .field {
+  display: table-cell;
+  vertical-align: top;
+}
+
+.nameRow > .field:first-child {
+  padding-right: 15px;
+}
+
+.nameRow > .field:last-child {
+  padding-left: 15px;
+}
+
+.field {
+  margin-bottom: 20px;
+}
+
+.field label {
+  display: block;
+  font-weight: var(--font-normal);
+  font-size: var(--text-base);
+  color: var(--color-text);
+  margin-bottom: 5px;
+  line-height: var(--leading-normal);
+}
+
+.field input,
+.field textarea {
+  display: block;
+  width: 100%;
+  background: var(--color-white);
+  border: 1px solid #e7e7e7;
+  padding: 14px 20px;
+  box-shadow: 0 0 4px rgba(0, 0, 0, 0.04);
+  font-size: 15px;
+  font-family: inherit;
+  color: var(--color-text);
+  border-radius: var(--radius-sm);
+  box-sizing: border-box;
+  line-height: var(--leading-normal);
+}
+
+.field input::placeholder,
+.field textarea::placeholder {
+  color: #999;
+}
+
+.field textarea {
+  resize: vertical;
+  min-height: 100px;
+}
+
+.submitWrap {
+  text-align: left;
+}
+
+.submitWrap button {
+  padding: 10px 40px;
+  background: #3d444e;
+  color: var(--color-white);
+  border: none;
+  border-radius: 50px;
+  font-size: var(--text-base);
+  font-family: inherit;
+  cursor: pointer;
+  line-height: var(--leading-normal);
+}
+
+.submitWrap button:hover {
+  opacity: 0.9;
+}
+
+.submitWrap button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.error {
+  display: block;
+  color: #d32f2f;
+  font-size: var(--text-md);
+  margin-top: 4px;
+}
+
+.errorMsg {
+  color: #d32f2f;
+  font-size: var(--text-md);
+  margin-top: 10px;
+}
+
+.successMsg {
+  font-size: var(--text-xl);
+  color: var(--color-text);
+  text-align: center;
+  padding: 40px 20px;
+}
+
+/* ── Responsive ── */
+@media (max-width: 801px) {
+  .nameRow {
+    display: block;
+  }
+
+  .nameRow > .field {
+    display: block;
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+  }
+}

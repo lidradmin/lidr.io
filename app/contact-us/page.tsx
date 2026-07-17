@@ -1,0 +1,41 @@
+import type { Metadata } from "next";
+import Image from "next/image";
+import styles from "./page.module.css";
+import { ContactForm } from "../../components/ContactForm/ContactForm";
+import { RevealManager } from "../../components/Reveal/RevealManager";
+
+export const metadata: Metadata = {
+  title: "Contact Us - Lidr.io",
+  openGraph: {
+    description: "Contact Us",
+  },
+};
+
+export default function ContactUs() {
+  return (
+    <div className={styles.page}>
+      <RevealManager />
+      <section className={styles.section}>
+        <div className={styles.inner}>
+          <div className={styles.row}>
+            <div className={styles.formCol}>
+              <h3 className={styles.heading}>Contact Us</h3>
+              <div className={styles.formWrap}>
+                <ContactForm />
+              </div>
+            </div>
+            <div className={styles.imageCol}>
+              <Image
+                src="/images/Group_162.webp"
+                alt="Hand holding phone showing Lidr.io app"
+                width={800}
+                height={1000}
+                priority
+              />
+            </div>
+          </div>
+        </div>
+      </section>
+    </div>
+  );
+}
