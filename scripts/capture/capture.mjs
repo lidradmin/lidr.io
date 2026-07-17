@@ -57,18 +57,45 @@ async function settle(page) {
   });
 }
 
-for (const { slug, path } of PAGES) {
-  assetLog[slug] = new Set();
-  for (const bp of BREAKPOINTS) {
-    const ctx = await browser.newContext({
-      viewport: { width: bp.width, height: bp.height },
-      deviceScaleFactor: 1,
-    });
+// The live site is a heavy WordPress install and intermittently slow;
+// a single networkidle/goto timeout must not kill a 30-screenshot run.
+// Retry each page×breakpoint capture in a fresh context before giving up.
+const ATTEMPTS = 3;
+
+async function capturePageAtBreakpoint(slug, path, bp) {
+  const ctx = await browser.newContext({
+    viewport: { width: bp.width, height: bp.height },
+    deviceScaleFactor: 1,
+  });
+  try {
     const page = await ctx.newPage();
     page.on("requestfinished", (r) => assetLog[slug].add(r.url()));
     await page.goto(LIVE_ORIGIN + path, { waitUntil: "load", timeout: 60000 });
     await settle(page);
     await captureFullPage(page, `capture/screens/${slug}-${bp.name}.png`);
+    return { ctx, page };
+  } catch (err) {
+    await ctx.close();
+    throw err;
+  }
+}
+
+for (const { slug, path } of PAGES) {
+  assetLog[slug] = new Set();
+  for (const bp of BREAKPOINTS) {
+    let ctx, page, lastErr;
+    for (let attempt = 1; attempt <= ATTEMPTS; attempt++) {
+      try {
+        ({ ctx, page } = await capturePageAtBreakpoint(slug, path, bp));
+        lastErr = null;
+        break;
+      } catch (err) {
+        lastErr = err;
+        console.warn(`retry ${attempt}/${ATTEMPTS} for ${slug}@${bp.name}: ${err.message?.split("\n")[0]}`);
+        await new Promise((r) => setTimeout(r, 5000 * attempt));
+      }
+    }
+    if (lastErr) throw lastErr;
     if (bp.name === "desktop") {
       writeFileSync(`capture/dom/${slug}.html`, await page.content());
       const meta = await page.evaluate(() => ({
