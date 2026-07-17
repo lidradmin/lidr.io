@@ -1,0 +1,129 @@
+/*
+ * About-page "Download The Lidr.io App" section — inline gray card variant.
+ * Live source: capture/dom/about.html section#lidr-download-sections
+ * Values verified against captured references at 1440/768/390.
+ *
+ * Key live rules:
+ *   .lidr-download-inner { max-width:98%; margin:auto; background:#F5F5F5 !important;
+ *                            padding:30px !important; border-radius:15px !important;
+ *                            margin-top:50px !important; margin-bottom:30px !important;
+ *                            display:flex; align-items:center }
+ *   #lidr-download-copy { width:70% !important }
+ *   h2.lidr-download-kicker { margin-bottom:5px !important; font-weight:normal !important;
+ *                               font-size:39px !important;
+ *                               border-bottom:1px solid #dbdbdb !important;
+ *                               width:fit-content; padding-bottom:5px !important;
+ *                               margin-bottom:10px !important }
+ *   p.lidr-download-tagline { font-size:16px; margin-bottom:7px !important }
+ *   p.lidr-download-cta-text { margin-bottom:0 !important; font-weight:700 !important }
+ *   .lidr-download-inner .lidr-download-buttons { margin:unset !important }
+ *   .lidr-download-buttons a { display:block; margin:0 5px !important }
+ */
+
+/* Outer section — no extra styling in the live DOM */
+.section {
+}
+
+/* live: .lidr-download-inner */
+.inner {
+  max-width: 98%; /* live: 98% */
+  margin: 0 auto;
+  background: var(--color-gray-100); /* live: #F5F5F5 !important */
+  padding: 30px; /* live: 30px !important */
+  border-radius: var(--radius-lg); /* live: 15px !important */
+  margin-top: 50px; /* live: 50px !important */
+  margin-bottom: 40px;
+  display: flex;
+  align-items: center;
+}
+
+/* live: #lidr-download-copy { width:70% !important } */
+.copy {
+  width: 70%; /* live: 70% !important */
+}
+
+/* live: h2.lidr-download-kicker */
+.heading {
+  font-weight: var(--font-normal); /* live: normal !important */
+  font-size: 39px; /* live: 39px !important */
+  border-bottom: 1px solid #dbdbdb; /* live: 1px solid #dbdbdb !important */
+  width: fit-content;
+  padding-bottom: 5px; /* live: 5px !important */
+  margin-top: 0;
+  margin-bottom: 10px; /* live: 10px !important */
+  color: var(--color-heading);
+  line-height: var(--leading-heading);
+}
+
+/* live: p.lidr-download-tagline */
+.tagline {
+  font-size: var(--text-base); /* live: 16px */
+  margin-bottom: 7px; /* live: 7px !important */
+  color: var(--color-text);
+}
+
+/* live: p.lidr-download-cta-text */
+.cta {
+  margin-bottom: 0; /* live: 0 !important */
+  font-weight: var(--font-bold); /* live: 700 !important */
+  color: var(--color-text);
+}
+
+/* live: .lidr-download-inner .lidr-download-buttons { display:flex; max-width:370px; margin:unset } */
+.badges {
+  display: flex;
+  max-width: 370px;
+  margin: unset; /* live: margin unset !important */
+}
+
+/* live: .lidr-download-buttons a { display:block; margin:0 5px } */
+.badges a {
+  display: block;
+  margin: 0 5px 0 0;
+}
+
+.badgeImg {
+  display: block;
+  max-width: 100%;
+  height: auto;
+  background: #000000;
+  border-radius: 10px;
+  padding: 2px;
+}
+
+/* ── Responsive — live @media (max-width:801px) ────────────────── */
+@media (max-width: 801px) {
+  /* live: .lidr-download-inner { display:block !important; margin-top:15px !important;
+                                    padding:15px !important } */
+  .inner {
+    display: block;
+    margin-top: 15px;
+    padding: 15px;
+  }
+
+  /* live: div#lidr-download-copy { width:100% !important } */
+  .copy {
+    width: 100%;
+  }
+
+  /* live: h2.lidr-download-kicker { font-size:24px !important } */
+  .heading {
+    font-size: 24px;
+  }
+
+  /* live: p.lidr-download-cta-text { font-size:14px !important } */
+  .cta {
+    font-size: 14px;
+  }
+
+  /* live: .lidr-download-inner .lidr-download-buttons a { margin:0 !important } */
+  .badges a {
+    margin: 0;
+  }
+
+  /* live: .lidr-download-inner .lidr-download-buttons { gap:10px; padding-top:15px } */
+  .badges {
+    gap: 10px;
+    padding-top: 15px;
+  }
+}

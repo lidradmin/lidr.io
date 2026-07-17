@@ -16,6 +16,18 @@
   background: var(--color-bg);
 }
 
+/* About variant: the live site wraps the FAQ+CTA inside a single Elementor
+   container (d5e256d) whose padding adds extra space around the shortcode.
+   These overrides reproduce that container spacing on the about page. */
+.sectionAbout {
+  padding-bottom: 0;
+  margin-top: 10px;
+}
+
+.sectionAbout .heading {
+  padding-top: 50px;
+}
+
 /* live: h2.lidr-faq-heading — theme h2 (35px, Amenti) + widget overrides */
 .heading {
   padding-top: var(--space-40); /* live: 40px !important */
@@ -134,12 +146,17 @@
   height: auto;
 }
 
-/* live: div#lidr-faq-visual .gadn23-s */
+/* live: div#lidr-faq-visual .gadn23-s
+   wp-custom-css overrides: padding:0, margin-top:auto, align-items:flex-end,
+   overflow:hidden. The visual stretches to match .left via flex-row stretch.
+   margin-top:auto pushes the mockup wrapper to the bottom of the visual
+   column, and overflow:hidden clips the tall image. */
 .mockup {
+  margin-top: auto;
+  margin-bottom: 0;
   display: flex;
   align-items: flex-end;
   justify-content: center;
-  margin-top: auto;
   overflow: hidden;
 }
 
@@ -194,5 +211,22 @@
   .visual {
     width: 100%;
     margin-top: 15px; /* live: 15px !important */
+  }
+
+  .mockup {
+    position: static;
+  }
+
+  /* About variant: live shortcode CSS at mobile gives
+     section#lidr-faq-section { padding: 10px; padding-top: 30px } =
+     30px 10px 10px 10px. Pricing needs the 60px bottom (calibrated to
+     match the 61px measured gap at 768/390). */
+  .sectionAbout {
+    padding-bottom: 10px;
+  }
+
+  .sectionAbout .heading {
+    padding-top: 15px;
+    padding-bottom: 20px;
   }
 }

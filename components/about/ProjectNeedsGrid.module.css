@@ -1,0 +1,203 @@
+/*
+ * "Everything Your Project Needs, In One Place" dark grid section.
+ * Live source: capture/dom/about.html .everything__youneed / .fli__constnms
+ * Values verified against captured references at 1440/768/390.
+ *
+ * Key live rules:
+ *   .everything__youneed { max-width:90% !important; margin:auto !important;
+ *                           position:relative; z-index:1 }
+ *   .fli__constnms { background:#3F444E !important; border-radius:15px !important;
+ *                     margin-top:50px !important; padding:40px !important }
+ *   .fli__constnms h3 { font-size:40px !important; color:white !important;
+ *                        font-weight:400 !important; padding-bottom:10px !important }
+ *   .fli__constnms .row { display:flex; flex-wrap:wrap; margin:0 -10px !important }
+ *   .fli__constnms .col-sm-6 { padding:10px !important }  ← cell outer spacing
+ *   .icons__barmiazns23 { border:1px solid rgba(255,255,255,0.33) !important;
+ *                          padding:25px !important; border-radius:20px !important;
+ *                          height:100% }                   ← card inner
+ *   .iconbami { display:flex; align-items:center }
+ *   .iconbami b { display:flex; margin-right:10px !important }
+ *   .iconbami h4 { color:white !important; font-weight:400 !important }
+ *   .beforebar__m { margin-top:20px; background:rgba(255,255,255,0.09);
+ *                    padding:15px 20px; border-radius:10px }
+ *   .beforebar__m span { font-size:18px; color:white; font-weight:600; display:block }
+ *   .beforebar__m p { color:white; margin:0 }
+ *   .afterbar__m { margin-top:20px; background:white; padding:15px 20px; border-radius:10px }
+ *   .afterbar__m span { font-size:18px; font-weight:600; display:block }
+ *   .afterbar__m p { margin-bottom:0 }
+ *
+ * @media (max-width:801px):
+ *   .fli__constnms { margin-top:20px; padding:20px }
+ *   .fli__constnms h3 { font-size:23px }
+ *   .iconbami h4 { font-size:16px }
+ *   .iconbami svg { width:28px; height:28px }
+ *   .beforebar__m p { font-size:14px }
+ *   .afterbar__m p { font-size:14px }
+ *   col-sm-6 collapses to 100%
+ */
+
+/* Live: .everything__youneed */
+.section {
+  max-width: 90%; /* live: 90% !important */
+  margin: 0 auto;
+  position: relative;
+  z-index: 1;
+}
+
+/* Live: .fli__constnms */
+.inner {
+  background: #3f444e; /* live: #3F444E !important */
+  border-radius: var(--radius-lg); /* live: 15px !important */
+  margin-top: 50px; /* live: 50px !important */
+  padding: 40px; /* live: 40px !important */
+}
+
+/* Live: .fli__constnms h3 */
+.heading {
+  font-size: 40px; /* live: 40px !important */
+  color: var(--color-white); /* live: white !important */
+  font-weight: var(--font-normal); /* live: 400 !important */
+  padding-bottom: 10px; /* live: 10px !important */
+  margin-top: 0;
+  margin-bottom: 22px; /* Blocksy theme h3 default margin (our * reset zeroes it) */
+  line-height: var(--leading-heading);
+}
+
+/* Live: .fli__constnms .row { display:flex; flex-wrap:wrap; margin:0 -10px } */
+.grid {
+  display: flex;
+  flex-wrap: wrap;
+  margin: 0 -10px; /* live: -10px !important */
+}
+
+/* Live: .fli__constnms .col-sm-6 { padding:10px !important } — outer cell spacing */
+.cell {
+  width: 50%;
+  padding: 10px; /* live: 10px !important */
+  box-sizing: border-box;
+}
+
+/* Live: .icons__barmiazns23 — the actual bordered card */
+.card {
+  border: 1px solid rgba(255, 255, 255, 0.33); /* live: rgba(255,255,255,0.33) */
+  padding: 25px; /* live: 25px !important */
+  border-radius: var(--radius-xl); /* live: 20px !important */
+  height: 100%; /* live: height:100% */
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ── Icon + title row ───────────────────────────────────────────── */
+
+/* live: .iconbami { display:flex; align-items:center } */
+.cardTitle {
+  display: flex;
+  align-items: center;
+}
+
+/* live: .iconbami b { display:flex; margin-right:10px !important } */
+.icon {
+  display: flex;
+  flex-shrink: 0;
+  margin-right: 10px; /* live: 10px !important */
+}
+
+/* live: .iconbami h4 { color:white !important; font-weight:400 !important } */
+.cardTitle h4 {
+  color: var(--color-white); /* live: white !important */
+  font-weight: var(--font-normal); /* live: 400 !important */
+  margin: 0;
+  font-size: var(--text-h4); /* live: Blocksy h4 default 25px */
+  line-height: var(--leading-heading);
+}
+
+/* ── Before block ───────────────────────────────────────────────── */
+.before {
+  margin-top: 20px; /* live: 20px !important */
+  background: rgba(255, 255, 255, 0.09); /* live: #ffffff17 ≈ rgba(255,255,255,0.09) */
+  padding: 15px 20px; /* live: 15px 20px !important */
+  border-radius: var(--radius-md); /* live: 10px !important */
+}
+
+.before span {
+  font-size: var(--text-xl); /* live: 18px !important */
+  color: var(--color-white); /* live: white !important */
+  font-weight: var(--font-semibold); /* live: 600 !important */
+  display: block; /* live: block !important */
+}
+
+.before p {
+  color: var(--color-white); /* live: white !important */
+  margin: 0; /* live: 0 !important */
+  font-size: var(--text-base);
+  line-height: var(--leading-normal);
+}
+
+/* ── After block ────────────────────────────────────────────────── */
+.after {
+  margin-top: 20px; /* live: 20px !important */
+  background: var(--color-white); /* live: white !important */
+  padding: 15px 20px; /* live: 15px 20px !important */
+  border-radius: var(--radius-md); /* live: 10px !important */
+}
+
+.after span {
+  font-size: var(--text-xl); /* live: 18px !important */
+  font-weight: var(--font-semibold); /* live: 600 !important */
+  display: block; /* live: block !important */
+  color: var(--color-text);
+}
+
+.after p {
+  margin-bottom: 0; /* live: 0 */
+  font-size: var(--text-base);
+  line-height: var(--leading-normal);
+  color: var(--color-text);
+}
+
+/* ── Responsive — live @media (max-width:801px) ────────────────── */
+@media (max-width: 801px) {
+  /* live: .fli__constnms { margin-top:20px !important; padding:20px !important } */
+  .inner {
+    margin-top: 20px;
+    padding: 20px;
+  }
+
+  /* live: .fli__constnms h3 { font-size:23px !important } */
+  .heading {
+    font-size: 23px;
+  }
+
+  /* live: .iconbami h4 { font-size:16px !important } */
+  .cardTitle h4 {
+    font-size: 16px;
+  }
+
+  /* live: .iconbami svg { width:28px !important; height:28px !important } */
+  .icon svg {
+    width: 28px;
+    height: 28px;
+  }
+
+  /* live: .beforebar__m p { font-size:14px !important } */
+  .before p {
+    font-size: 14px;
+  }
+
+  /* live: .afterbar__m p { font-size:14px !important } */
+  .after p {
+    font-size: 14px;
+  }
+
+  /* Bootstrap col-sm-6 collapses to 100% at <576px (Bootstrap sm breakpoint),
+     NOT at 801px. At 768px tablet the live site still shows 2-col.
+     The negative margins (0 -10px) stay at all breakpoints on the live site. */
+}
+
+/* Bootstrap col-sm-6 collapses to full width below 576px */
+@media (max-width: 575px) {
+  .cell {
+    width: 100%;
+  }
+}

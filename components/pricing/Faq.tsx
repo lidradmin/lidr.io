@@ -20,20 +20,56 @@ function PlusIcon() {
 }
 
 /**
- * "Commonly Asked Questions" accordion + app-mockup visual, pricing-page
- * only. Live source: capture/dom/pricing.html section#lidr-faq-section
- * (Elementor container 8a8f2ef, shortcode widget fa15939). Text verbatim.
+ * "Commonly Asked Questions" accordion + app-mockup visual.
+ * Live source: capture/dom/pricing.html + capture/dom/about.html
+ * (same shortcode, same FAQ text, different visual image).
  *
  * Behavior transcribed from the live inline script: single-open accordion —
  * opening an item closes the others; clicking the open item closes it
  * (leaving none open). The first item is open initially, exactly like the
  * captured state.
+ *
+ * variant="pricing" (default): pricingimg2 bottom-pinned (pricing page)
+ * variant="about": aboutusimhg2 centered with 60px padding (about page)
  */
-export function Faq() {
+export function Faq({ variant = "pricing" }: { variant?: "pricing" | "about" } = {}) {
   const [openIdx, setOpenIdx] = useState(0);
+
+  /* wp-custom-css (lines 29281-29300 in capture/dom/about.html) overrides
+     the shortcode inline CSS and makes BOTH the about and pricing FAQ
+     visuals render with the same bottom-pinned, 340px, translateX(4.5%)
+     layout. Only the image source differs. */
+  const mockupImg =
+    variant === "about" ? (
+      <img
+        src="/images/aboutusimhg2.png"
+        width={1099}
+        height={2168}
+        alt="Phone showing the Lidr.io app on a construction site"
+        loading="lazy"
+      />
+    ) : (
+      <img
+        src="/images/pricingimg2.webp"
+        srcSet="/images/pricingimg2-half.webp 843w, /images/pricingimg2.webp 1686w"
+        sizes="340px"
+        width={1686}
+        height={2204}
+        alt="Hand holding a phone showing the Lidr.io app login screen"
+        loading="lazy"
+      />
+    );
+
+  const mockup = <div className={styles.mockup}>{mockupImg}</div>;
+
+  const sectionCls =
+    variant === "about"
+      ? `${styles.section} ${styles.sectionAbout}`
+      : styles.section;
+
   return (
     <section
-      className={styles.section}
+      className={sectionCls}
       aria-label="Frequently asked questions"
     >
       <h2 className={styles.heading}>Commonly Asked Questions</h2>
@@ -81,17 +117,7 @@ export function Faq() {
               loading="lazy"
             />
           </div>
-          <div className={styles.mockup}>
-            <img
-              src="/images/pricingimg2.webp"
-              srcSet="/images/pricingimg2-half.webp 843w, /images/pricingimg2.webp 1686w"
-              sizes="340px"
-              width={1686}
-              height={2204}
-              alt="Hand holding a phone showing the Lidr.io app login screen"
-              loading="lazy"
-            />
-          </div>
+          {mockup}
         </div>
       </div>
     </section>

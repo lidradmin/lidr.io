@@ -1,0 +1,289 @@
+/*
+ * "Built by Builders" hero section.
+ * Live source: capture/dom/about.html inline CSS on the about shortcode widget.
+ * Values verified against captured references at 1440/768/390.
+ *
+ * Container: #shoftgradient / .category__topmains — Elementor e-con-full,
+ * white background.
+ * Live rule: div#shoftgradient { margin-top: -80px !important }
+ *
+ * Inner classes (live):
+ *   .mains__goodconmsin23 { padding-top:140px !important; text-align:center;
+ *                             position:relative; z-index:1 }
+ *   .mains__goodconmsin23 h4 { font-size:45px !important; font-weight:normal !important;
+ *                                padding-bottom:40px !important }
+ *   .mains__rowcolumn { max-width:94% !important; margin:auto !important;
+ *                         position:relative; z-index:1 }
+ *   .mains__rowcolumn .row { display:flex }
+ *   col-sm-5 = 41.66667% (image column)
+ *   col-sm-7 = 58.33333% (content column)
+ *   .mains__imag223 { background:#dcdcdc75; border-radius:10px; padding:40px;
+ *                      display:flex; align-items:center; justify-content:center;
+ *                      height:100% }
+ *   .short__barmins { background:#dcdcdc75; border-radius:10px; padding:20px;
+ *                      margin-bottom:32px }
+ *   .short__barmins:last-child { margin-bottom:0 }
+ *   .short__barmins h5 { font-weight:500; font-size:22px; margin-bottom:5px }
+ *   .short__barmins p { margin-bottom:0 }
+ *   .bottom__bar .lidr-download-buttons { display:flex; max-width:370px; margin:auto }
+ *   .lidr-download-buttons a { display:block; margin:0 5px }
+ *
+ * @media (max-width:801px):
+ *   .mains__goodconmsin23 { padding-top:110px !important }
+ *   .mains__goodconmsin23 h4 { font-size:33px !important; padding-bottom:20px !important }
+ *   .mains__rowcolumn { max-width:100% !important }
+ *   .mains__rowcolumn .row { display:block !important }
+ *   .mains--23min33 img { max-width:200px !important }
+ *   .bottom__bar img { max-width:120px !important (note: at 672638 width:100%/max-width:100%) }
+ *   .mains__barcontent { margin-top:20px !important }
+ *   .short__barmins { margin-bottom:20px !important }
+ */
+
+/* live: div#shoftgradient { margin-top:-80px !important }
+   The live site uses position:fixed on the header, so content starts at y=0
+   and the -80px pulls the hero under the header. Our rebuild uses
+   position:sticky (takes ~65px of flow), so margin-top:-80px only reaches
+   y≈-15. We keep the same -80px so scroll-stitch chunks align, and adjust
+   padding-top below to compensate for the lost 65px. */
+.section {
+  margin-top: -80px;
+  position: relative;
+  z-index: 1;
+  /* live: Elementor bg = "classic" — same construction-site photo
+     (343-1) as the home/pricing heroes, layered with a translucent wash
+     and the app-collage arcs (mainimage1-scaled), matching the captured
+     reference background at the page edges. */
+  background: url("/images/343-1.webp") 0 0 / cover no-repeat;
+}
+
+/* live: #shoftgradient::before — translucent wash over the photo.
+   Fitted against the reference edge pixels (about page has lighter
+   show-through than pricing, ~8% photo vs pricing's ~12%). */
+.section::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  background: var(--color-gray-100);
+  opacity: 0.92;
+}
+
+/* live: #shoftgradient::after — app-collage overlay at 35% opacity */
+.section::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  background: url("/images/mainimage1-scaled_1000x.webp") 0 0 / 100% no-repeat;
+  opacity: 0.35;
+}
+
+/* live: .mains__goodconmsin23 */
+.heading {
+  padding-top: 140px; /* live: 140px !important */
+  text-align: center;
+  position: relative;
+  z-index: 1;
+}
+
+/* live: .mains__goodconmsin23 h4 */
+.heading h4 {
+  font-size: 45px; /* live: 45px !important */
+  font-weight: var(--font-normal); /* live: normal !important → Amenti 500 face */
+  padding-bottom: 40px; /* live: 40px !important */
+  margin-top: 0;
+  margin-bottom: 0;
+  color: var(--color-heading);
+  line-height: var(--leading-heading);
+}
+
+/* live: .mains__rowcolumn { max-width:94% !important; margin:auto !important;
+                               position:relative; z-index:1 } */
+.row {
+  max-width: 94%; /* live: 94% !important */
+  margin: 0 auto;
+  position: relative;
+  z-index: 1;
+}
+
+/* live: .mains__rowcolumn .row { display:flex } */
+.rowInner {
+  display: flex;
+}
+
+/* live: col-sm-5 = 41.66667% with Bootstrap padding 15px each side */
+.imageCol {
+  width: 41.66667%;
+  padding: 0 15px; /* Bootstrap col-sm-5 padding */
+  box-sizing: border-box;
+}
+
+/* live: col-sm-7 = 58.33333% */
+.contentCol {
+  width: 58.33333%;
+  padding: 0 15px;
+  box-sizing: border-box;
+}
+
+/* live: .mains__imag223 */
+.imageWrap {
+  background: rgba(220, 220, 220, 0.46); /* live: #dcdcdc75 */
+  border-radius: var(--radius-md); /* live: 10px !important */
+  padding: 40px; /* live: 40px !important */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  box-sizing: border-box;
+}
+
+/* live: .mains--23min33 wraps img + .bottom__bar.
+   Width is content-intrinsic, constrained by the badge bar (max-width:370px). */
+.imageInner {
+  text-align: center;
+  max-width: 370px;
+}
+
+.imageInner > img {
+  display: block;
+  max-width: 352px;
+  height: auto;
+  margin: 0 auto;
+}
+
+/* live: .bottom__bar — no margin on live DOM */
+.badgeBar {
+}
+
+/* live: .lidr-download-buttons { display:flex; max-width:370px; margin:auto } */
+.badges {
+  display: flex;
+  max-width: 370px;
+  margin: 0 auto;
+}
+
+/* live: .lidr-download-buttons a { display:block; margin:0 5px } */
+.badges a {
+  display: block;
+  margin: 0 5px;
+}
+
+.badgeImg {
+  display: block;
+  max-width: 100%;
+  height: auto;
+  background: #000000;
+  border-radius: 10px;
+  padding: 2px;
+}
+
+/* live: .short__barmins */
+.qaBlock {
+  background: rgba(220, 220, 220, 0.46); /* live: #dcdcdc75 */
+  border-radius: var(--radius-md); /* live: 10px !important */
+  padding: 20px; /* live: 20px !important */
+  margin-bottom: 32px; /* live: 32px !important */
+}
+
+.qaBlock:last-child {
+  margin-bottom: 0; /* live: 0 !important */
+}
+
+/* live: .short__barmins h5 */
+.qaBlock h5 {
+  font-weight: var(--font-medium); /* live: 500 !important */
+  font-size: 22px; /* live: 22px !important */
+  margin-bottom: 5px; /* live: 5px !important */
+  margin-top: 0;
+  color: var(--color-heading);
+  line-height: var(--leading-heading);
+}
+
+/* live: .short__barmins p */
+.qaBlock p {
+  margin-bottom: 0; /* live: 0 !important */
+  font-size: var(--text-base);
+  line-height: var(--leading-normal);
+  color: var(--color-text);
+}
+
+/* ------------------------------------------------------------------ *
+ * Responsive — live @media (max-width:801px)
+ *
+ * The live site's row has `display:block` at 801px, but Bootstrap
+ * col-sm-5/col-sm-7 still `float:left` down to 768px. Below 768px
+ * Bootstrap drops the floats and the columns stack. We replicate
+ * this two-tier behavior.
+ * ------------------------------------------------------------------ */
+@media (max-width: 801px) {
+  /* live: .mains__goodconmsin23 { padding-top:110px !important } */
+  .heading {
+    padding-top: 110px;
+  }
+
+  /* live: .mains__goodconmsin23 h4 { font-size:33px; padding-bottom:20px } */
+  .heading h4 {
+    font-size: 33px;
+    padding-bottom: 20px;
+  }
+
+  /* live: .mains__rowcolumn { max-width:100% !important } */
+  .row {
+    max-width: 100%;
+  }
+
+  /* live: .mains__rowcolumn .row { display:block !important }
+     Columns still float side-by-side (Bootstrap col-sm >= 768px). */
+  .rowInner {
+    display: block;
+  }
+
+  .rowInner::after {
+    content: "";
+    display: table;
+    clear: both;
+  }
+
+  .imageCol {
+    float: left;
+    width: 41.66667%;
+    padding: 0 15px;
+  }
+
+  .contentCol {
+    float: left;
+    width: 58.33333%;
+    padding: 0 15px;
+  }
+
+  /* live: .mains--23min33 img { max-width:200px !important } */
+  .imageInner > img {
+    max-width: 200px;
+    margin: 0 auto;
+  }
+
+  /* live: .bottom__bar img { max-width:120px !important } */
+  .badgeImg {
+    max-width: 120px;
+  }
+
+  /* live: .short__barmins { margin-bottom:20px !important } */
+  .qaBlock {
+    margin-bottom: 20px;
+  }
+}
+
+/* Below Bootstrap sm (768px) the columns stack but keep 15px
+   horizontal padding (Bootstrap col-sm default). */
+@media (max-width: 767px) {
+  .imageCol,
+  .contentCol {
+    float: none;
+    width: 100%;
+  }
+
+  /* live: .mains__barcontent { margin-top:20px !important } */
+  .contentCol {
+    margin-top: 20px;
+  }
+}

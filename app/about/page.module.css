@@ -1,0 +1,16 @@
+/*
+ * About page shell.
+ * The outer Elementor container (#shoftgradient / .category__topmains) matches
+ * the pattern on home + pricing: a single white-background e-con-full that
+ * pulls -80px over the header (handled in AboutHero.module.css .section).
+ * No extra spacing between this page's sections — they are a single flat
+ * shortcode widget stack, not the flex-column container that features/home use.
+ *
+ * live: <main> on the about page has no explicit padding (unlike home's 4px
+ * entry-content strip); using flow-root to contain margins.
+ */
+
+.page {
+  display: flow-root;
+  background: var(--color-bg);
+}
