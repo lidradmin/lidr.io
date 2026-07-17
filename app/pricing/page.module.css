@@ -20,7 +20,9 @@
 .pricingBand {
   position: relative;
   margin-top: -80px; /* live: div#shoftgradient { margin-top: -80px } */
-  padding: 156px 0 12px; /* measured: cards top 278 / band end 852 @1440 */
+  padding: 150px 0 0; /* live: 150px top like the home/features heroes, no
+                          bottom padding — verified at 1440/768/390 (band
+                          end = last card + its margin + section padding) */
   background: url("/images/343-1.webp") 0 0 / cover no-repeat;
 }
 
@@ -42,11 +44,4 @@
   z-index: 0;
   background: url("/images/mainimage1-scaled_1000x.webp") 0 0 / 100% no-repeat;
   opacity: 0.35; /* live: 0.35 */
-}
-
-/* live: Elementor tablet/mobile padding on the container */
-@media (max-width: 1024px) {
-  .pricingBand {
-    padding: 150px 0 30px; /* measured: cards top 190 @768 / 224 @390 */
-  }
 }

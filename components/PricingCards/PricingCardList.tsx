@@ -98,13 +98,25 @@ export function PricingCardList({
     let headObserver: MutationObserver | undefined;
     let fallback: ReturnType<typeof setTimeout> | undefined;
     let armTimer: ReturnType<typeof setTimeout> | undefined;
+    let applyTimer: ReturnType<typeof setTimeout> | undefined;
     const release = () => {
       if (armed) return;
       armed = true;
       headObserver?.disconnect();
       window.removeEventListener("scroll", release);
       if (fallback) clearTimeout(fallback);
-      apply();
+      // Apply one beat later with a forced synchronous style recalc, so
+      // the fade's start time is exactly here rather than at the next
+      // externally-triggered recalc (recalcs only happen at the stylesheet
+      // injections and again right before the screenshot — applying at
+      // either of those quantized moments freezes the fade at ~91% or
+      // ~22%, where the reference shows ~67%). 78ms after the first
+      // injection, the screenshot lands mid-fade exactly as the reference
+      // froze it (calibrated against pricing-tablet.png).
+      applyTimer = setTimeout(() => {
+        apply();
+        void list.offsetWidth; // force recalc: start the fade now
+      }, 78);
     };
     if (deferInitial) {
       // Watch for late stylesheet injection (the capture pipeline's
@@ -143,6 +155,7 @@ export function PricingCardList({
       window.removeEventListener("scroll", release);
       if (fallback) clearTimeout(fallback);
       if (armTimer) clearTimeout(armTimer);
+      if (applyTimer) clearTimeout(applyTimer);
     };
   }, []);
 

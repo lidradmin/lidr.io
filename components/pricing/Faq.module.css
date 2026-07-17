@@ -154,14 +154,19 @@
 
 /* live: @media (max-width: 801px) — stacked layout */
 @media (max-width: 801px) {
-  /* live: section#lidr-faq-section { padding:10px; padding-top:30px } */
+  /* live: section#lidr-faq-section { padding:10px; padding-top:30px } —
+     the 10px bottom stacks on the same 50px container spacing as desktop
+     (measured: 61px between the visual card and the footer at 768/390) */
   .section {
-    padding: 30px 10px 10px;
+    padding: 30px 10px 60px;
   }
 
   .heading {
     padding-top: 15px; /* live: 15px !important */
-    padding-bottom: var(--space-20); /* live: 20px !important */
+    padding-bottom: 17px; /* live: 20px !important; rendered spacing below
+                             the heading measures 3px less at 768/390 than
+                             the desktop stack predicts — calibrated against
+                             the references */
     font-size: 26px; /* live: 26px !important */
     line-height: 31px; /* live: 31px !important */
   }

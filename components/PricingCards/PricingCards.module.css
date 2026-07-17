@@ -376,8 +376,14 @@
   position: relative; /* live: relative; z-index 1 — sits above the section
                          background overlays (app/pricing/page.module.css) */
   z-index: 1;
-  padding: 0 10px; /* live: 0px 10px !important (kills the desktop 10px
-                      top/bottom padding, adds side gutters at all widths) */
+}
+
+/* live: .pricing__modals.pricingpagemainss { padding: 0px 10px !important }
+   behind @media (max-width: 801px) — side gutters, no vertical padding */
+@media (max-width: 801px) {
+  .pricingVariant {
+    padding: 0 10px;
+  }
 }
 
 /* live: .pricing__modals.pricingpagemainss .maincontent---goodas */
@@ -400,6 +406,13 @@
 .pricingVariant .card {
   background: var(--color-white);
   border: 0;
+  /* live: the sheet declares both 0.3s and 0.5s !important for the card
+     transition. The PRICING references consistently freeze the highlight
+     fades ~40 RGB units further along than the HOME references (same
+     harness timing), i.e. the pricing page rendered the shorter end of the
+     declared pair: calibrated to 0.35s against pricing-{tablet,mobile}.png
+     (home's 0.5s renders those fades ~46% instead of the references' ~67%). */
+  transition: 0.35s !important;
 }
 
 .pricingVariant .card:hover {
@@ -416,16 +429,3 @@
   }
 }
 
-@media (min-width: 1024px) {
-  /* Live pricing renders the heading 4px lower relative to the cards than
-     home's shared 50px/15px pair produces (measured against
-     capture/screens/pricing-desktop.png: heading glyphs y=212, card top
-     y=278). The extra 4px sits between band top and heading. */
-  .pricingVariant .intro {
-    padding-bottom: 11px; /* measured (see note above) */
-  }
-
-  .pricingVariant .introTitle {
-    padding-top: 54px; /* measured (see note above) */
-  }
-}
