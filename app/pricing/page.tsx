@@ -5,8 +5,15 @@ import { Faq } from "../../components/pricing/Faq";
 import { RevealManager } from "../../components/Reveal/RevealManager";
 
 export const metadata: Metadata = {
-  // live: capture/meta/pricing.json (no meta description on the live page)
   title: "Pricing - Lidr.io",
+  alternates: { canonical: "https://lidr.io/pricing/" },
+  openGraph: {
+    title: "Pricing - Lidr.io",
+    url: "https://lidr.io/pricing/",
+    siteName: "Lidr.io",
+    locale: "en_US",
+    type: "article",
+  },
 };
 
 export default function Pricing() {

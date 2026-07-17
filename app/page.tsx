@@ -13,6 +13,16 @@ export const metadata: Metadata = {
   title: "Smart, Scalable Solutions to Simplify Your Workflow | LIDR.IO",
   description:
     "LIDR.io streamlines your workflow with smart, secure, and scalable solutions. Discover tools designed to simplify data management, enhance collaboration, and drive productivity—tailored for businesses of all sizes.",
+  alternates: { canonical: "https://lidr.io/" },
+  openGraph: {
+    title: "Smart, Scalable Solutions to Simplify Your Workflow | LIDR.IO",
+    description:
+      "LIDR.io streamlines your workflow with smart, secure, and scalable solutions. Discover tools designed to simplify data management, enhance collaboration, and drive productivity—tailored for businesses of all sizes.",
+    url: "https://lidr.io/",
+    siteName: "Lidr.io",
+    locale: "en_US",
+    type: "website",
+  },
 };
 
 export default function Home() {

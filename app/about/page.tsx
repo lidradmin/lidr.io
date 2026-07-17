@@ -7,8 +7,15 @@ import { AboutDownloadCta } from "../../components/about/AboutDownloadCta";
 import { RevealManager } from "../../components/Reveal/RevealManager";
 
 export const metadata: Metadata = {
-  // live: capture/meta/about.json (no meta description on the live page)
   title: "About - Lidr.io",
+  alternates: { canonical: "https://lidr.io/about/" },
+  openGraph: {
+    title: "About - Lidr.io",
+    url: "https://lidr.io/about/",
+    siteName: "Lidr.io",
+    locale: "en_US",
+    type: "article",
+  },
 };
 
 export default function About() {

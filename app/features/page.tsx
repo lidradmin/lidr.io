@@ -9,8 +9,15 @@ import { DownloadCta } from "../../components/DownloadCta/DownloadCta";
 import { RevealManager } from "../../components/Reveal/RevealManager";
 
 export const metadata: Metadata = {
-  // live: capture/meta/features.json (no meta description on the live page)
   title: "Features - Lidr.io",
+  alternates: { canonical: "https://lidr.io/features/" },
+  openGraph: {
+    title: "Features - Lidr.io",
+    url: "https://lidr.io/features/",
+    siteName: "Lidr.io",
+    locale: "en_US",
+    type: "article",
+  },
 };
 
 export default function Features() {

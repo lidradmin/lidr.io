@@ -6,8 +6,14 @@ import { RevealManager } from "../../components/Reveal/RevealManager";
 
 export const metadata: Metadata = {
   title: "Contact Us - Lidr.io",
+  alternates: { canonical: "https://lidr.io/contact-us/" },
   openGraph: {
+    title: "Contact Us - Lidr.io",
     description: "Contact Us",
+    url: "https://lidr.io/contact-us/",
+    siteName: "Lidr.io",
+    locale: "en_US",
+    type: "article",
   },
 };
 

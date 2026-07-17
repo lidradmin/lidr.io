@@ -4,6 +4,14 @@ import { FairUsePolicyContent } from "../../content/legal/fair-use-policy";
 
 export const metadata: Metadata = {
   title: "Fair Use Policy - Lidr.io",
+  alternates: { canonical: "https://lidr.io/fair-use-policy/" },
+  openGraph: {
+    title: "Fair Use Policy - Lidr.io",
+    url: "https://lidr.io/fair-use-policy/",
+    siteName: "Lidr.io",
+    locale: "en_US",
+    type: "article",
+  },
 };
 
 export default function FairUsePolicy() {
