@@ -33,15 +33,26 @@ async function settle(page) {
     });
   });
   await page.waitForLoadState("networkidle");
-  // freeze animations for stable screenshots, and hide the live site's
+  // Freeze animations for stable screenshots, and hide the live site's
   // cookie-consent banner (Blocksy theme: .cookie-notification). The
   // rebuild ships no cookie banner at all (the site sets no tracking
   // cookies), so references should exclude it rather than bake in a
   // transient overlay that has no equivalent to diff against. We hide via
   // CSS instead of clicking "Accept"/"Decline" so we don't set cookies or
   // otherwise change page state during capture.
+  //
+  // The freeze selector must carry HIGH SPECIFICITY, not just !important:
+  // a bare `* { transition: none !important }` has specificity (0,0,0), so
+  // any site rule that is itself !important at class level (the live site
+  // declares e.g. `.bigmainscbar-22 { transition: .5s !important }`) wins
+  // the !important-vs-!important comparison and keeps animating. That
+  // previously let in-flight fades leak into the references (captured
+  // mid-transition instead of at rest). `html:not(#\9)x3` bumps the freeze
+  // to specificity (3,0,1) while still matching every element, so the
+  // references show rest states only. The diff harness
+  // (tests/visual/visual.spec.ts) injects the identical rule.
   await page.addStyleTag({
-    content: `*,*::before,*::after{animation:none!important;transition:none!important;caret-color:transparent!important}
+    content: `html:not(#\\9):not(#\\9):not(#\\9) *, html:not(#\\9):not(#\\9):not(#\\9) *::before, html:not(#\\9):not(#\\9):not(#\\9) *::after { animation: none !important; transition: none !important; caret-color: transparent !important; }
 .cookie-notification{display:none!important}`,
   });
 }

@@ -26,8 +26,19 @@ for (const slug of ENABLED) {
       const page = await ctx.newPage();
       await page.goto(PAGES[slug], { waitUntil: "networkidle" });
       await page.evaluate(() => document.fonts.ready);
+      // Freeze animations/transitions before screenshotting — identical rule
+      // to the one capture.mjs injects when shooting the live references.
+      // The selector must carry HIGH SPECIFICITY, not just !important: a bare
+      // `* { transition: none !important }` has specificity (0,0,0), so any
+      // site rule that is itself !important at class level (live declares
+      // e.g. `.bigmainscbar-22 { transition: .5s !important }`, faithfully
+      // transcribed into the rebuild) wins the !important-vs-!important
+      // comparison and keeps animating — previously freezing fades mid-flight
+      // in both references and test shots. `html:not(#\9)x3` bumps the freeze
+      // to specificity (3,0,1) while still matching every element, so both
+      // pipelines compare rest states only.
       await page.addStyleTag({
-        content: `*,*::before,*::after{animation:none!important;transition:none!important;caret-color:transparent!important}`,
+        content: `html:not(#\\9):not(#\\9):not(#\\9) *, html:not(#\\9):not(#\\9):not(#\\9) *::before, html:not(#\\9):not(#\\9):not(#\\9) *::after { animation: none !important; transition: none !important; caret-color: transparent !important; }`,
       });
 
       mkdirSync("test-results/actual", { recursive: true });
