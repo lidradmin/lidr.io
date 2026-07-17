@@ -118,12 +118,21 @@ a state-based wait. Avoid bare timing constants.
 
 ## Remaining steps
 
-- [ ] Implement + commit the deterministic bottom-quiesce fix in settle()
-      (capture.mjs). Consider whether visual.spec.ts needs the same
-      (it doesn't pre-scroll; rebuild reveal is synchronous — likely no).
-- [ ] Re-capture 2× (background, ~10 min each; poll output file). Verify the
-      two runs pixel-identical (scratchpad/compare-runs.mjs). Check
-      features-desktop matches run2/old-ref (revealed). Keep final run.
+- [x] Implement + commit the deterministic bottom-quiesce fix in settle()
+      (capture.mjs) — committed with the smooth-scroll override + retry
+      logic (see git log around "wip(capture): smooth-scroll override").
+      visual.spec.ts does NOT need it (no pre-scroll; rebuild reveal is
+      synchronous).
+- [ ] Re-capture 2× and verify determinism AT GATE TOLERANCE, not md5.
+      **Evidence so far (2026-07-17):** a post-fix double capture ran; 15/30
+      PNGs differed at md5/byte level, but run 1's PNGs were NOT kept, so
+      pixel-level comparison wasn't possible. LESSON: copy run 1's
+      capture/screens to the scratchpad before run 2, then compare with
+      scratchpad/compare-runs.mjs (pixelmatch threshold 0.15 is the bar that
+      matters — earlier analysis showed md5-differing pairs can be 0 px at
+      gate tolerance). Specifically check features-desktop lands REVEALED
+      (bottom laptop mockup ~115px higher, matching run2/old-ref) in BOTH
+      runs. capture/ currently holds the second post-fix run, state unverified.
 - [ ] `npm run test:visual` ×2 → need "9 passed" both times. If home/features
       drift: fix on the live-true side (RevealManager trigger/threshold vs
       live), never timing constants. If non-convergent → report BLOCKED with
