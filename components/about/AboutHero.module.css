@@ -87,7 +87,7 @@
 }
 
 /* live: .mains__goodconmsin23 h4 */
-.heading h4 {
+.heading h1 {
   font-size: 45px; /* live: 45px !important */
   font-weight: var(--font-normal); /* live: normal !important → Amenti 500 face */
   padding-bottom: 40px; /* live: 40px !important */
@@ -222,7 +222,7 @@
   }
 
   /* live: .mains__goodconmsin23 h4 { font-size:33px; padding-bottom:20px } */
-  .heading h4 {
+  .heading h1 {
     font-size: 33px;
     padding-bottom: 20px;
   }

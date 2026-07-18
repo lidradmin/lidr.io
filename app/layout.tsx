@@ -31,8 +31,27 @@ const montserrat = localFont({
 });
 
 export const metadata: Metadata = {
-  title: "Lidr.io",
-  description: "Lidr.io",
+  title: {
+    default: "Lidr.io — Construction Photo Documentation & Reporting",
+    template: "%s | Lidr.io",
+  },
+  description:
+    "Lidr.io helps construction teams capture, organise, and report on site photos with GPS tagging, annotations, and one-click PDF reports.",
+  openGraph: {
+    siteName: "Lidr.io",
+    locale: "en_US",
+    images: [
+      {
+        url: "https://lidr.io/images/Group-198.webp",
+        width: 2962,
+        height: 4320,
+        alt: "Lidr.io app screenshot",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+  },
 };
 
 export default function RootLayout({

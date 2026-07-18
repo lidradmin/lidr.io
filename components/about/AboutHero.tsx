@@ -12,7 +12,7 @@ export function AboutHero({ children }: { children?: ReactNode } = {}) {
   return (
     <section className={styles.section} aria-labelledby="about-hero-heading">
       <div className={styles.heading} data-reveal="always" data-reveal-delay="50">
-        <h4 id="about-hero-heading">Built by Builders</h4>
+        <h1 id="about-hero-heading">Built by Builders</h1>
       </div>
       <div className={styles.row}>
         <div className={styles.rowInner}>

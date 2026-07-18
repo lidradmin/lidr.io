@@ -5,13 +5,15 @@ import { Faq } from "../../components/pricing/Faq";
 import { RevealManager } from "../../components/Reveal/RevealManager";
 
 export const metadata: Metadata = {
-  title: "Pricing - Lidr.io",
+  title: "Pricing",
+  description:
+    "Simple, transparent pricing for construction teams of every size. Start with a 14-day free trial — no credit card required.",
   alternates: { canonical: "https://lidr.io/pricing/" },
   openGraph: {
     title: "Pricing - Lidr.io",
+    description:
+      "Simple, transparent pricing for construction teams of every size. Start with a 14-day free trial — no credit card required.",
     url: "https://lidr.io/pricing/",
-    siteName: "Lidr.io",
-    locale: "en_US",
     type: "article",
   },
 };

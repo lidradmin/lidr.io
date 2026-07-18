@@ -7,13 +7,15 @@ import { AboutDownloadCta } from "../../components/about/AboutDownloadCta";
 import { RevealManager } from "../../components/Reveal/RevealManager";
 
 export const metadata: Metadata = {
-  title: "About - Lidr.io",
+  title: "About",
+  description:
+    "Built by builders — learn how Lidr.io helps construction teams capture, organise, and transform site documentation into professional records.",
   alternates: { canonical: "https://lidr.io/about/" },
   openGraph: {
     title: "About - Lidr.io",
+    description:
+      "Built by builders — learn how Lidr.io helps construction teams capture, organise, and transform site documentation into professional records.",
     url: "https://lidr.io/about/",
-    siteName: "Lidr.io",
-    locale: "en_US",
     type: "article",
   },
 };

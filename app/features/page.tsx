@@ -9,13 +9,15 @@ import { DownloadCta } from "../../components/DownloadCta/DownloadCta";
 import { RevealManager } from "../../components/Reveal/RevealManager";
 
 export const metadata: Metadata = {
-  title: "Features - Lidr.io",
+  title: "Features",
+  description:
+    "Photo capture, GPS tagging, image annotations, one-click PDF reports, team collaboration, AI assistance, and secure cloud storage — all in one platform.",
   alternates: { canonical: "https://lidr.io/features/" },
   openGraph: {
     title: "Features - Lidr.io",
+    description:
+      "Photo capture, GPS tagging, image annotations, one-click PDF reports, team collaboration, AI assistance, and secure cloud storage — all in one platform.",
     url: "https://lidr.io/features/",
-    siteName: "Lidr.io",
-    locale: "en_US",
     type: "article",
   },
 };

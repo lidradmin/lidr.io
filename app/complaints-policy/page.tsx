@@ -3,13 +3,13 @@ import { LegalLayout } from "../../components/LegalLayout/LegalLayout";
 import { ComplaintsPolicyContent } from "../../content/legal/complaints-policy";
 
 export const metadata: Metadata = {
-  title: "Complaints Policy - Lidr.io",
+  title: "Complaints Policy",
+  description:
+    "How to raise a complaint with Lidr.io — our process for handling feedback, escalation steps, and resolution timelines.",
   alternates: { canonical: "https://lidr.io/complaints-policy/" },
   openGraph: {
     title: "Complaints Policy - Lidr.io",
     url: "https://lidr.io/complaints-policy/",
-    siteName: "Lidr.io",
-    locale: "en_US",
     type: "article",
   },
 };
