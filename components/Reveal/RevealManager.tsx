@@ -69,7 +69,13 @@ export function RevealManager() {
       if (!pending.size) window.removeEventListener("scroll", check);
     };
 
-    check();
+    // Force the browser to paint the hidden state before revealing
+    // above-the-fold elements, so CSS transitions actually animate.
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        check();
+      });
+    });
     window.addEventListener("scroll", check, { passive: true });
     return () => window.removeEventListener("scroll", check);
   }, []);
