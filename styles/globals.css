@@ -90,22 +90,29 @@ textarea {
 }
 
 /*
- * Scroll-reveal hidden + transition states (see components/Reveal/RevealManager.tsx).
- * Mirrors the live site's AOS zoom-out-up: the element starts scaled up,
- * translated down, and transparent, then transitions to its final state
- * when scrolled into view.
+ * Scroll-reveal states (see components/Reveal/RevealManager.tsx).
+ * Mirrors AOS 2.3.1 zoom-out-up: elements start hidden (opacity 0, scaled
+ * up 1.2x, translated down 100px) from first paint via pure CSS. JS adds
+ * .reveal-ready to enable transitions, then adds .reveal-visible to
+ * trigger the entrance animation. This avoids the FOUC that happens when
+ * the hidden state is applied only via JS in useEffect.
  *
- * Live AOS settings: data-aos-easing="ease", data-aos-duration="400".
- * zoom-out-up starts at scale(1.2) translateY(40px) opacity(0).
+ * AOS defaults: easing "ease", duration 400ms.
  */
 [data-reveal] {
+  opacity: 0;
+  transform: scale(1.2) translate3d(0, 100px, 0);
+  pointer-events: none;
+}
+
+[data-reveal].reveal-ready {
   transition: opacity 0.4s ease, transform 0.4s ease;
 }
 
-.reveal-pending {
-  opacity: 0 !important;
-  transform: scale(1.2) translateY(40px) !important;
-  pointer-events: none;
+[data-reveal].reveal-visible {
+  opacity: 1;
+  transform: scale(1) translate3d(0, 0, 0);
+  pointer-events: auto;
 }
 
 .skip-link {

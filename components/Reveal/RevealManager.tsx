@@ -10,71 +10,78 @@ import { useEffect } from "react";
 export type RevealMode = "always" | "max1024" | "max767";
 
 /**
- * Scroll-reveal runtime, mirroring the live site's AOS behavior as actually
- * captured (AOS.init({ once: true }) + the site's custom
- * `.aos-init { filter: blur(10px) }` hidden state).
+ * Scroll-reveal runtime, mirroring the live site's AOS behavior.
  *
- * On the live site, AOS computes element positions at DOMContentLoaded —
- * before the lazy images inflate the page — so a breakpoint-dependent set of
- * below-fold elements never fires during normal browsing and re-reveals on
- * scroll. The reference screenshots (chunked scroll-and-stitch) bake those
- * reveal states in: an element is hidden (blurred/transparent) until its top
- * enters the viewport minus AOS's default 120px offset, then snaps (or, for
- * pricing cards, fades over their 0.5s transition) to its final state.
+ * Elements with [data-reveal] start hidden from first paint via pure CSS
+ * (opacity 0, scale 1.2, translate3d down 100px — matching AOS zoom-out-up).
+ * No JS is needed for the hidden state, so there's no flash of content.
  *
- * Elements opt in via data-reveal:
- *   "always"  — hidden until scrolled into view at every width
- *   "max1024" — participates only at widths <= 1024px
- *   "max767"  — participates only at widths <= 767px
- * (the per-width sets were measured on the live site at 1440/768/390).
+ * On mount this component:
+ *  1. Filters elements by their data-reveal mode vs current viewport width
+ *  2. Adds .reveal-ready to enable CSS transitions
+ *  3. After one frame (so the browser paints the hidden state with
+ *     transitions now active), reveals above-the-fold elements by adding
+ *     .reveal-visible, respecting data-reveal-delay for staggered entrance
+ *  4. Listens for scroll to reveal below-fold elements as they enter
  *
- * The hidden state lives in styles/globals.css (.reveal-pending) with
- * !important + class specificity so it interacts with the visual-test
- * "freeze" stylesheet exactly like the live site's rules do.
+ * Elements whose data-reveal mode doesn't match the current width get
+ * .reveal-visible immediately (no animation, just shown).
  */
 export function RevealManager() {
   useEffect(() => {
     const w = window.innerWidth;
-    const els = Array.from(
+    const all = Array.from(
       document.querySelectorAll<HTMLElement>("[data-reveal]")
-    ).filter((el) => {
-      const mode = el.getAttribute("data-reveal");
-      if (mode === "always") return true;
-      if (mode === "max1024") return w <= 1024;
-      if (mode === "max767") return w <= 767;
-      return false;
-    });
-    if (!els.length) return;
+    );
 
-    const pending = new Set<HTMLElement>();
-    for (const el of els) {
-      el.classList.add("reveal-pending");
-      pending.add(el);
+    // Elements that don't participate at this width — show immediately
+    const participating: HTMLElement[] = [];
+    for (const el of all) {
+      const mode = el.getAttribute("data-reveal");
+      const active =
+        mode === "always" ||
+        (mode === "max1024" && w <= 1024) ||
+        (mode === "max767" && w <= 767);
+      if (active) {
+        participating.push(el);
+      } else {
+        el.classList.add("reveal-visible");
+      }
     }
+    if (!participating.length) return;
+
+    // Enable transitions on participating elements
+    for (const el of participating) {
+      el.classList.add("reveal-ready");
+    }
+
+    const pending = new Set(participating);
+
+    const reveal = (el: HTMLElement) => {
+      const delay = parseInt(el.getAttribute("data-reveal-delay") || "0", 10);
+      if (delay > 0) {
+        setTimeout(() => el.classList.add("reveal-visible"), delay);
+      } else {
+        el.classList.add("reveal-visible");
+      }
+      pending.delete(el);
+    };
 
     const check = () => {
       const line = window.scrollY + window.innerHeight - 120;
       for (const el of pending) {
         const top = el.getBoundingClientRect().top + window.scrollY;
         if (top < line) {
-          const delay = parseInt(el.getAttribute("data-reveal-delay") || "0", 10);
-          if (delay > 0) {
-            setTimeout(() => el.classList.remove("reveal-pending"), delay);
-          } else {
-            el.classList.remove("reveal-pending");
-          }
-          pending.delete(el);
+          reveal(el);
         }
       }
       if (!pending.size) window.removeEventListener("scroll", check);
     };
 
-    // Force the browser to paint the hidden state before revealing
-    // above-the-fold elements, so CSS transitions actually animate.
+    // Wait one frame so the browser has painted the hidden+transitioned
+    // state, then reveal above-fold elements with their staggered delays
     requestAnimationFrame(() => {
-      requestAnimationFrame(() => {
-        check();
-      });
+      check();
     });
     window.addEventListener("scroll", check, { passive: true });
     return () => window.removeEventListener("scroll", check);
