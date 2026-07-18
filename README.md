@@ -1,36 +1,81 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Lidr.io
 
-## Getting Started
+Pixel-perfect static rebuild of [lidr.io](https://lidr.io) — WordPress to Next.js App Router with `output: 'export'`.
 
-First, run the development server:
+## Quick start
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+npm install
+npm run dev          # dev server on localhost:3000
+npm run build        # static export to out/
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Verification
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```bash
+npm run build                              # build static export
+npm run test:visual                        # 30 visual pixel-diff tests (10 pages x 3 breakpoints)
+npx playwright test                        # a11y, functional, contact-form (3 browsers)
+node scripts/crawl-compare.mjs             # URL crawl: live vs static build
+npx lhci autorun                           # Lighthouse CI gates
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+### Visual testing
 
-## Learn More
+Reference screenshots live in `capture/screens/` (gitignored). To regenerate:
 
-To learn more about Next.js, take a look at the following resources:
+```bash
+npm run build
+node scripts/capture/capture-screens.mjs   # re-capture from local build
+npm run test:visual                        # should be 30/30 pass
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Pages
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+| Path | Title |
+|------|-------|
+| `/` | Smart, Scalable Solutions to Simplify Your Workflow |
+| `/about/` | About |
+| `/features/` | Features |
+| `/pricing/` | Pricing |
+| `/contact-us/` | Contact Us |
+| `/privacy-policy/` | Privacy Policy |
+| `/gdpr-policy/` | GDPR Policy |
+| `/terms-of-service/` | Terms of Service |
+| `/fair-use-policy/` | Fair Use Policy |
+| `/complaints-policy/` | Complaints Policy |
 
-## Deploy on Vercel
+## Contact form
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+Uses [Web3Forms](https://web3forms.com/). Replace the placeholder access key in `components/ContactForm/ContactForm.tsx`:
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+```
+REPLACE_WITH_REAL_ACCESS_KEY
+```
+
+## Deploy
+
+### Vercel
+
+`vercel.json` includes 301 redirects for `/sign-up/` to `/`.
+
+### Netlify / Cloudflare Pages
+
+`public/_redirects` provides the same 301 redirects.
+
+## Post-cutover checklist
+
+- [ ] Replace Web3Forms access key placeholder
+- [ ] Update Google Search Console with new sitemap URL
+- [ ] Submit `sitemap.xml` to search engines
+- [ ] Verify Amenti font license covers production use
+- [ ] Configure custom domain DNS
+- [ ] Set up SSL certificate (auto on Vercel/Netlify)
+- [ ] Monitor 404s after launch for any missed redirects
+
+## Stack
+
+- Next.js 16 (App Router, Turbopack, static export)
+- CSS Modules with design tokens (`styles/tokens.css`)
+- Playwright for visual regression, a11y, and functional testing
+- Lighthouse CI for performance gates

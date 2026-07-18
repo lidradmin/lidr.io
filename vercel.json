@@ -1,0 +1,6 @@
+{
+  "redirects": [
+    { "source": "/sign-up", "destination": "/", "statusCode": 301 },
+    { "source": "/sign-up/", "destination": "/", "statusCode": 301 }
+  ]
+}
