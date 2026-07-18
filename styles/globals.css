@@ -92,21 +92,19 @@ textarea {
 /*
  * Scroll-reveal hidden + transition states (see components/Reveal/RevealManager.tsx).
  * Mirrors the live site's AOS zoom-out-up: the element starts scaled up,
- * translated down, blurred, and transparent, then transitions to its final
- * state when scrolled into view.
+ * translated down, and transparent, then transitions to its final state
+ * when scrolled into view.
  *
  * Live AOS settings: data-aos-easing="ease", data-aos-duration="400".
- * Custom live rule: .aos-init { filter: blur(10px) !important }.
  * zoom-out-up starts at scale(1.2) translateY(40px) opacity(0).
  */
 [data-reveal] {
-  transition: opacity 0.4s ease, transform 0.4s ease, filter 0.4s ease;
+  transition: opacity 0.4s ease, transform 0.4s ease;
 }
 
 .reveal-pending {
   opacity: 0 !important;
   transform: scale(1.2) translateY(40px) !important;
-  filter: blur(10px) !important;
   pointer-events: none;
 }
 
