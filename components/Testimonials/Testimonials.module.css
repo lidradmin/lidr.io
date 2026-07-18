@@ -117,7 +117,9 @@
   background: var(--color-white);
 }
 
-.card:hover p {
+.card:hover p,
+.card:hover .name,
+.card:hover .role {
   color: var(--color-black);
 }
 

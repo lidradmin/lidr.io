@@ -15,14 +15,14 @@ export function FeaturesHero() {
         <div className={styles.row}>
           <div className={styles.colText}>
             <div className={styles.copy}>
-              <h1 id="features-hero-heading" className={styles.title}>
+              <h1 id="features-hero-heading" className={styles.title} data-reveal="always" data-reveal-delay="10">
                 Features That Empower Your Workflow
               </h1>
-              <p className={styles.lead}>
+              <p className={styles.lead} data-reveal="always" data-reveal-delay="40">
                 Discover a suite of intuitive tools designed to simplify
                 complexity and boost productivity.
               </p>
-              <div className={styles.ctas}>
+              <div className={styles.ctas} data-reveal="always" data-reveal-delay="60">
                 <a
                   href="https://apps.apple.com/app/id6759912615"
                   className={styles.btn}
@@ -38,7 +38,7 @@ export function FeaturesHero() {
               </div>
             </div>
           </div>
-          <div className={styles.colImages}>
+          <div className={styles.colImages} data-reveal="always" data-reveal-delay="100">
             <div className={styles.images}>
               {/* Hero/LCP images — never lazy. */}
               <img

@@ -158,12 +158,12 @@ export function ProjectNeedsGrid() {
       aria-labelledby="project-needs-heading"
     >
       <div className={styles.inner}>
-        <h3 id="project-needs-heading" className={styles.heading}>
+        <h3 id="project-needs-heading" className={styles.heading} data-reveal="always" data-reveal-delay="10">
           Everything Your Project Needs, In One Place
         </h3>
         <div className={styles.grid}>
-          {CARDS.map((card) => (
-            <div key={card.title + card.before.slice(0, 20)} className={styles.cell}>
+          {CARDS.map((card, i) => (
+            <div key={card.title + card.before.slice(0, 20)} className={styles.cell} data-reveal="always" data-reveal-delay={30 + i * 20}>
               <div className={styles.card}>
                 <div className={styles.cardTitle}>
                   <b className={styles.icon}>

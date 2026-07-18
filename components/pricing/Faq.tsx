@@ -72,8 +72,8 @@ export function Faq({ variant = "pricing" }: { variant?: "pricing" | "about" } =
       className={sectionCls}
       aria-label="Frequently asked questions"
     >
-      <h2 className={styles.heading}>Commonly Asked Questions</h2>
-      <div className={styles.inner}>
+      <h2 className={styles.heading} data-reveal="always" data-reveal-delay="10">Commonly Asked Questions</h2>
+      <div className={styles.inner} data-reveal="always" data-reveal-delay="50">
         <div className={styles.left}>
           <ul className={styles.list}>
             {FAQS.map((faq, i) => {

@@ -88,6 +88,10 @@
   color: var(--color-text); /* live: inherited body color (see header note) */
 }
 
+.trigger:hover {
+  color: var(--color-text-muted);
+}
+
 /* live: span.lidr-faq-icon (+ svg 14px) */
 .icon {
   display: flex;

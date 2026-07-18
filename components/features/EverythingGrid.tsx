@@ -50,12 +50,12 @@ const CARDS = [
 export function EverythingGrid() {
   return (
     <section className={styles.section} aria-labelledby="everything-heading">
-      <h2 id="everything-heading" className={styles.heading}>
+      <h2 id="everything-heading" className={styles.heading} data-reveal="always" data-reveal-delay="10">
         Everything Your Project Needs, In One Place
       </h2>
       <div className={styles.grid}>
-        {CARDS.map((c) => (
-          <div key={c.title} className={styles.col}>
+        {CARDS.map((c, i) => (
+          <div key={c.title} className={styles.col} data-reveal="always" data-reveal-delay={10 + i * 50}>
             <div className={styles.card}>
               <div
                 className={styles.icon}

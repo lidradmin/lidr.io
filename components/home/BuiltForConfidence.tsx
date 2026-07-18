@@ -37,12 +37,12 @@ const CARDS = [
 export function BuiltForConfidence() {
   return (
     <section className={styles.section} aria-labelledby="bfc-heading">
-      <h2 id="bfc-heading" className={styles.title}>
+      <h2 id="bfc-heading" className={styles.title} data-reveal="always" data-reveal-delay="10">
         Built for Confidence
       </h2>
       <div className={styles.grid}>
-        {CARDS.map((c) => (
-          <div key={c.title} className={styles.card}>
+        {CARDS.map((c, i) => (
+          <div key={c.title} className={styles.card} data-reveal="always" data-reveal-delay={30 + i * 20}>
             <div
               className={styles.iconWrap}
               aria-hidden="true"

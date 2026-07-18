@@ -25,12 +25,12 @@ export default function ContactUs() {
         <div className={styles.inner}>
           <div className={styles.row}>
             <div className={styles.formCol}>
-              <h3 className={styles.heading}>Contact Us</h3>
-              <div className={styles.formWrap}>
+              <h3 className={styles.heading} data-reveal="always" data-reveal-delay="10">Contact Us</h3>
+              <div className={styles.formWrap} data-reveal="always" data-reveal-delay="50">
                 <ContactForm />
               </div>
             </div>
-            <div className={styles.imageCol}>
+            <div className={styles.imageCol} data-reveal="always" data-reveal-delay="100">
               <Image
                 src="/images/Group_162.webp"
                 alt="Hand holding phone showing Lidr.io app"

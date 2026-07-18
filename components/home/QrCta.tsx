@@ -10,7 +10,7 @@ export function QrCta() {
   return (
     <section className={styles.section} aria-labelledby="qr-cta-heading">
       <div className={styles.wrapper}>
-        <div className={styles.banners}>
+        <div className={styles.banners} data-reveal="always" data-reveal-delay="50">
           <img
             src="/images/scantodownload.webp"
             srcSet="/images/scantodownload-half.webp 1268w, /images/scantodownload.webp 2536w"
@@ -21,11 +21,11 @@ export function QrCta() {
           />
         </div>
         <div className={styles.content}>
-          <h2 id="qr-cta-heading" className={styles.heading}>
+          <h2 id="qr-cta-heading" className={styles.heading} data-reveal="always" data-reveal-delay="50">
             Download The Lidr.io App
           </h2>
-          <p className={styles.sub}>Transform Photo Documentation.</p>
-          <p className={styles.offer}>Get 14 Day Free Trial.</p>
+          <p className={styles.sub} data-reveal="always" data-reveal-delay="100">Transform Photo Documentation.</p>
+          <p className={styles.offer} data-reveal="always" data-reveal-delay="120">Get 14 Day Free Trial.</p>
           <AppStoreBadges
             className={styles.badges}
             imgClassName={styles.badgeImg}

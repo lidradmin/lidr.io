@@ -30,14 +30,14 @@ export function Hero() {
     <section className={styles.hero} aria-labelledby="hero-heading">
       <div className={styles.clip}>
         <div className={styles.content}>
-          <h1 id="hero-heading" className={styles.title}>
+          <h1 id="hero-heading" className={styles.title} data-reveal="always" data-reveal-delay="50">
             Capture. Organise. Report. Built for Photo Management
           </h1>
-          <p className={styles.subtitle}>
+          <p className={styles.subtitle} data-reveal="always" data-reveal-delay="50">
             Turn everyday job site photos into secure, professional project
             records your team and clients can rely on.
           </p>
-          <div className={styles.buttons}>
+          <div className={styles.buttons} data-reveal="always" data-reveal-delay="50">
             <a href="/sign-up/" className={`${styles.btn} ${styles.btnPrimary}`}>
               Get Started
             </a>
@@ -49,8 +49,8 @@ export function Hero() {
             </a>
           </div>
           <div className={styles.features}>
-            {FEATURES.map((f) => (
-              <div key={f.title} className={styles.card}>
+            {FEATURES.map((f, i) => (
+              <div key={f.title} className={styles.card} data-reveal="always" data-reveal-delay={50 + i * 50}>
                 <div
                   className={styles.icon}
                   aria-hidden="true"
@@ -64,7 +64,7 @@ export function Hero() {
             ))}
           </div>
         </div>
-        <div className={styles.image}>
+        <div className={styles.image} data-reveal="always" data-reveal-delay="150">
           <img
             src="/images/Group-198.webp"
             srcSet="/images/Group-198-half.webp 1481w, /images/Group-198.webp 2962w"

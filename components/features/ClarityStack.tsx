@@ -80,7 +80,7 @@ export function ClarityStack() {
     <section className={styles.section} aria-label="Clarity From Every Capture">
       <div className={styles.scrollArea} ref={areaRef}>
         <div className={styles.stickyFrame}>
-          <h2 className={styles.heading}>Clarity From Every Capture</h2>
+          <h2 className={styles.heading} data-reveal="always" data-reveal-delay="10">Clarity From Every Capture</h2>
           <div className={styles.stack} ref={stackRef}>
             {/* live: decorative ghost layers behind the deck */}
             <div className={`${styles.ghost} ${styles.ghost3}`} aria-hidden="true" />

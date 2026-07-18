@@ -53,12 +53,16 @@ export function RevealManager() {
     }
 
     const check = () => {
-      // live: AOS default trigger — element top above viewport bottom - 120
       const line = window.scrollY + window.innerHeight - 120;
       for (const el of pending) {
         const top = el.getBoundingClientRect().top + window.scrollY;
         if (top < line) {
-          el.classList.remove("reveal-pending");
+          const delay = parseInt(el.getAttribute("data-reveal-delay") || "0", 10);
+          if (delay > 0) {
+            setTimeout(() => el.classList.remove("reveal-pending"), delay);
+          } else {
+            el.classList.remove("reveal-pending");
+          }
           pending.delete(el);
         }
       }

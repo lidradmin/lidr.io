@@ -39,6 +39,11 @@
   padding: var(--space-20);
   background: var(--color-gray-100); /* live: #F5F5F5 */
   border-radius: var(--radius-md); /* live: 10px */
+  transition: 0.3s;
+}
+
+.card:hover {
+  transform: scale(1.05);
 }
 
 /* live: .icon__block — inline 56px svg leaves an 8.4px baseline strut gap

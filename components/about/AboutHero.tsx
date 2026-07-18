@@ -11,13 +11,13 @@ import { AppStoreBadges } from "../AppStoreBadges/AppStoreBadges";
 export function AboutHero({ children }: { children?: ReactNode } = {}) {
   return (
     <section className={styles.section} aria-labelledby="about-hero-heading">
-      <div className={styles.heading}>
+      <div className={styles.heading} data-reveal="always" data-reveal-delay="50">
         <h4 id="about-hero-heading">Built by Builders</h4>
       </div>
       <div className={styles.row}>
         <div className={styles.rowInner}>
         {/* Left column: app collage image + store badges */}
-        <div className={styles.imageCol}>
+        <div className={styles.imageCol} data-reveal="always" data-reveal-delay="100">
           <div className={styles.imageWrap}>
             <div className={styles.imageInner}>
               <img
@@ -35,7 +35,7 @@ export function AboutHero({ children }: { children?: ReactNode } = {}) {
         </div>
 
         {/* Right column: three Q&A blocks */}
-        <div className={styles.contentCol}>
+        <div className={styles.contentCol} data-reveal="always" data-reveal-delay="150">
           <div className={styles.qaBlock}>
             <h5>What is Lidr.io?</h5>
             <p>

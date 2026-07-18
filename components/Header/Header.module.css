@@ -70,6 +70,7 @@
 }
 
 .navList a {
+  position: relative;
   display: flex;
   align-items: center;
   padding: 0 17.5px 0 5px; /* live per-link padding */
@@ -79,10 +80,26 @@
   transition: color 0.3s;
 }
 
+.navList a::after {
+  content: "";
+  position: absolute;
+  bottom: -3px;
+  left: 5px;
+  right: 17.5px;
+  height: 1px;
+  background: var(--color-brand);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.3s;
+}
+
+.navList a:hover::after,
+.navLinkActive.navLinkActive::after {
+  transform: scaleX(1);
+}
+
 .navList a:hover,
 .navLinkActive.navLinkActive {
-  /* live: current + hovered links go brand green; class doubled so this
-     beats .navList a { color } regardless of source order */
   color: var(--color-brand);
 }
 

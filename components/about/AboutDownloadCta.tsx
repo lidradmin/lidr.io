@@ -29,7 +29,7 @@ export function AboutDownloadCta() {
       aria-label="Download the Lidr.io app"
       className={styles.section}
     >
-      <div className={styles.inner}>
+      <div className={styles.inner} data-reveal="always" data-reveal-delay="50">
         <div className={styles.copy}>
           <h2 className={styles.heading}>Download The Lidr.io App</h2>
           <p className={styles.tagline}>Transform Photo Documentation.</p>

@@ -81,10 +81,10 @@ export function FeatureCarousel() {
         <div className={styles.dHeader}>
           <div className={styles.dRow}>
             <div>
-              <h2 id="clarity-heading" className={styles.dHeading}>
+              <h2 id="clarity-heading" className={styles.dHeading} data-reveal="always" data-reveal-delay="10">
                 Clarity From Every Capture
               </h2>
-              <p className={styles.dLede}>
+              <p className={styles.dLede} data-reveal="always" data-reveal-delay="50">
                 Helping your team work faster, stay compliant, and deliver
                 confident updates to clients and stakeholders.
               </p>
@@ -136,10 +136,10 @@ export function FeatureCarousel() {
         <div className={styles.mHeader}>
           <div className={styles.mRow}>
             <div>
-              <h2 id="clarity-heading-m" className={styles.mHeading}>
+              <h2 id="clarity-heading-m" className={styles.mHeading} data-reveal="always" data-reveal-delay="10">
                 Clarity From Every Capture
               </h2>
-              <p className={styles.mLede}>
+              <p className={styles.mLede} data-reveal="always" data-reveal-delay="50">
                 Helping your team work faster, stay compliant, and deliver
                 confident updates to clients and stakeholders.
               </p>
