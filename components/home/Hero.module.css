@@ -105,10 +105,11 @@
 }
 
 .btnSecondary:hover {
-  background: var(--btn-gradient);
+  background: var(--btn-gradient-hover);
   color: var(--color-white);
   border-color: transparent;
-  box-shadow: var(--shadow-btn);
+  transform: scale(1.05);
+  box-shadow: var(--shadow-btn-hover);
 }
 
 /* live: .features-container */

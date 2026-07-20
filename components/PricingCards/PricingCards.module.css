@@ -71,7 +71,8 @@
 .card:hover .planName,
 .card:hover .price,
 .card:hover .per,
-.card:hover .planDesc {
+.card:hover .planDesc,
+.card:hover .seeAllBtn {
   color: var(--color-white);
 }
 
@@ -422,7 +423,8 @@
 .pricingVariant .card:hover .planName,
 .pricingVariant .card:hover .price,
 .pricingVariant .card:hover .per,
-.pricingVariant .card:hover .planDesc {
+.pricingVariant .card:hover .planDesc,
+.pricingVariant .card:hover .seeAllBtn {
   color: var(--color-white);
 }
 
