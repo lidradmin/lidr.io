@@ -25,17 +25,12 @@ export default function Pricing() {
       {/* Live: Elementor container 79e035f (#shoftgradient) — the mountains
           photo + white wash + app-collage arcs band behind the cards. */}
       <div className={styles.pricingBand}>
-        {/* Measured reveal set for PRICING (from the reference captures):
-            EMPTY. Every card renders crisp in every chunk of
-            pricing-{desktop,tablet,mobile}.png — even the below-fold ones
-            whose scroll-active background fades are frozen mid-flight —
-            so no card participates in the scroll reveal on this page
-            (unlike home, where Essential/Pro/Business re-arm). */}
         <PricingCards
           variant="pricing"
           intro={null}
           headingAs="h1"
-          cardReveal={[]}
+          cardReveal={["always", "always", "always", "always"]}
+          cardRevealDelays={[50, 100, 200, 400]}
         />
       </div>
       {/* Live: Elementor container 8a8f2ef — white FAQ band. */}

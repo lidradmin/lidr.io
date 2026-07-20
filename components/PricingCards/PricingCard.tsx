@@ -39,10 +39,12 @@ function FeatureItem({ text, extra }: { text: string; extra?: boolean }) {
 export function PricingCard({
   plan,
   reveal,
+  revealDelay,
 }: {
   plan: Plan;
   /** scroll-reveal participation (see components/Reveal/RevealManager) */
   reveal?: RevealMode;
+  revealDelay?: number;
 }) {
   const [open, setOpen] = useState(false);
   // The live mobile scroll highlight (styles.scrollActive) is applied
@@ -50,7 +52,7 @@ export function PricingCard({
   // classList mutation — see the timing note there.
   const cls = [styles.card, open && styles.cardOpen].filter(Boolean).join(" ");
   return (
-    <div className={cls} data-reveal={reveal}>
+    <div className={cls} data-reveal={reveal} data-reveal-delay={revealDelay}>
       <h3 className={styles.planName}>{plan.name}</h3>
       <p className={styles.price}>
         {plan.price}

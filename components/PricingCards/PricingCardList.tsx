@@ -29,11 +29,16 @@ const HOME_REVEAL: (RevealMode | undefined)[] = [
   "max1024",
 ];
 
+const HOME_DELAYS = [50, 100, 200, 400];
+
 export function PricingCardList({
   reveal = HOME_REVEAL,
+  revealDelays = HOME_DELAYS,
 }: {
   /** per-card reveal modes, in PLANS order (see RevealManager) */
   reveal?: (RevealMode | undefined)[];
+  /** per-card reveal delays in ms, in PLANS order */
+  revealDelays?: number[];
 } = {}) {
   const listRef = useRef<HTMLDivElement>(null);
 
@@ -74,7 +79,7 @@ export function PricingCardList({
   return (
     <div className={styles.cards} ref={listRef}>
       {PLANS.map((plan, i) => (
-        <PricingCard key={plan.name} plan={plan} reveal={reveal[i]} />
+        <PricingCard key={plan.name} plan={plan} reveal={reveal[i]} revealDelay={revealDelays?.[i]} />
       ))}
     </div>
   );

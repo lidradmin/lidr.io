@@ -415,7 +415,15 @@
 }
 
 .pricingVariant .card:hover {
-  background: var(--color-white);
+  background: var(--color-slate);
+  border-color: var(--color-slate);
+}
+
+.pricingVariant .card:hover .planName,
+.pricingVariant .card:hover .price,
+.pricingVariant .card:hover .per,
+.pricingVariant .card:hover .planDesc {
+  color: var(--color-white);
 }
 
 /* live: the .scroll-active rules live in wp-custom-css (after the page-id

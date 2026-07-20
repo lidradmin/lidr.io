@@ -37,6 +37,19 @@ export const metadata: Metadata = {
   },
   description:
     "Lidr.io helps construction teams capture, organise, and report on site photos with GPS tagging, annotations, and one-click PDF reports.",
+  icons: {
+    icon: [
+      { url: "/favicon-32x32.png", sizes: "32x32", type: "image/png" },
+      { url: "/favicon-192x192.png", sizes: "192x192", type: "image/png" },
+    ],
+    apple: "/apple-touch-icon.png",
+    other: [
+      {
+        rel: "msapplication-TileImage",
+        url: "/favicon-270x270.png",
+      },
+    ],
+  },
   openGraph: {
     siteName: "Lidr.io",
     locale: "en_US",

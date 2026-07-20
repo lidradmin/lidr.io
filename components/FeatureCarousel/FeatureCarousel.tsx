@@ -89,7 +89,7 @@ export function FeatureCarousel() {
                 confident updates to clients and stakeholders.
               </p>
             </div>
-            <div className={styles.dArrows}>
+            <div className={styles.dArrows} data-reveal="always" data-reveal-delay="10">
               <button
                 type="button"
                 className={styles.dArrowBtn}
@@ -117,8 +117,8 @@ export function FeatureCarousel() {
             ref={rowRef}
             style={{ transform: `translate3d(${-offset}px, 0px, 0px)` }}
           >
-            {SLIDES.map((s) => (
-              <div key={s.title} className={styles.dSlide}>
+            {SLIDES.map((s, i) => (
+              <div key={s.title} className={styles.dSlide} data-reveal="always" data-reveal-delay={50 + i * 50}>
                 <div className={styles.dCard}>
                   <h3 className={styles.dCardTitle}>{s.title}</h3>
                   <div className={styles.dImgWrap}>
@@ -144,7 +144,7 @@ export function FeatureCarousel() {
                 confident updates to clients and stakeholders.
               </p>
             </div>
-            <div className={styles.mArrows}>
+            <div className={styles.mArrows} data-reveal="always" data-reveal-delay="10">
               <button
                 type="button"
                 className={styles.mArrowBtn}
@@ -166,8 +166,8 @@ export function FeatureCarousel() {
         </div>
         <div className={styles.mCarousel} ref={mCarouselRef}>
           <div className={styles.mTrack}>
-            {SLIDES.map((s) => (
-              <div key={s.title} className={styles.mSlide}>
+            {SLIDES.map((s, i) => (
+              <div key={s.title} className={styles.mSlide} data-reveal="always" data-reveal-delay={50 + i * 50}>
                 <div className={styles.mCard}>
                   <h3 className={styles.mCardTitle}>{s.title}</h3>
                   <div className={styles.mImgWrap}>{slideImg(s, "mobile")}</div>

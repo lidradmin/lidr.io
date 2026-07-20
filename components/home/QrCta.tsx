@@ -29,6 +29,8 @@ export function QrCta() {
           <AppStoreBadges
             className={styles.badges}
             imgClassName={styles.badgeImg}
+            reveal="always"
+            revealDelay={150}
           />
         </div>
       </div>

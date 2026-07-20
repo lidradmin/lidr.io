@@ -49,7 +49,13 @@ export default function Features() {
           reviews={FEATURES_REVIEWS}
           variant="features"
         />
-        <DownloadCta reveal={{}} />
+        <DownloadCta reveal={{
+          heading: "always",
+          sub: "always",
+          offer: "always",
+          badges: "always",
+          image: "always",
+        }} />
       </div>
     </div>
   );

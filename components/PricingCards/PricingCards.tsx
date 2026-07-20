@@ -26,11 +26,13 @@ export function PricingCards({
     </p>
   ),
   cardReveal,
+  cardRevealDelays,
   variant = "home",
   headingAs: Heading = "h2",
 }: {
   intro?: React.ReactNode;
   cardReveal?: (RevealMode | undefined)[];
+  cardRevealDelays?: number[];
   variant?: "home" | "pricing";
   headingAs?: "h1" | "h2";
 } = {}) {
@@ -40,13 +42,13 @@ export function PricingCards({
       : styles.section;
   return (
     <section className={cls} aria-labelledby="pricing-heading">
-      <div className={styles.intro}>
+      <div className={styles.intro} data-reveal="always" data-reveal-delay="10">
         <Heading id="pricing-heading" className={styles.introTitle}>
           Clear Pricing. Built for Construction Teams.
         </Heading>
         {intro}
       </div>
-      <PricingCardList reveal={cardReveal} />
+      <PricingCardList reveal={cardReveal} revealDelays={cardRevealDelays} />
     </section>
   );
 }

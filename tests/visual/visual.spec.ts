@@ -26,6 +26,14 @@ for (const slug of ENABLED) {
       const page = await ctx.newPage();
       await page.goto(PAGES[slug], { waitUntil: "networkidle" });
       await page.evaluate(() => document.fonts.ready);
+      // Wait for all reveal animations to complete — scroll to bottom so
+      // every section triggers, then scroll back to top and let reveals settle.
+      await page.evaluate(async () => {
+        window.scrollTo(0, document.body.scrollHeight);
+        await new Promise(r => setTimeout(r, 600));
+        window.scrollTo(0, 0);
+        await new Promise(r => setTimeout(r, 600));
+      });
       // Freeze animations/transitions before screenshotting — identical rule
       // to the one capture.mjs injects when shooting the live references.
       // The selector must carry HIGH SPECIFICITY, not just !important: a bare

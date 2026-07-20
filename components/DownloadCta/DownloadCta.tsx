@@ -44,23 +44,25 @@ export function DownloadCta({
               id="download-heading"
               className={styles.heading}
               data-reveal={reveal.heading}
+              data-reveal-delay="50"
             >
               Download The Lidr.io App
             </h2>
-            <p className={styles.sub} data-reveal={reveal.sub}>
+            <p className={styles.sub} data-reveal={reveal.sub} data-reveal-delay="100">
               Transform Photo Documentation.
             </p>
-            <p className={styles.offer} data-reveal={reveal.offer}>
+            <p className={styles.offer} data-reveal={reveal.offer} data-reveal-delay="120">
               Get 14 Day Free Trial.
             </p>
             <AppStoreBadges
               className={styles.badges}
               imgClassName={styles.badgeImg}
               reveal={reveal.badges}
+              revealDelay={150}
             />
           </div>
         </div>
-        <div className={styles.image} data-reveal={reveal.image}>
+        <div className={styles.image} data-reveal={reveal.image} data-reveal-delay="300">
           <img
             src="/images/lidrlaptop.webp"
             srcSet="/images/lidrlaptop-half.webp 1859w, /images/lidrlaptop.webp 3718w"

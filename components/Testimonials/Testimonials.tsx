@@ -89,6 +89,7 @@ export function Testimonials({
       }
       aria-labelledby="reviews-heading"
       data-reveal={reveal}
+      data-reveal-delay="10"
     >
       <div className={styles.header}>
         <div className={styles.headerRow}>
