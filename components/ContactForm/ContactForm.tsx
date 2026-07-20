@@ -60,7 +60,7 @@ export function ContactForm() {
       noValidate
       aria-label="Contact form"
     >
-      <input type="hidden" name="access_key" value="REPLACE_WITH_REAL_ACCESS_KEY" />
+      <input type="hidden" name="access_key" value={process.env.NEXT_PUBLIC_WEB3FORMS_KEY ?? ""} />
       <input
         type="checkbox"
         name="botcheck"
