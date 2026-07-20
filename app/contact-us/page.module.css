@@ -74,6 +74,7 @@
 
 .formCol {
   width: 55%;
+  align-self: center;
 }
 
 .formWrap {
