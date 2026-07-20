@@ -74,6 +74,48 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className={`${amenti.variable} ${montserrat.variable}`}>
+      <head>
+        <link rel="dns-prefetch" href="https://api.web3forms.com" />
+        <link rel="preconnect" href="https://api.web3forms.com" />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              "@context": "https://schema.org",
+              "@graph": [
+                {
+                  "@type": "Organization",
+                  name: "Lidr.io",
+                  url: "https://lidr.io",
+                  logo: "https://lidr.io/images/Group-198.webp",
+                  sameAs: [
+                    "https://www.facebook.com/lidr.io",
+                    "https://www.linkedin.com/company/lidr-io",
+                    "https://www.tiktok.com/@lidr.io",
+                  ],
+                },
+                {
+                  "@type": "WebSite",
+                  name: "Lidr.io",
+                  url: "https://lidr.io",
+                },
+                {
+                  "@type": "SoftwareApplication",
+                  name: "Lidr.io",
+                  operatingSystem: "iOS, Android",
+                  applicationCategory: "BusinessApplication",
+                  offers: {
+                    "@type": "Offer",
+                    price: "0",
+                    priceCurrency: "GBP",
+                  },
+                  downloadUrl: "https://apps.apple.com/app/id6759912615",
+                },
+              ],
+            }),
+          }}
+        />
+      </head>
       <body>
         <a className="skip-link" href="#main">
           Skip to content
