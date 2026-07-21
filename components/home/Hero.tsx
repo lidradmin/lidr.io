@@ -38,7 +38,7 @@ export function Hero() {
             records your team and clients can rely on.
           </p>
           <div className={styles.buttons} data-reveal="always" data-reveal-delay="50">
-            <a href="/sign-up/" className={`${styles.btn} ${styles.btnPrimary}`}>
+            <a href="https://apps.apple.com/app/id6759912615" className={`${styles.btn} ${styles.btnPrimary}`}>
               Get Started
             </a>
             <a

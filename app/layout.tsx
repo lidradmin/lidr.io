@@ -79,6 +79,8 @@ export default function RootLayout({
       <head>
         <link rel="dns-prefetch" href="https://api.web3forms.com" />
         <link rel="preconnect" href="https://api.web3forms.com" />
+        <link rel="dns-prefetch" href="https://ipinfo.io" />
+        <link rel="preconnect" href="https://ipinfo.io" />
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{

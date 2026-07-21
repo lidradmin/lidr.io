@@ -89,7 +89,7 @@ export function PricingCard({
           <ChevronIcon />
         </button>
       </div>
-      <a href="/sign-up/" className={styles.cta}>
+      <a href="https://apps.apple.com/app/id6759912615" className={styles.cta}>
         {plan.cta}
       </a>
     </div>

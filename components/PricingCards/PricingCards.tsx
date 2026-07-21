@@ -1,5 +1,6 @@
 import styles from "./PricingCards.module.css";
 import { PricingCardList } from "./PricingCardList";
+import { GeoPricing } from "./GeoPricing";
 import type { RevealMode } from "../Reveal/RevealManager";
 
 /**
@@ -49,6 +50,7 @@ export function PricingCards({
         {intro}
       </div>
       <PricingCardList reveal={cardReveal} revealDelays={cardRevealDelays} />
+      <GeoPricing />
     </section>
   );
 }
