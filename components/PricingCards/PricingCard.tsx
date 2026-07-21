@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useCallback, useRef } from "react";
 import styles from "./PricingCards.module.css";
 import type { Plan } from "./plans";
 import type { RevealMode } from "../Reveal/RevealManager";
@@ -46,13 +46,22 @@ export function PricingCard({
   reveal?: RevealMode;
   revealDelay?: number;
 }) {
-  const [open, setOpen] = useState(false);
-  // The live mobile scroll highlight (styles.scrollActive) is applied
-  // imperatively by PricingCardList, exactly like the live inline script's
-  // classList mutation — see the timing note there.
-  const cls = [styles.card, open && styles.cardOpen].filter(Boolean).join(" ");
+  const cardRef = useRef<HTMLDivElement>(null);
+  const labelRef = useRef<HTMLSpanElement>(null);
+  const openRef = useRef(false);
+
+  const toggle = useCallback(() => {
+    const el = cardRef.current;
+    if (!el) return;
+    openRef.current = !openRef.current;
+    el.classList.toggle(styles.cardOpen, openRef.current);
+    if (labelRef.current) {
+      labelRef.current.textContent = openRef.current ? "See Less " : "See All Features ";
+    }
+  }, []);
+
   return (
-    <div className={cls} data-reveal={reveal} data-reveal-delay={revealDelay}>
+    <div className={styles.card} ref={cardRef} data-reveal={reveal} data-reveal-delay={revealDelay}>
       <h3 className={styles.planName}>{plan.name}</h3>
       <p className={styles.price}>
         {plan.price}
@@ -74,10 +83,9 @@ export function PricingCard({
         <button
           type="button"
           className={styles.seeAllBtn}
-          aria-expanded={open}
-          onClick={() => setOpen(!open)}
+          onClick={toggle}
         >
-          {open ? "See Less " : "See All Features "}
+          <span ref={labelRef}>See All Features </span>
           <ChevronIcon />
         </button>
       </div>
