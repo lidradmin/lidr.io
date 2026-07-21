@@ -54,13 +54,7 @@
   border: 1px solid var(--color-gray-300); /* live: #dcdcdc — matches token */
   border-radius: 25px; /* live: 25px */
   text-align: center;
-  /* live: the stylesheet declares `.bigmainscbar-22 { transition: ... }`
-     twice at equal specificity, both !important — 0.3s first, then 0.5s;
-     the later declaration wins, so the live cascade resolves to 0.5s.
-     (The `.enabled .bigmainscbar-22` 0.3s rules match nothing in the live
-     DOM.) The !important is kept as a faithful transcription of the live
-     cascade. */
-  transition: 0.5s !important;
+  transition: background 0.5s, border-color 0.5s, color 0.5s;
 }
 
 .card:hover {
