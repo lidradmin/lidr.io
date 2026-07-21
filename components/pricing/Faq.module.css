@@ -28,6 +28,23 @@
   padding-top: 50px;
 }
 
+/* About variant visual: the about image (aboutusimhg2.png, 1099×2168) is much
+   taller than the pricing mockup. Constrain it so the badge stays visible and
+   the image is centered within the card rather than overflowing it. */
+.sectionAbout .visual {
+  justify-content: center;
+}
+
+.sectionAbout .mockup {
+  align-items: center;
+  padding: 80px 20px 20px;
+}
+
+.sectionAbout .mockup img {
+  max-width: 240px;
+  transform: none;
+}
+
 /* live: h2.lidr-faq-heading — theme h2 (35px, Amenti) + widget overrides */
 .heading {
   padding-top: var(--space-40); /* live: 40px !important */
