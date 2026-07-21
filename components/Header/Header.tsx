@@ -47,7 +47,7 @@ export function Header() {
             <NavList items={NAV_ITEMS} />
           </nav>
           <div className={styles.actions}>
-            <Button href="https://app.lidr.io" variant="secondary">
+            <Button href="https://app.lidr.io" variant="secondary" className={styles.loginBtn}>
               Login
             </Button>
             {/* Live default href is /sign-up/ (dropped by the owner); this

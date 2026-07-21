@@ -30,6 +30,10 @@ export type RevealMode = "always" | "max1024" | "max767";
 export function RevealManager() {
   useEffect(() => {
     const w = window.innerWidth;
+
+    // No reveal animations on mobile — CSS leaves elements visible below 769px
+    if (w < 769) return;
+
     const all = Array.from(
       document.querySelectorAll<HTMLElement>("[data-reveal]")
     );

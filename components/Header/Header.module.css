@@ -220,9 +220,7 @@
     font-size: 12px; /* live mobile Login font size */
   }
 
-  .actions .downloadBtn {
-    /* live hides the Download App button on mobile/tablet; doubled
-       specificity so this beats .button { display: inline-flex } */
+  .actions .loginBtn {
     display: none;
   }
 }

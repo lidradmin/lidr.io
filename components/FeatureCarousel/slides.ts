@@ -23,6 +23,6 @@ export const SLIDES: Slide[] = [
   { title: "Add Your Team To Any Project", base: "addyourteamtoanyproject", w: 1183, h: 2004 },
   { title: "Instant PDF Reports With Context", base: "instantpdfreportswithcontext", w: 1169, h: 2070 },
   { title: "Every Photo Auto Synced", base: "everyphotoautosynced", w: 1075, h: 2070 },
-  { title: "AI That Finds Everything", base: "aithatfindseverything1", w: 1178, h: 2073, mobileBase: "aithatfindseverything", mw: 1018, mh: 2073 },
-  { title: "No Signal No Problem", base: "nosignalnoproblem1", w: 1193, h: 2078, mobileBase: "nosignalnoproblem", mw: 1022, mh: 2078 },
+  { title: "AI That Finds Everything", base: "aithatfindseverything1", w: 1178, h: 2073 },
+  { title: "No Signal No Problem", base: "nosignalnoproblem1", w: 1193, h: 2078 },
 ];
