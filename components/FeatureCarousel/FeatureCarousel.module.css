@@ -100,7 +100,12 @@
 /* live: .swiper-wrapper */
 .dSlides {
   display: flex;
-  padding-right: 5vw;
+}
+
+.dSlides::after {
+  content: "";
+  flex-shrink: 0;
+  width: 5vw;
 }
 
 /* live: .swiper-slide */
