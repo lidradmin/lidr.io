@@ -16,7 +16,7 @@
 
 html {
   -webkit-text-size-adjust: 100%;
-  overflow-x: hidden;
+  overflow-x: clip;
 }
 
 body {
@@ -29,9 +29,7 @@ body {
   /* Live site (Blocksy) sets both — affects glyph rendering weight */
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  /* live-faithful; must stay on body (propagates to viewport) — moving it
-     to a wrapper would break position: sticky */
-  overflow-x: hidden;
+  overflow-x: clip;
   overflow-wrap: break-word;
 }
 
