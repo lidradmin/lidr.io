@@ -189,8 +189,8 @@
   margin-bottom: 0; /* live: 0 !important */
 }
 
-/* live: .short__barmins h5 */
-.qaBlock h5 {
+/* live: .short__barmins h5 (changed to h2 for heading-order a11y) */
+.qaBlock h2 {
   font-weight: var(--font-medium); /* live: 500 !important */
   font-size: 22px; /* live: 22px !important */
   margin-bottom: 5px; /* live: 5px !important */

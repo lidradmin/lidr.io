@@ -40,11 +40,13 @@ export function PricingCard({
   plan,
   reveal,
   revealDelay,
+  nameAs: NameTag = "h3",
 }: {
   plan: Plan;
   /** scroll-reveal participation (see components/Reveal/RevealManager) */
   reveal?: RevealMode;
   revealDelay?: number;
+  nameAs?: "h2" | "h3";
 }) {
   const cardRef = useRef<HTMLDivElement>(null);
   const labelRef = useRef<HTMLSpanElement>(null);
@@ -62,14 +64,14 @@ export function PricingCard({
 
   return (
     <div className={styles.card} ref={cardRef} data-reveal={reveal} data-reveal-delay={revealDelay}>
-      <h3 className={styles.planName}>{plan.name}</h3>
+      <NameTag className={styles.planName}>{plan.name}</NameTag>
       <p className={styles.price}>
         {plan.price}
         <span className={styles.per}>{plan.per}</span>
       </p>
       <p className={styles.planDesc}>{plan.description}</p>
       <div className={styles.included}>
-        <h4 className={styles.includedTitle}>What&apos;s Included:</h4>
+        <p className={styles.includedTitle}>What&apos;s Included:</p>
         <ul className={styles.list}>
           {plan.included.map((f) => (
             <FeatureItem key={f} text={f} />

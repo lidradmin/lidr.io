@@ -62,7 +62,7 @@ export function Footer() {
 
       <div className={`${styles.container} ${styles.columns}`}>
         <div className={styles.column}>
-          <h3 className={styles.columnTitle}>Contact</h3>
+          <p className={styles.columnTitle}>Contact</p>
           <ul className={styles.contactList}>
             <li>
               <a href="mailto:info@lidr.io">
@@ -77,7 +77,7 @@ export function Footer() {
           </ul>
         </div>
         <nav className={styles.column} aria-label="Footer quick links">
-          <h3 className={styles.columnTitle}>Quick Links</h3>
+          <p className={styles.columnTitle}>Quick Links</p>
           <ul className={styles.menu}>
             {QUICK_LINKS.map((item) => (
               <li key={item.href}>
@@ -87,7 +87,7 @@ export function Footer() {
           </ul>
         </nav>
         <nav className={styles.column} aria-label="Legal">
-          <h3 className={styles.columnTitle}>Legal</h3>
+          <p className={styles.columnTitle}>Legal</p>
           <ul className={styles.menu}>
             {LEGAL_LINKS.map((item) => (
               <li key={item.href}>

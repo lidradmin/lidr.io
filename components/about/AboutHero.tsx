@@ -37,7 +37,7 @@ export function AboutHero({ children }: { children?: ReactNode } = {}) {
         {/* Right column: three Q&A blocks */}
         <div className={styles.contentCol} data-reveal="always" data-reveal-delay="150">
           <div className={styles.qaBlock}>
-            <h5>What is Lidr.io?</h5>
+            <h2>What is Lidr.io?</h2>
             <p>
               Lidr.io is a construction documentation and reporting platform
               designed to help teams capture, organize, and transform site photos
@@ -48,7 +48,7 @@ export function AboutHero({ children }: { children?: ReactNode } = {}) {
             </p>
           </div>
           <div className={styles.qaBlock}>
-            <h5>When was Lidr.io founded?</h5>
+            <h2>When was Lidr.io founded?</h2>
             <p>
               Lidr.io was founded to address the growing need for reliable,
               visual project documentation in modern construction environments.
@@ -59,7 +59,7 @@ export function AboutHero({ children }: { children?: ReactNode } = {}) {
             </p>
           </div>
           <div className={styles.qaBlock}>
-            <h5>What features do we offer?</h5>
+            <h2>What features do we offer?</h2>
             <p>
               Lidr.io equips construction teams with essential tools, including
               photo and video capture, project organization, image annotations,

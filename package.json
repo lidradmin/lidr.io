@@ -8,7 +8,9 @@
     "start": "next start",
     "lint": "eslint",
     "capture": "node scripts/capture/capture.mjs",
-    "test:visual": "next build && playwright test tests/visual --project=chromium"
+    "test:visual": "next build && playwright test tests/visual --project=chromium",
+    "test:a11y": "next build && playwright test tests/a11y.spec.ts tests/functional.spec.ts --project=chromium",
+    "test:lighthouse": "next build && lhci autorun"
   },
   "dependencies": {
     "next": "16.2.10",

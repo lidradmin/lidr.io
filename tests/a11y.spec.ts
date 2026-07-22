@@ -12,6 +12,7 @@ const PAGES = [
   "/terms-of-service/",
   "/fair-use-policy/",
   "/complaints-policy/",
+  "/download/",
 ];
 
 for (const page of PAGES) {
@@ -19,7 +20,6 @@ for (const page of PAGES) {
     await p.goto(page, { waitUntil: "networkidle" });
     const results = await new AxeBuilder({ page: p })
       .withTags(["wcag2a", "wcag2aa"])
-      .disableRules(["color-contrast"])
       .analyze();
     expect(
       results.violations,

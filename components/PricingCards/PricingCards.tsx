@@ -49,7 +49,7 @@ export function PricingCards({
         </Heading>
         {intro}
       </div>
-      <PricingCardList reveal={cardReveal} revealDelays={cardRevealDelays} />
+      <PricingCardList reveal={cardReveal} revealDelays={cardRevealDelays} cardNameAs={Heading === "h1" ? "h2" : "h3"} />
       <GeoPricing />
     </section>
   );
