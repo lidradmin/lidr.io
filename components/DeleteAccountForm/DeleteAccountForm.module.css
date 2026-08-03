@@ -1,0 +1,116 @@
+.card {
+  background: rgba(255, 255, 255, 0.58);
+  padding: 25px;
+  border-radius: 15px;
+}
+
+.honeypot {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+  width: 0;
+  height: 0;
+}
+
+.field {
+  margin-bottom: 20px;
+}
+
+.field label {
+  display: block;
+  font-weight: var(--font-normal);
+  font-size: var(--text-base);
+  color: var(--color-text);
+  margin-bottom: 5px;
+  line-height: var(--leading-normal);
+}
+
+.field input,
+.field textarea {
+  display: block;
+  width: 100%;
+  background: var(--color-white);
+  border: 1px solid #e7e7e7;
+  padding: 14px 20px;
+  box-shadow: 0 0 4px rgba(0, 0, 0, 0.04);
+  font-size: 15px;
+  font-family: inherit;
+  color: var(--color-text);
+  border-radius: var(--radius-sm);
+  box-sizing: border-box;
+  line-height: var(--leading-normal);
+}
+
+.field input::placeholder,
+.field textarea::placeholder {
+  color: #999;
+}
+
+.field textarea {
+  resize: vertical;
+  min-height: 80px;
+}
+
+.checkboxField {
+  margin-bottom: 20px;
+}
+
+.checkboxLabel {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  font-size: var(--text-base);
+  color: var(--color-text);
+  line-height: var(--leading-normal);
+  cursor: pointer;
+}
+
+.checkboxLabel input[type="checkbox"] {
+  margin-top: 4px;
+  flex-shrink: 0;
+}
+
+.submitWrap {
+  text-align: left;
+}
+
+.submitWrap button {
+  padding: 10px 40px;
+  background: #d32f2f;
+  color: var(--color-white);
+  border: none;
+  border-radius: 50px;
+  font-size: var(--text-base);
+  font-family: inherit;
+  cursor: pointer;
+  line-height: var(--leading-normal);
+}
+
+.submitWrap button:hover {
+  opacity: 0.9;
+}
+
+.submitWrap button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.error {
+  display: block;
+  color: #d32f2f;
+  font-size: var(--text-md);
+  margin-top: 4px;
+}
+
+.errorMsg {
+  color: #d32f2f;
+  font-size: var(--text-md);
+  margin-top: 10px;
+}
+
+.successMsg {
+  font-size: var(--text-xl);
+  color: var(--color-text);
+  text-align: center;
+  padding: 40px 20px;
+}
