@@ -1,0 +1,23 @@
+{
+  "applinks": {
+    "apps": [],
+    "details": [
+      {
+        "appID": "M887P2RMC6.io.lidr.app",
+        "paths": [
+          "/verify-email/*",
+          "/reset-password/*",
+          "/cancel-deletion/*",
+          "/promo/*",
+          "/team-invite/*",
+          "/project-invite/*"
+        ]
+      }
+    ]
+  },
+  "webcredentials": {
+    "apps": [
+      "M887P2RMC6.io.lidr.app"
+    ]
+  }
+}

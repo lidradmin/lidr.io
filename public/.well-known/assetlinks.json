@@ -1,0 +1,13 @@
+[
+  {
+    "relation": ["delegate_permission/common.handle_all_urls"],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "io.lidr.app",
+      "sha256_cert_fingerprints": [
+        "CD:13:64:57:97:6E:AD:73:98:63:64:9A:13:ED:6A:E8:99:81:5D:84:D3:EE:B6:B0:48:86:06:6D:A8:7F:80:A5",
+        "2B:02:C0:B8:B4:44:E3:00:1C:EA:C4:EB:16:10:7A:D6:4A:43:9A:97:80:EA:18:E3:C7:2E:A3:89:A6:7F:C4:E5"
+      ]
+    }
+  }
+]

@@ -1,0 +1,9 @@
+# Apple requires the AASA file to be served as JSON. It has no file extension,
+# so Cloudflare would otherwise guess a type (or offer it as a download) and
+# iOS would reject it. Android's verifier is stricter still: it does not follow
+# redirects, so both files must be served directly at these exact paths.
+/.well-known/apple-app-site-association
+  Content-Type: application/json
+
+/.well-known/assetlinks.json
+  Content-Type: application/json
