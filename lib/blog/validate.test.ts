@@ -45,6 +45,33 @@ describe("validatePost — hard problems", () => {
   });
 });
 
+describe("validatePost — leftover placeholders", () => {
+  test.each([
+    "See [NEEDS SOURCE] for details.",
+    "Related reading: [RELATED POST LINK]",
+    "Call us on [INSERT PHONE NUMBER].",
+    "[TODO] finish this",
+  ])("placeholder in body is hard: %s", (body) => {
+    const r = run(GOOD, body);
+    expect(r.meta).toBeNull();
+    expect(r.problems[0]).toMatchObject({ level: "hard", field: "body" });
+    expect(r.problems[0].message).toContain("[");
+  });
+  test("placeholder in title or description is hard", () => {
+    expect(run({ ...GOOD, title: "Snagging photos [TBC]" }).problems[0]).toMatchObject({ level: "hard", field: "title" });
+    expect(run({ ...GOOD, description: `${GOOD.description} [NEEDS SOURCE]` }).problems[0]).toMatchObject({ level: "hard", field: "description" });
+  });
+  test.each([
+    "Download the [PDF](https://lidr.io/features/) report.",
+    "Tick [x] when done, or [ ] if not.",
+    "Use a [Lidr](https://lidr.io/) project.",
+    "Array access like a[0] is fine.",
+    "Plain [note in brackets] stays.",
+  ])("normal brackets are fine: %s", (body) => {
+    expect(run(GOOD, body).problems).toEqual([]);
+  });
+});
+
 describe("validatePost — soft problems keep the post", () => {
   test("long description warns but publishes", () => {
     const r = run({ ...GOOD, description: "x".repeat(182) });
