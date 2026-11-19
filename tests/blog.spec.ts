@@ -95,3 +95,17 @@ test("footer shows the Blog link", async ({ page }) => {
   await page.goto("/");
   await expect(page.locator("footer a[data-blog-link]")).toHaveAttribute("href", "/blog/");
 });
+
+test.describe("small phones (320px)", () => {
+  test.use({ viewport: { width: 320, height: 640 } });
+  for (const path of ["/blog/", "/blog/tag/reporting/", "/blog/photo-reports-that-hold-up/"]) {
+    test(`no sideways scrolling: ${path}`, async ({ page }) => {
+      await page.goto(path);
+      const { scrollWidth, clientWidth } = await page.evaluate(() => ({
+        scrollWidth: document.documentElement.scrollWidth,
+        clientWidth: document.documentElement.clientWidth,
+      }));
+      expect(scrollWidth).toBeLessThanOrEqual(clientWidth);
+    });
+  }
+});
