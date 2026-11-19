@@ -1,6 +1,22 @@
 import { execFileSync } from "node:child_process";
 import { existsSync, rmSync } from "node:fs";
-import { resolve } from "node:path";
+import { basename, resolve } from "node:path";
+
+const redact = (s: string) => s.replace(/\/\/[^@/\s]*@/g, "//***@");
+
+/** git clone argv. `--` stops a URL starting with "-" being parsed as an option. */
+export function cloneArgs(url: string, target: string): string[] {
+  return [
+    "-c", "core.symlinks=false",
+    "-c", "filter.lfs.smudge=",
+    "-c", "filter.lfs.process=",
+    "-c", "filter.lfs.required=false",
+    "clone", "--quiet",
+    // blob:none keeps the clone small; history blobs load lazily for findLastGood.
+    "--filter=blob:none",
+    "--", url, target,
+  ];
+}
 
 /**
  * Where blog content comes from:
@@ -17,13 +33,21 @@ export function resolveContentDir(env: NodeJS.ProcessEnv | Record<string, string
     return dir;
   }
   if (env.BLOG_CONTENT_REPO) {
+    // The target is deleted recursively, so refuse anything but our own dir.
+    if (basename(resolve(cloneTarget)) !== ".blog-content") {
+      throw new Error(`Refusing to clone into ${cloneTarget}: target must be named .blog-content`);
+    }
     rmSync(cloneTarget, { recursive: true, force: true });
+    const url = env.BLOG_CONTENT_REPO;
     try {
-      // blob:none keeps the clone small; history blobs load lazily for findLastGood.
-      // `--` stops a URL starting with "-" from being parsed as an option.
-      execFileSync("git", ["clone", "--quiet", "--filter=blob:none", "--", env.BLOG_CONTENT_REPO, cloneTarget], { stdio: "pipe" });
+      execFileSync("git", cloneArgs(url, cloneTarget), {
+        stdio: ["ignore", "pipe", "pipe"],
+        timeout: 120_000,
+        env: { ...process.env, GIT_TERMINAL_PROMPT: "0", GIT_LFS_SKIP_SMUDGE: "1" },
+      });
     } catch (err) {
-      throw new Error(`Could not fetch blog content from ${env.BLOG_CONTENT_REPO}: ${(err as Error).message}`);
+      const stderr = (err as { stderr?: Buffer | string }).stderr?.toString().trim() ?? "";
+      throw new Error(`Could not fetch blog content from ${redact(url)}: ${redact(stderr)}`);
     }
     return cloneTarget;
   }
