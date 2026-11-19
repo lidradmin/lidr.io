@@ -3,7 +3,7 @@ import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { expect, test } from "vitest";
-import { findLastGood } from "./history";
+import { findLastGood, findLastGoodFile } from "./history";
 import { resolveContentDir } from "./source";
 
 const git = (cwd: string, ...args: string[]) =>
@@ -99,4 +99,13 @@ test("returns null for a repo with no commits", () => {
   const dir = mkdtempSync(join(tmpdir(), "empty-"));
   git(dir, "init", "-q");
   expect(findLastGood(dir, "p", isGood)).toBeNull();
+});
+
+test("findLastGoodFile reads any safe path and rejects unsafe ones", () => {
+  const dir = repoWith(["title: Good one\n"]);
+  expect(findLastGoodFile(dir, "posts/p.md", isGood)).toBe("title: Good one\n");
+  expect(findLastGoodFile(dir, "../p.md", () => true)).toBeNull();
+  expect(findLastGoodFile(dir, "posts/../p.md", () => true)).toBeNull();
+  expect(findLastGoodFile(dir, "/etc/passwd", () => true)).toBeNull();
+  expect(findLastGoodFile(dir, "Posts/P.md", () => true)).toBeNull();
 });

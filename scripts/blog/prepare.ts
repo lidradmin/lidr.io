@@ -1,7 +1,7 @@
 import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
-import { join } from "node:path";
-import { buildBlogData } from "./pipeline";
+import { dirname, join } from "node:path";
+import { buildBlogData, countProblems, formatProblems } from "./pipeline";
 import { resolveContentDir } from "./source";
 
 /**
@@ -14,6 +14,9 @@ async function main() {
   const cwd = process.cwd();
   const check = process.argv.includes("--check");
   const strict = process.env.BLOG_STRICT === "1";
+  const ri = process.argv.indexOf("--report");
+  const reportPath = ri >= 0 ? process.argv[ri + 1] : undefined;
+  if (ri >= 0 && !reportPath) throw new Error("--report needs a file path");
   const contentDir = resolveContentDir(process.env, join(cwd, ".blog-content"));
   const publicDir = check ? mkdtempSync(join(tmpdir(), "blog-check-")) : join(cwd, "public");
   if (!check) {
@@ -23,7 +26,7 @@ async function main() {
 
   let result;
   try {
-    result = await buildBlogData({ contentDir, publicDir, strict });
+    result = await buildBlogData({ contentDir, publicDir });
   } finally {
     if (check) rmSync(publicDir, { recursive: true, force: true });
   }
@@ -35,17 +38,22 @@ async function main() {
     writeFileSync(join(cwd, ".blog/report.json"), JSON.stringify(report, null, 2));
   }
 
+  if (reportPath) {
+    mkdirSync(dirname(reportPath), { recursive: true });
+    writeFileSync(reportPath, JSON.stringify(report, null, 2));
+  }
+
   const problems = Object.entries(report.problems);
+  const problemCount = countProblems(report);
   console.log(
     data.enabled
       ? `blog: ${data.posts.length} post(s), ${data.tags.length} tag(s), ${data.redirects.length} redirect(s), ${problems.length} item(s) with problems`
       : "blog: disabled (set BLOG_CONTENT_REPO or BLOG_CONTENT_DIR to enable)"
   );
-  for (const [key, ps] of problems) {
-    for (const p of ps) {
-      console.warn(`  ${key} [${p.level}] ${p.field}: ${p.message}`);
-      if (p.detail) console.warn(`    ${p.detail}`);
-    }
+  for (const line of formatProblems(report)) console.warn(line);
+  if (strict && problemCount > 0) {
+    console.error(`blog: ${problemCount} problem(s) found and BLOG_STRICT=1`);
+    process.exit(1);
   }
 }
 

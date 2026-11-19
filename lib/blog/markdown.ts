@@ -33,7 +33,7 @@ export function markdownToPlainText(md: string): string {
   return blocks.join(" ").replace(/\s+/g, " ").trim();
 }
 
-function lookupImage(images: ImageManifest, src: string): ImageVariant | undefined {
+export function lookupImage(images: ImageManifest, src: string): ImageVariant | undefined {
   if (Object.hasOwn(images, src)) return images[src];
   try {
     const decoded = decodeURIComponent(src);

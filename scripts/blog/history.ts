@@ -1,6 +1,7 @@
 import { execFileSync } from "node:child_process";
 
 const SLUG_RE = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
+const PATH_RE = /^[a-z0-9._/-]+$/;
 const MAX_VERSIONS = 25;
 
 const run = (cwd: string, args: string[]) =>
@@ -24,7 +25,14 @@ const run = (cwd: string, args: string[]) =>
  */
 export function findLastGood(contentDir: string, slug: string, isGood: (raw: string) => boolean): string | null {
   if (!SLUG_RE.test(slug)) return null;
-  const path = `posts/${slug}.md`;
+  return findLastGoodFile(contentDir, `posts/${slug}.md`, isGood);
+}
+
+/** Same walk as findLastGood, for any safe repo-relative file (e.g. tags.yml). */
+export function findLastGoodFile(contentDir: string, relPath: string, isGood: (raw: string) => boolean): string | null {
+  if (!PATH_RE.test(relPath) || relPath.includes("..") || relPath.startsWith("/")) return null;
+  const path = relPath;
+  const slug = relPath;
   try {
     run(contentDir, ["rev-parse", "--is-inside-work-tree"]);
   } catch {
