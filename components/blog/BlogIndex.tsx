@@ -13,11 +13,25 @@ type Props = {
   posts: BuiltPost[];
   page?: number;
   totalPages?: number;
+  /** Base for pagination hrefs: page 1 = basePath, page n = `${basePath}page/n/`. */
+  basePath?: string;
 };
 
-const pageHref = (n: number) => (n === 1 ? "/blog/" : `/blog/page/${n}/`);
+/** Cards loaded eagerly when there is no featured card (page 2+, tag pages). */
+const EAGER_CARDS = 3;
 
-export function BlogIndex({ heading, intro, tags, activeTag, featured, posts, page = 1, totalPages = 1 }: Props) {
+export function BlogIndex({
+  heading,
+  intro,
+  tags,
+  activeTag,
+  featured,
+  posts,
+  page = 1,
+  totalPages = 1,
+  basePath = "/blog/",
+}: Props) {
+  const pageHref = (n: number) => (n === 1 ? basePath : `${basePath}page/${n}/`);
   const empty = !featured && posts.length === 0;
   return (
     <>
@@ -52,8 +66,8 @@ export function BlogIndex({ heading, intro, tags, activeTag, featured, posts, pa
           <>
             {featured && <PostCard post={featured} variant="featured" />}
             <div className={styles.grid}>
-              {posts.map((p) => (
-                <PostCard key={p.slug} post={p} />
+              {posts.map((p, i) => (
+                <PostCard key={p.slug} post={p} eager={!featured && i < EAGER_CARDS} />
               ))}
             </div>
           </>
@@ -61,11 +75,11 @@ export function BlogIndex({ heading, intro, tags, activeTag, featured, posts, pa
 
         {totalPages > 1 && (
           <nav className={styles.pagination} aria-label="Pagination">
-            {page > 1 ? <Link href={pageHref(page - 1)} rel="prev">Newer posts</Link> : <span />}
+            {page > 1 ? <Link href={pageHref(page - 1)} rel="prev">Newer posts</Link> : <span aria-hidden="true" />}
             <span>
               Page {page} of {totalPages}
             </span>
-            {page < totalPages ? <Link href={pageHref(page + 1)} rel="next">Older posts</Link> : <span />}
+            {page < totalPages ? <Link href={pageHref(page + 1)} rel="next">Older posts</Link> : <span aria-hidden="true" />}
           </nav>
         )}
       </div>

@@ -41,7 +41,7 @@ export function PostArticle({ post, tags, related }: Props) {
             )}
           </div>
         </header>
-        {post.cover && <BlogImage image={post.cover} sizes="(min-width: 760px) 728px, 100vw" className={styles.cover} eager />}
+        {post.cover && <BlogImage image={post.cover} sizes="(min-width: 760px) 728px, 100vw" className={styles.cover} eager priority />}
         <div className={`${prose.prose} ${prose.rich}`} dangerouslySetInnerHTML={{ __html: post.html }} />
         <aside className={styles.cta} aria-label="Get the app">
           <p className={styles.ctaTitle}>Try Lidr on your next site</p>
