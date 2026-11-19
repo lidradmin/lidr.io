@@ -49,8 +49,10 @@ async function processFile(opts: {
   outName: string;
   inDir: string;
   outDir: string;
+  /** Write a copy at the original file name (false when it would clash with a generated file). */
+  copyOriginal: boolean;
 }): Promise<FileResult> {
-  const { slug, file, outName, inDir, outDir } = opts;
+  const { slug, file, outName, inDir, outDir, copyOriginal } = opts;
   const problems: Problem[] = [];
   const written: string[] = [];
   try {
@@ -102,6 +104,17 @@ async function processFile(opts: {
     written.push(jpg);
     await fromRaw().flatten({ background: "#ffffff" }).jpeg({ quality: 80, mozjpeg: true }).toFile(jpg);
 
+    // The editor previews photos at their upload path (/images/blog/<slug>/<file>),
+    // so publish a resized, metadata-free copy there too. Never the original bytes.
+    if (copyOriginal) {
+      const copy = join(outDir, file);
+      written.push(copy);
+      const img = fromRaw();
+      if (meta.format === "png") await img.png().toFile(copy);
+      else if (meta.format === "webp") await img.webp({ quality: 78 }).toFile(copy);
+      else await img.flatten({ background: "#ffffff" }).jpeg({ quality: 80, mozjpeg: true }).toFile(copy);
+    }
+
     return {
       key: `/images/blog/${slug}/${file}`,
       variant: { src: `${urlBase}-${MAX_WIDTH}.jpg`, srcset: srcset.join(", "), width: raw.width, height: raw.height },
@@ -122,7 +135,9 @@ async function processFile(opts: {
 
 /**
  * Turns content/images/<slug>/<file> into optimised, metadata-free files at
- * public/images/blog/<slug>/<name>-<w>.webp and <name>-1600.jpg.
+ * public/images/blog/<slug>/<name>-<w>.webp and <name>-1600.jpg, plus a
+ * resized, metadata-free copy at the original <file> name for editor previews
+ * (skipped if that name clashes with a generated file).
  * Manifest keys are the paths authors use in Markdown: /images/blog/<slug>/<file>.
  * One bad file never fails the build; it becomes a soft problem.
  */
@@ -156,6 +171,7 @@ export async function processImages(opts: {
     // Sequential pass: classify files and resolve name collisions (first sorted file wins).
     const used = new Set<string>();
     const jobs: { file: string; outName: string }[] = [];
+    const generated = new Set<string>(); // every generated file name, lowercased
     for (const f of readdirSync(inDir, { withFileTypes: true }).sort(byName)) {
       const file = f.name;
       if (file.startsWith(".")) continue;
@@ -179,12 +195,16 @@ export async function processImages(opts: {
       }
       used.add(outName);
       jobs.push({ file, outName });
+      for (const w of WIDTHS) generated.add(`${outName}-${w}.webp`);
+      generated.add(`${outName}-${MAX_WIDTH}.jpg`);
     }
 
     // Up to CONCURRENCY files at a time; results are applied in sorted order.
     for (let i = 0; i < jobs.length; i += CONCURRENCY) {
       const results = await Promise.all(
-        jobs.slice(i, i + CONCURRENCY).map((j) => processFile({ slug, inDir, outDir, ...j })),
+        jobs
+          .slice(i, i + CONCURRENCY)
+          .map((j) => processFile({ slug, inDir, outDir, ...j, copyOriginal: !generated.has(j.file.toLowerCase()) })),
       );
       for (const res of results) {
         for (const p of res.problems) add(slug, p);

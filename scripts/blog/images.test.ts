@@ -49,6 +49,17 @@ describe("processImages", () => {
     expect(gps).toBeUndefined();
   });
 
+  test("writes a metadata-free copy at the original file name for editor previews", async () => {
+    await processImages({ contentDir, publicDir });
+    const jpg = await sharp(join(publicDir, "images/blog/my-post/gps.jpg")).metadata();
+    expect(jpg).toMatchObject({ format: "jpeg", width: 1600, height: 1067 });
+    expect(jpg.exif ? exifReader(jpg.exif).GPSInfo : undefined).toBeUndefined();
+    expect(jpg.xmp).toBeUndefined();
+    const png = await sharp(join(publicDir, "images/blog/my-post/small.png")).metadata();
+    expect(png).toMatchObject({ format: "png", width: 600 });
+    expect(existsSync(join(publicDir, "images/blog/my-post/phone.heic"))).toBe(false);
+  });
+
   test("warns about GPS in originals and unsupported formats", async () => {
     const { problems } = await processImages({ contentDir, publicDir });
     const msgs = problems["my-post"].map((p) => p.message).join("\n");
@@ -79,6 +90,9 @@ describe("processImages robustness", () => {
     await px(300, 200, "#654").png().toFile(join(dir, "a.png"));
     writeFileSync(join(dir, "My Photo (1).jpg"), real);
     writeFileSync(join(dir, "Photo.jpg"), real);
+    // "b-1600.jpg" as an original-name copy would overwrite b.jpg's generated JPEG.
+    writeFileSync(join(dir, "b.jpg"), real);
+    await px(300, 200, "#222").jpeg().toFile(join(dir, "b-1600.jpg"));
     await px(30, 30, "#111").png().toFile(join(dir, "photo.png"));
     mkdirSync(join(dir, "x.jpg"));
     const outside = join(root, "outside.jpg");
@@ -117,6 +131,19 @@ describe("processImages robustness", () => {
     expect(r.manifest["/images/blog/edge-post/Photo.jpg"]).toBeDefined();
     expect(r.manifest["/images/blog/edge-post/photo.png"]).toBeUndefined();
     expect(slugMsgs("edge-post")).toMatch(/"photo\.png" has the same name/);
+  });
+
+  test("an original-name copy that would clash with a generated file is skipped", async () => {
+    expect(r.manifest["/images/blog/edge-post/b.jpg"]?.src).toBe("/images/blog/edge-post/b-1600.jpg");
+    expect(r.manifest["/images/blog/edge-post/b-1600.jpg"]?.src).toBe("/images/blog/edge-post/b-1600-1600.jpg");
+    expect(await sharp(join(pub, "images/blog/edge-post/b-1600.jpg")).metadata()).toMatchObject({ width: 800, height: 600 });
+    expect(existsSync(join(pub, "images/blog/edge-post/b.jpg"))).toBe(true);
+  });
+
+  test("WebP originals get a WebP copy without GPS", async () => {
+    const meta = await sharp(join(pub, "images/blog/edge-post/geo.webp")).metadata();
+    expect(meta.format).toBe("webp");
+    expect(meta.exif ? exifReader(meta.exif).GPSInfo : undefined).toBeUndefined();
   });
 
   test("unsafe file names give safe URLs but the manifest key stays raw", () => {
@@ -213,6 +240,7 @@ describe("processImages follow-ups", () => {
     expect(slugMsgs("fu-post")).toMatch(/"tall\.jpg" is too tall to use \(very long screenshots aren't supported\)\. Crop it and upload again\./);
     expect(r.manifest["/images/blog/fu-post/tall.jpg"]).toBeUndefined();
     expect(readdirSync(join(pub, "images/blog/fu-post")).filter((f) => f.startsWith("tall"))).toEqual([]);
+    expect(existsSync(join(pub, "images/blog/fu-post/tall.jpg"))).toBe(false);
   });
 
   test("XMP-only location is flagged", () => {
