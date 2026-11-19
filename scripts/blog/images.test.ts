@@ -134,7 +134,8 @@ describe("processImages robustness", () => {
   });
 
   test("invalid slug directories are skipped", () => {
-    expect(r.problems["Bad Slug"]?.map((p) => p.message).join()).toMatch(/"Bad Slug" isn't a normal photo file and was skipped\./);
+    expect(r.problems["Bad Slug"]).toBeUndefined();
+    expect(r.problems["_images"]?.map((p) => p.message).join()).toMatch(/The photo folder "Bad Slug" doesn't match any post name and was skipped\./);
   });
 
   test("an SVG renamed .jpg is skipped", () => {
@@ -169,5 +170,66 @@ describe("processImages robustness", () => {
   test("a missing images root gives an empty result", async () => {
     const res = await processImages({ contentDir: join(root, "nope"), publicDir: pub });
     expect(res).toEqual({ manifest: {}, problems: {} });
+  });
+});
+
+describe("processImages follow-ups", () => {
+  let root: string;
+  let pub: string;
+  let r: Result;
+  const slugMsgs = (slug: string) => (r.problems[slug] ?? []).map((p) => p.message).join("\n");
+  const gps = { IFD3: { GPSLatitudeRef: "N", GPSLatitude: "51/1 30/1 0/1" } };
+
+  beforeAll(async () => {
+    root = mkdtempSync(join(tmpdir(), "blog-fu-"));
+    pub = mkdtempSync(join(tmpdir(), "blog-fu-pub-"));
+    const dir = join(root, "images", "fu-post");
+    mkdirSync(dir, { recursive: true });
+    const px = (w: number, h: number, bg = "#789") => sharp({ create: { width: w, height: h, channels: 3, background: bg } });
+
+    // GPS-tagged and too tall: fails after the location warning is collected.
+    await px(1600, 20000).jpeg().withExif(gps).toFile(join(dir, "tall.jpg"));
+    // XMP-only location.
+    const xmp = Buffer.from(
+      '<?xpacket begin="" id="W5M0MpCehiHzreSzNTczkc9d"?><x:xmpmeta xmlns:x="adobe:ns:meta/"><rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"><rdf:Description xmlns:exif="http://ns.adobe.com/exif/1.0/" exif:GPSLatitude="51,30.0N"/></rdf:RDF></x:xmpmeta><?xpacket end="w"?>',
+    );
+    await px(100, 100).jpeg().withXmp(xmp.toString()).toFile(join(dir, "xmp.jpg"));
+    // Animated WebP.
+    const a = await px(40, 40, "#f00").png().toBuffer();
+    const b = await px(40, 40, "#00f").png().toBuffer();
+    await sharp([a, b], { join: { animated: true } }).webp({ delay: [100, 100], loop: 0 } as never).toFile(join(dir, "anim.webp"));
+    // CMYK and 16-bit.
+    await px(120, 80).toColourspace("cmyk").jpeg().toFile(join(dir, "cmyk.jpg"));
+    await px(120, 80).toColourspace("rgb16").png().toFile(join(dir, "deep.png"));
+    // Stray file at the images root.
+    writeFileSync(join(root, "images", "stray.txt"), "x");
+
+    r = await processImages({ contentDir: root, publicDir: pub });
+  });
+
+  test("a failing file keeps earlier warnings and adds the failure", () => {
+    expect(slugMsgs("fu-post")).toMatch(/"tall\.jpg" contains the location/);
+    expect(slugMsgs("fu-post")).toMatch(/"tall\.jpg" is too tall to use \(very long screenshots aren't supported\)\. Crop it and upload again\./);
+    expect(r.manifest["/images/blog/fu-post/tall.jpg"]).toBeUndefined();
+    expect(readdirSync(join(pub, "images/blog/fu-post")).filter((f) => f.startsWith("tall"))).toEqual([]);
+  });
+
+  test("XMP-only location is flagged", () => {
+    expect(slugMsgs("fu-post")).toMatch(/"xmp\.jpg" contains the location/);
+  });
+
+  test("animated images get a first-frame note and still process", () => {
+    expect(slugMsgs("fu-post")).toMatch(/"anim\.webp" is animated/);
+    expect(r.manifest["/images/blog/fu-post/anim.webp"]).toBeDefined();
+  });
+
+  test("CMYK and 16-bit PNG inputs process fine", () => {
+    expect(r.manifest["/images/blog/fu-post/cmyk.jpg"]).toMatchObject({ width: 120, height: 80 });
+    expect(r.manifest["/images/blog/fu-post/deep.png"]).toMatchObject({ width: 120, height: 80 });
+    expect(slugMsgs("fu-post")).not.toMatch(/cmyk|deep/);
+  });
+
+  test("root-level strays are reported under _images", () => {
+    expect((r.problems["_images"] ?? []).map((p) => p.message).join()).toMatch(/stray\.txt/);
   });
 });

@@ -12,6 +12,9 @@ const CONCURRENCY = 3;
 const MAX_PIXELS = 100_000_000;
 const REAL_FORMATS = ["jpeg", "png", "webp"];
 
+const MAX_WEBP_DIMENSION = 16383;
+const UNKNOWN_FOLDER = "_images";
+
 const soft = (message: string): Problem => ({ level: "soft", field: "images", message });
 
 function hasGps(meta: Metadata): boolean {
@@ -75,6 +78,9 @@ async function processFile(opts: {
       .resize({ width: MAX_WIDTH, withoutEnlargement: true })
       .raw()
       .toBuffer({ resolveWithObject: true });
+    if (raw.height > MAX_WEBP_DIMENSION) {
+      return { problems: [...problems, soft(`"${file}" is too tall to use (very long screenshots aren't supported). Crop it and upload again.`)] };
+    }
     const fromRaw = () => sharp(data, { raw: { width: raw.width, height: raw.height, channels: raw.channels } });
 
     // Outputs deliberately carry no metadata: keepMetadata()/withMetadata() is
@@ -103,11 +109,14 @@ async function processFile(opts: {
     };
   } catch (err) {
     for (const f of written) rmSync(f, { force: true });
+    // A broken machine (disk full, permissions, too many open files) must fail
+    // the build, not silently drop images.
+    if (typeof (err as NodeJS.ErrnoException)?.code === "string") throw err;
     const text = err instanceof Error ? err.message : String(err);
     if (/pixel limit/i.test(text)) {
-      return { problems: [soft(`"${file}" is too large (over 100 megapixels). Upload a smaller version.`)] };
+      return { problems: [...problems, soft(`"${file}" is too large (over 100 megapixels). Upload a smaller version.`)] };
     }
-    return { problems: [soft(`"${file}" looks damaged or incomplete and was left out. Upload it again.`)] };
+    return { problems: [...problems, soft(`"${file}" looks damaged or incomplete and was left out. Upload it again.`)] };
   }
 }
 
@@ -132,8 +141,12 @@ export async function processImages(opts: {
 
   for (const d of readdirSync(root, { withFileTypes: true }).sort(byName)) {
     if (d.name.startsWith(".")) continue;
-    if (!d.isDirectory() || !RULES.slugPattern.test(d.name)) {
-      add(d.name, notNormal(d.name));
+    if (!d.isDirectory()) {
+      add(UNKNOWN_FOLDER, notNormal(d.name));
+      continue;
+    }
+    if (!RULES.slugPattern.test(d.name)) {
+      add(UNKNOWN_FOLDER, soft(`The photo folder "${d.name}" doesn't match any post name and was skipped.`));
       continue;
     }
     const slug = d.name;
