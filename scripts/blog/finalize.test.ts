@@ -12,7 +12,7 @@ test("removes __empty placeholders and appends redirects", () => {
   writeFileSync(join(out, "blog/__empty.txt"), "x");
   writeFileSync(join(out, "_redirects"), "/sign-up   /  301\n");
 
-  finalizeOut(out, { enabled: true, posts: [], tags: [], redirects: [{ from: "/blog/old/", to: "/blog/new/" }] });
+  finalizeOut(out, { enabled: true, posts: [], tags: [], retired: [], redirects: [{ from: "/blog/old/", to: "/blog/new/" }] });
 
   expect(existsSync(join(out, "blog/__empty"))).toBe(false);
   expect(existsSync(join(out, "blog/page/__empty"))).toBe(false);
@@ -22,7 +22,7 @@ test("removes __empty placeholders and appends redirects", () => {
   expect(redirects).toBe("/sign-up   /  301\n\n# blog (generated)\n/blog/old/  /blog/new/  301\n/blog/old  /blog/new/  301\n");
 });
 
-const empty = { enabled: true, posts: [], tags: [], redirects: [{ from: "/blog/old/", to: "/blog/new/" }] };
+const empty = { enabled: true, posts: [], tags: [], retired: [], redirects: [{ from: "/blog/old/", to: "/blog/new/" }] };
 
 test("is idempotent: the generated block appears once", () => {
   const out = mkdtempSync(join(tmpdir(), "out-"));
@@ -60,7 +60,7 @@ test("removes blog/page and blog/tag when emptied, keeps them when not", () => {
   const out = mkdtempSync(join(tmpdir(), "out-"));
   mkdirSync(join(out, "blog/page/__empty"), { recursive: true });
   mkdirSync(join(out, "blog/tag/__empty"), { recursive: true });
-  finalizeOut(out, { enabled: true, posts: [], tags: [], redirects: [] });
+  finalizeOut(out, { enabled: true, posts: [], tags: [], retired: [], redirects: [] });
   expect(existsSync(join(out, "blog/page"))).toBe(false);
   expect(existsSync(join(out, "blog/tag"))).toBe(false);
 
@@ -68,7 +68,7 @@ test("removes blog/page and blog/tag when emptied, keeps them when not", () => {
   mkdirSync(join(out2, "blog/page/2"), { recursive: true });
   mkdirSync(join(out2, "blog/page/__empty"), { recursive: true });
   mkdirSync(join(out2, "blog/tag/__empty"), { recursive: true });
-  finalizeOut(out2, { enabled: true, posts: [], tags: [], redirects: [] });
+  finalizeOut(out2, { enabled: true, posts: [], tags: [], retired: [], redirects: [] });
   expect(existsSync(join(out2, "blog/page/2"))).toBe(true);
   expect(existsSync(join(out2, "blog/tag"))).toBe(false);
 });

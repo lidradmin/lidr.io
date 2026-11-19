@@ -65,3 +65,13 @@ test("non-ENOENT errors are rethrown with a cause", async () => {
     expect((e as Error).cause).toBeInstanceOf(SyntaxError);
   }
 });
+
+test("getRetired finds retired slugs, ignores live ones, and tolerates old data without the field", async () => {
+  const d = await load({ enabled: true, posts: [post], tags: [], redirects: [], retired: [{ slug: "gone" }, { slug: "a" }, { slug: "moved", redirectTo: "/blog/a/" }] });
+  expect(d.getRetired("gone")).toEqual({ slug: "gone" });
+  expect(d.getRetired("moved")).toEqual({ slug: "moved", redirectTo: "/blog/a/" });
+  expect(d.getRetired("a")).toBeUndefined();
+  expect(d.getRetiredSlugs()).toEqual(["gone", "moved"]);
+  const old = await load({ enabled: true, posts: [], tags: [], redirects: [] });
+  expect(old.getRetiredSlugs()).toEqual([]);
+});

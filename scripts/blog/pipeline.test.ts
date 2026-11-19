@@ -96,7 +96,7 @@ test("formatProblems lists every problem with detail, countProblems counts them"
 
 test("disabled blog returns empty data", async () => {
   const r = await buildBlogData({ contentDir: null, publicDir: mkdtempSync(join(tmpdir(), "pipe-")) });
-  expect(r.data).toEqual({ enabled: false, posts: [], tags: [], redirects: [] });
+  expect(r.data).toEqual({ enabled: false, posts: [], tags: [], redirects: [], retired: [] });
 });
 
 test("Cyrillic title without a cover gets the share-image soft problem", async () => {
@@ -439,5 +439,98 @@ describe("content lint refinements", () => {
   test("a code block containing a literal href is not a link", async () => {
     const r = await build(mkContent({ "a.md": withBody("A post with code sample", `\`\`\`\n<a href="/blog/x/">x</a>\n\`\`\`\n\nInline \`<a href="/blog/y/">\` too. ${BODY}`) }));
     expect(linkMsgs(r, "a")).toHaveLength(0);
+  });
+});
+
+describe("retired posts", () => {
+  const redirect = (to: string) => `---\nredirectTo: ${to}\n---\n`;
+  function repo(posts: Record<string, string> = {}) {
+    const dir = mkContent(posts);
+    git(dir, "init", "-q");
+    return dir;
+  }
+  const commit = (dir: string, m: string) => {
+    git(dir, "add", "-A", ".");
+    git(dir, "commit", "-q", "-m", m);
+  };
+  test("fixtures: the redirect post is retired with its target", () => {
+    expect(data.retired).toEqual([{ slug: "old-url", redirectTo: "/blog/welcome-to-the-lidr-blog/" }]);
+  });
+  test("a post hidden after being live is retired", async () => {
+    const dir = repo({ "a.md": post("A") });
+    writeFileSync(join(dir, "posts", "p.md"), post("Was live"));
+    commit(dir, "v1");
+    writeFileSync(join(dir, "posts", "p.md"), post("Was live", "draft: true\n"));
+    commit(dir, "v2");
+    const r = await build(dir);
+    expect(r.data.posts.map((p) => p.slug)).toEqual(["a"]);
+    expect(r.data.retired).toEqual([{ slug: "p" }]);
+  });
+  test("an uncommitted hide of a committed live post is retired", async () => {
+    const dir = repo();
+    writeFileSync(join(dir, "posts", "p.md"), post("Was live"));
+    commit(dir, "v1");
+    writeFileSync(join(dir, "posts", "p.md"), post("Was live", "draft: true\n"));
+    expect((await build(dir)).data.retired).toEqual([{ slug: "p" }]);
+  });
+  test("a draft that was never live is not retired", async () => {
+    const dir = repo();
+    writeFileSync(join(dir, "posts", "p.md"), post("Never live", "draft: true\n"));
+    commit(dir, "v1");
+    writeFileSync(join(dir, "posts", "p.md"), post("Still never live", "draft: true\n"));
+    commit(dir, "v2");
+    expect((await build(dir)).data.retired).toEqual([]);
+  });
+  test("a deleted post is retired; a deleted then re-added live post is not", async () => {
+    const dir = repo({ "a.md": post("A"), "gone.md": post("Gone"), "back.md": post("Back") });
+    commit(dir, "v1");
+    rmSync(join(dir, "posts", "gone.md"));
+    rmSync(join(dir, "posts", "back.md"));
+    commit(dir, "v2");
+    writeFileSync(join(dir, "posts", "back.md"), post("Back again"));
+    commit(dir, "v3");
+    const r = await build(dir);
+    expect(r.data.posts.map((p) => p.slug).sort()).toEqual(["a", "back"]);
+    expect(r.data.retired).toEqual([{ slug: "gone" }]);
+  });
+  test("a renamed post retires its old slug", async () => {
+    const dir = repo({ "old-name.md": post("Renamed") });
+    commit(dir, "v1");
+    git(dir, "mv", "posts/old-name.md", "posts/new-name.md");
+    commit(dir, "v2");
+    const r = await build(dir);
+    expect(r.data.retired).toEqual([{ slug: "old-name" }]);
+  });
+  test("deleted files that aren't valid post names are ignored", async () => {
+    const dir = repo({ "a.md": post("A"), "Bad_Name.md": post("Bad"), "notes.txt": "x" });
+    commit(dir, "v1");
+    rmSync(join(dir, "posts", "Bad_Name.md"));
+    rmSync(join(dir, "posts", "notes.txt"));
+    commit(dir, "v2");
+    expect((await build(dir)).data.retired).toEqual([]);
+  });
+  test("redirect posts are retired with the final (chain-collapsed) target, sorted by slug", async () => {
+    const r = await build(mkContent({ "a.md": post("A"), "c.md": redirect("/blog/b"), "b.md": redirect("/blog/a/") }));
+    expect(r.data.retired).toEqual([
+      { slug: "b", redirectTo: "/blog/a/" },
+      { slug: "c", redirectTo: "/blog/a/" },
+    ]);
+    expect(r.data.redirects).toHaveLength(2);
+  });
+  test("without a git repo, drafts are not retired", async () => {
+    const r = await build(mkContent({ "a.md": post("A"), "p.md": post("P", "draft: true\n") }));
+    expect(r.data.retired).toEqual([]);
+  });
+  test("a live post is never retired", async () => {
+    const dir = repo();
+    writeFileSync(join(dir, "posts", "p.md"), post("Live v1"));
+    commit(dir, "v1");
+    writeFileSync(join(dir, "posts", "p.md"), post("Hidden", "draft: true\n"));
+    commit(dir, "v2");
+    writeFileSync(join(dir, "posts", "p.md"), post("Live again"));
+    commit(dir, "v3");
+    const r = await build(dir);
+    expect(r.data.posts.map((p) => p.slug)).toEqual(["p"]);
+    expect(r.data.retired).toEqual([]);
   });
 });

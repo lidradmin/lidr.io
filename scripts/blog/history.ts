@@ -76,3 +76,32 @@ export function* historyVersions(contentDir: string, relPath: string, max: numbe
     }
   }
 }
+
+/**
+ * Slugs of posts/<slug>.md files deleted (or renamed away, via --no-renames)
+ * at any point in history, sorted. The caller drops slugs whose file exists
+ * again. Returns [] if the content dir isn't a git repo or has no commits.
+ * Only needs trees, so it works in a blob:none clone. Throws if git log
+ * fails, so the build fails and the previous deployment stays live.
+ */
+export function deletedPostSlugs(contentDir: string): string[] {
+  try {
+    run(contentDir, ["rev-parse", "--is-inside-work-tree"]);
+    run(contentDir, ["rev-parse", "--verify", "-q", "HEAD"]);
+  } catch {
+    return [];
+  }
+  let out: string;
+  try {
+    // --relative: paths relative to contentDir, even if it's a subfolder of the repo.
+    out = run(contentDir, ["log", "--relative", "--no-renames", "--diff-filter=D", "--name-only", "--format=", "--", "./posts/"]);
+  } catch (err) {
+    throw new Error(`Could not read deleted posts from history: ${(err as Error).message}`);
+  }
+  const slugs = new Set<string>();
+  for (const line of out.split("\n")) {
+    const m = /^posts\/([^/]+)\.md$/.exec(line.trim());
+    if (m && SLUG_RE.test(m[1])) slugs.add(m[1]);
+  }
+  return [...slugs].sort();
+}

@@ -48,6 +48,8 @@ export type BuiltPost = {
   source: "current" | "last-good";
 };
 
+export type RetiredPost = { slug: string; redirectTo?: string };
+
 export type TagPage = TagDef & { count: number };
 
 export type BlogData = {
@@ -55,6 +57,12 @@ export type BlogData = {
   posts: BuiltPost[]; // newest first
   tags: TagPage[]; // only tags with count > 0
   redirects: { from: string; to: string }[];
+  /**
+   * Slugs that were once live but no longer are (hidden, deleted or redirected).
+   * They keep a small "no longer available" page so the old page can't linger in
+   * the CDN cache. Never includes a live post's slug.
+   */
+  retired: RetiredPost[];
 };
 
 /** Problems per post slug ("_tags" / "_content" for non-post issues). */
@@ -65,4 +73,5 @@ export const EMPTY_BLOG: BlogData = {
   posts: [],
   tags: [],
   redirects: [],
+  retired: [],
 };

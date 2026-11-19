@@ -3,9 +3,9 @@ import { basename, join } from "node:path";
 import { lookupImage, markdownToPlainText, renderMarkdown } from "../../lib/blog/markdown";
 import { computeRelated } from "../../lib/blog/related";
 import { RULES } from "../../lib/blog/rules";
-import { EMPTY_BLOG, type BlogData, type BlogReport, type BuiltPost, type PostMeta, type Problem, type TagDef } from "../../lib/blog/types";
+import { EMPTY_BLOG, type BlogData, type BlogReport, type BuiltPost, type PostMeta, type Problem, type RetiredPost, type TagDef } from "../../lib/blog/types";
 import { parsePostFile, parseTags, validatePost } from "../../lib/blog/validate";
-import { findLastGoodFile, historyVersions } from "./history";
+import { deletedPostSlugs, findLastGoodFile, historyVersions } from "./history";
 import { processImages } from "./images";
 import { ogUnsupportedChars, renderOgImage } from "./og";
 
@@ -293,5 +293,27 @@ export async function buildBlogData(opts: {
     .map((t) => ({ ...t, count: counts.get(t.slug)! }))
     .sort((a, b) => a.slug.localeCompare(b.slug));
 
-  return { data: { enabled: true, posts, tags: tagPages, redirects: finalRedirects }, report };
+  // Retired slugs: once a post page has been live its file must never vanish from
+  // the deployment (the CDN keeps serving the old copy), so it gets a small page.
+  const retired = new Map<string, RetiredPost>();
+  for (const r of finalRedirects) {
+    const slug = slugOf(r.from);
+    if (RULES.slugPattern.test(slug) && !live.has(slug)) retired.set(slug, { slug, redirectTo: r.to });
+  }
+  const wasLive = (slug: string) => {
+    for (const raw of historyVersions(contentDir, `posts/${slug}.md`)) {
+      if (publishable(analyse(slug, raw, tags).meta)) return true;
+    }
+    return false;
+  };
+  for (const slug of postSlugs) {
+    // Hidden (draft), or broken with no publishable fallback, after having been live.
+    if (RULES.slugPattern.test(slug) && !live.has(slug) && !retired.has(slug) && wasLive(slug)) retired.set(slug, { slug });
+  }
+  for (const slug of deletedPostSlugs(contentDir)) {
+    if (RULES.slugPattern.test(slug) && !postSlugs.has(slug) && !live.has(slug)) retired.set(slug, { slug });
+  }
+  const retiredList = [...retired.values()].sort((a, b) => (a.slug < b.slug ? -1 : a.slug > b.slug ? 1 : 0));
+
+  return { data: { enabled: true, posts, tags: tagPages, redirects: finalRedirects, retired: retiredList }, report };
 }
