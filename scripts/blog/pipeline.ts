@@ -255,6 +255,27 @@ export async function buildBlogData(opts: {
   const related = computeRelated(built);
   const posts: BuiltPost[] = built.map((p) => ({ ...p, related: related.get(p.slug) ?? [] }));
 
+  // Content lint: duplicate titles, links to posts that don't exist.
+  const byTitle = new Map<string, string[]>();
+  for (const p of posts) {
+    const k = p.title.trim().toLowerCase();
+    byTitle.set(k, [...(byTitle.get(k) ?? []), p.slug]);
+  }
+  for (const slugs of byTitle.values()) {
+    if (slugs.length < 2) continue;
+    for (const s of slugs) {
+      add(s, [soft("title", `Another post has the same title (${slugs.filter((x) => x !== s).join(", ")}). Give each post its own title so Google doesn't treat them as duplicates.`)]);
+    }
+  }
+  const liveTargets = new Set([...posts.map((p) => p.slug), ...finalRedirects.map((r) => slugOf(r.from))]);
+  const RESERVED = new Set(["tag", "page", "rss.xml"]);
+  const LINK = /href="(?:https:\/\/(?:www\.)?lidr\.io)?\/blog\/([a-z0-9-]+)\/?(?:[#?][^"]*)?"/g;
+  for (const p of posts) {
+    const missing = new Set<string>();
+    for (const m of p.html.matchAll(LINK)) if (!RESERVED.has(m[1]) && !liveTargets.has(m[1])) missing.add(m[1]);
+    for (const s of missing) add(p.slug, [soft("links", `This post links to /blog/${s}/, which doesn't exist. Fix or remove the link.`)]);
+  }
+
   const counts = new Map<string, number>();
   posts.forEach((p) => p.tags.forEach((t) => counts.set(t, (counts.get(t) ?? 0) + 1)));
   const tagPages = [...tags.values()]

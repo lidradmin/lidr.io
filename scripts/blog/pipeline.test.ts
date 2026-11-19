@@ -362,3 +362,28 @@ describe("render failures", () => {
     expect(r.data.posts[0].html).toContain("second");
   });
 });
+
+describe("content lint", () => {
+  const withBody = (title: string, text: string) => post(title).replace(BODY, text);
+  test("duplicate titles get a soft problem on each post", async () => {
+    const r = await build(mkContent({ "a.md": post("Same title for two posts"), "b.md": post("same title for two POSTS"), "c.md": post("A different title entirely") }));
+    for (const s of ["a", "b"]) {
+      expect(r.report.problems[s].some((p) => p.field === "title" && /another post has the same title/i.test(p.message))).toBe(true);
+    }
+    expect((r.report.problems["c"] ?? []).some((p) => p.field === "title")).toBe(false);
+  });
+  test("links to blog posts that don't exist get a soft problem", async () => {
+    const text = `See [b](/blog/b/), [gone](/blog/missing-post/), [frag](/blog/b/#intro), [nos](/blog/b), [tag](/blog/tag/safety/), [home](/blog/) and [abs](https://lidr.io/blog/also-missing) and [abs2](https://www.lidr.io/blog/b/#x). ${BODY}`;
+    const r = await build(mkContent({ "a.md": withBody("A post with several links", text), "b.md": post("The other post here") }));
+    const m = (r.report.problems["a"] ?? []).filter((p) => p.field === "links").map((p) => p.message);
+    expect(m).toHaveLength(2);
+    expect(m.join(" ")).toMatch(/missing-post/);
+    expect(m.join(" ")).toMatch(/also-missing/);
+  });
+  test("links to a retired post that redirects don't warn", async () => {
+    const r = await build(
+      mkContent({ "a.md": withBody("A post linking to old", `Read [old](/blog/old/). ${BODY}`), "b.md": post("The target post here"), "old.md": "---\nredirectTo: /blog/b/\n---\n" })
+    );
+    expect((r.report.problems["a"] ?? []).some((p) => p.field === "links")).toBe(false);
+  });
+});
