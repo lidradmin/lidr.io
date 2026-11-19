@@ -8,6 +8,8 @@ module.exports = {
         "/features/",
         "/pricing/",
         "/contact-us/",
+        "/blog/",
+        "/blog/photo-reports-that-hold-up/",
       ],
       numberOfRuns: 1,
     },
