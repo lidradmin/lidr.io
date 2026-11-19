@@ -14,7 +14,7 @@ must be able to produce posts in the same format.
 ## Constraints
 
 - Site is Next.js 16 with `output: "export"` (static), deployed by Cloudflare
-  Pages from GitHub `lidradmin/lidr.io` (public repo). No runtime server, so
+  Pages from GitHub `lidradmin/lidr.io` (to be made private; it was public as of 2026-11-19). No runtime server, so
   every blog page is generated at build time. All routes need
   `generateStaticParams()` with `dynamicParams = false`.
 - Per `AGENTS.md`, read the relevant guide in `node_modules/next/dist/docs/`
@@ -262,31 +262,50 @@ minimal Decap-compatible OAuth proxy Worker (`/auth`, `/callback`,
 `postMessage` handshake) in `workers/cms-auth/`. Secrets
 (`GITHUB_CLIENT_ID`, `GITHUB_CLIENT_SECRET`) live only in Worker env vars.
 
-## 8. CI (GitHub Actions; free for public repos)
+## 8. CI (GitHub Actions)
 
-`.github/workflows/blog-pr.yml` on PRs touching `content/blog/**`,
-`public/images/blog/**`, `app/blog/**`, `lib/blog/**`:
-1. `npm ci` → `next build`. Schema validation runs inside the build.
-2. Lint posts: every image has alt text, no broken internal `/blog/` links,
-   cover images under 500 KB (warn above 300 KB).
+**Runners:** blog workflows use **GitHub-hosted** runners
+(`runs-on: ubuntu-latest`), not the owner's self-hosted runners, so checks
+and previews work while the owner's machine is off. Other workflows and
+projects keep their self-hosted runners. The repo is private: GitHub Free
+includes 2,000 hosted minutes/month. Expected use is about 80–100
+min/month (~10 posts × ~2 review rounds × ~4 min).
 
-`.github/workflows/blog-review-preview.yml`: the review preview.
-- Trigger: `pull_request` events `labeled` and `synchronize`. Runs only
-  when the PR has the Decap label `decap-cms/pending_review` or
-  `decap-cms/pending_publish`, or when the head branch matches `blog/*`
-  (Claude Code PRs). Drafts get no preview build.
-- Same-repo branches only (`github.event.pull_request.head.repo.full_name == github.repository`),
-  so secrets never reach fork code. Never uses `pull_request_target`.
-- Steps: `npm ci` → `next build` → `wrangler pages deploy out
-  --project-name=lidr-blog-preview --branch=<sanitised slug>` → post commit
-  status `deploy/preview` with the deployment URL.
-- Secrets: `CLOUDFLARE_API_TOKEN` (scoped to Pages: Edit on the account) and
-  `CLOUDFLARE_ACCOUNT_ID`.
-- Preview project responses carry `X-Robots-Tag: noindex` via its own
-  `_headers` (an Action step appends it to `out/_headers` before upload).
+To save minutes, one workflow does both validation and preview, and it runs
+only when a post is up for review, never on draft saves.
 
-Branch protection on `main`: require this check to pass and one approval.
-Owner/admins may bypass.
+`.github/workflows/blog-review.yml`:
+- Trigger: `pull_request` events `labeled` and `synchronize`, paths
+  `content/blog/**`, `public/images/blog/**`, `app/blog/**`, `lib/blog/**`.
+  A job-level `if` runs it only when the PR has the Decap label
+  `decap-cms/pending_review` or `decap-cms/pending_publish`, or the head
+  branch matches `blog/*` (Claude Code PRs). Drafts cost no minutes.
+- `concurrency: blog-review-${{ github.head_ref }}` with
+  `cancel-in-progress: true`, so rapid saves while in review collapse into
+  one run.
+- Same-repo branches only
+  (`github.event.pull_request.head.repo.full_name == github.repository`).
+  Never uses `pull_request_target`.
+- Cache `~/.npm` and `.next/cache` to keep runs around 3–4 min.
+- Steps:
+  1. `npm ci` → `next build`. Schema validation runs inside the build.
+  2. Lint posts: every image has alt text, no broken internal `/blog/`
+     links, cover images under 500 KB (warn above 300 KB).
+  3. Append `X-Robots-Tag: noindex` for `/*` to `out/_headers`.
+  4. `wrangler pages deploy out --project-name=lidr-blog-preview
+     --branch=<sanitised slug>`.
+  5. Post commit status `deploy/preview` with the deployment URL (Decap
+     shows it as "View preview"). A failed build posts a `failure` status
+     with a link to the run log.
+- Secrets: `CLOUDFLARE_API_TOKEN` (Pages: Edit) and `CLOUDFLARE_ACCOUNT_ID`.
+
+**Review enforcement:** branch protection and rulesets are **not available
+on private repos under GitHub Free**. So in v1 the review gate is the CMS
+editorial workflow plus team convention: only designated approvers move posts
+to Ready and click Publish. Decap has no per-user roles, so any Write
+collaborator *could* publish. To enforce it (required check + one approval
+on `main`), upgrade `lidradmin` to GitHub Pro ($4/month). That's optional
+and can be added later with no code changes.
 
 ## 9. Tests
 
@@ -337,7 +356,8 @@ troubleshooting section ("my post failed checks" → what the error means).
 2. Deploy the auth Worker and set its secrets. Optional custom domain
    `cms-auth.lidr.io`.
 3. Add authors as collaborators (Write). Designate approvers.
-4. Enable branch protection on `main` (§8).
+4. Make the repo private (Settings → General → Change visibility). Optional:
+   GitHub Pro + branch protection on `main` (§8).
 5. Cloudflare Pages branch control: exclude `cms/*` and `blog/*` from
    preview builds (§7).
 6. Create the Direct Upload Pages project `lidr-blog-preview` and a
@@ -348,8 +368,9 @@ troubleshooting section ("my post failed checks" → what the error means).
 
 All on free tiers:
 - **Decap CMS:** open source.
-- **GitHub:** free accounts. Unlimited collaborators. Actions minutes are free
-  on public repos.
+- **GitHub:** free accounts, unlimited collaborators on private repos.
+  Hosted Actions use about 80–100 of 2,000 free minutes/month. Optional: Pro
+  ($4/month) to enforce review via branch protection.
 - **Cloudflare Workers:** free tier (100k requests/day); login traffic is
   tiny.
 - **Cloudflare Pages:** free plan allows **500 builds/month**. With the
