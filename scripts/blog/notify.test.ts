@@ -136,6 +136,16 @@ describe("notify", () => {
     expect(Object.keys(g).sort()).toEqual(["_setup", "_weird"]);
   });
 
+  test("markdown links, GH- references and backticks are neutralised", () => {
+    const body = renderBody("post-a", [{ level: "soft", field: "f", message: "[x](https://evil.example) see GH-123", detail: "a `code` b" }], ctx);
+    const rest = body.split("\n").slice(1).join("\n");
+    expect(rest).not.toContain("[x](");
+    expect(rest).toContain("\\[x\\]\\(https://evil.example\\)");
+    expect(rest).not.toContain("GH-123");
+    expect(rest).toContain("a 'code' b");
+    expect(rest).not.toContain("`code`");
+  });
+
   test("close comment is neutral", () => {
     const open: OpenIssue[] = [{ number: 2, body: renderBody("post-b", [{ level: "soft", field: "x", message: "y" }], ctx) }];
     expect(planActions({ problems: {} }, open, ctx)).toEqual([

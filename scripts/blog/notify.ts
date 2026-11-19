@@ -38,7 +38,7 @@ const ZWSP = "​";
 export function safe(input: unknown, max = MAX_TEXT): string {
   let t = String(input).replace(/<!--|-->/g, "").replace(/\s*[\r\n]+\s*/g, " ");
   if (t.length > max) t = t.slice(0, max) + "…";
-  return t.replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/([@#])(?=\w)/g, `$1${ZWSP}`);
+  return t.replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/([@#])(?=\w)/g, `$1${ZWSP}`).replace(/GH(?=-\d)/g, `GH${ZWSP}`).replace(/[[\]()]/g, "\\$&");
 }
 
 export function groupProblems(report: BlogReport): Record<string, Problem[]> {
@@ -89,7 +89,7 @@ export function renderBody(key: string, problems: Problem[], ctx: Ctx, who?: str
     lines.push(
       "<details><summary>Technical details (for the site owner)</summary>",
       "",
-      ...details.slice(0, MAX_BULLETS).map((p) => `- \`${safe(p.field, 80).replace(/`/g, "'")}\`: ${safe(p.detail)}`),
+      ...details.slice(0, MAX_BULLETS).map((p) => `- \`${safe(p.field, 80).replace(/`/g, "'")}\`: ${safe(p.detail).replace(/`/g, "'")}`),
       "",
       "</details>",
       ""
