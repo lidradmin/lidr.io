@@ -8,7 +8,7 @@ const soft = (field: string, message: string): Problem => ({ level: "soft", fiel
 
 const WRONG_FORMAT =
   "The settings at the top of the post are in the wrong format. Open it in lidr.io/admin and Publish again.";
-const REDIRECT_PATTERN = /^\/(?:[a-z0-9-]+\/)*(?:[a-z0-9-]+\/?)?$/;
+export const REDIRECT_PATTERN = /^\/(?:[a-z0-9-]+\/)*(?:[a-z0-9-]+\/?)?$/;
 const OWN_HOSTS = ["lidr.io", "www.lidr.io"];
 
 export type ParsedFile =
