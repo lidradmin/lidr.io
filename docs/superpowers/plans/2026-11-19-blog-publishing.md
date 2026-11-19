@@ -1,5 +1,7 @@
 # Blog Publishing Implementation Plan — Plan 2 of 2
 
+> **Superseded during execution:** the content repo is data-only (no `scripts/` or `.claude/`); the Claude Code skill lives at `docs/claude-code/new-blog-post/SKILL.md` and the checker at `scripts/blog/check-content.sh <content-dir> [slug]` in the site repo; `CF_DEPLOY_HOOK` is an Environment secret (`production`, `main` only).
+
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
 **Goal:** Let anyone on the team publish blog posts with no Git knowledge and no review step. Covers:
@@ -1572,21 +1574,26 @@ Expected: `blog: 0 post(s), 0 tag(s)…`, no problems, `exit=0`. Tag pages are o
 - [ ] **Step 3: Check the editor loads under its CSP.** Open https://lidr.io/admin/ in Chrome (Claude in Chrome, or the owner) and read the console.
   - If there are `Content-Security-Policy` violations, add exactly the blocked source to the `/admin/*` CSP. Only add `'unsafe-eval'` to `script-src` if the violation is an eval. Commit, push, and re-check.
   - Log in. The GitHub popup should show the "Lidr Blog Editor" app; authorise it, and the editor should show "Blog posts" and "Settings".
-- [ ] **Step 4: Publish a test post** titled "Test post — please ignore". It needs a cover photo from a phone with location ON, one body image, 1 topic, and a description deliberately 170 characters long. Publish, then within 5 minutes confirm:
-  - (a) `lidr-blog` has a commit "Publish blog post "test-post-please-ignore"" with `posts/…md` and `images/test-post-please-ignore/…`;
+- [ ] **Step 4: Publish a test post** titled "Test post — please ignore". It needs a cover photo from a phone with location ON, one body image, 1 topic, and **no** "Describe the cover photo" text. Both are soft problems, so the post still publishes. (Don't use an over-long description: the editor blocks it before Publish.) Publish, then within 5 minutes confirm:
+  - (a) `lidr-blog` has a commit `Create blog "test-post-please-ignore"` with `posts/…md` and `images/test-post-please-ignore/…`;
   - (b) the "Publish to lidr.io" action succeeded and Cloudflare built with `blog: 1 post(s)`;
   - (c) https://lidr.io/blog/test-post-please-ignore/ shows the post, the cover is WebP via `<picture>`, and the image has no GPS (`exiftool` or `sharp` metadata on the downloaded `-1600.jpg`);
-  - (d) the "Blog check" action opened an Issue "Post needs attention: test-post-please-ignore", assigned to the author and mentioning `BLOG_OWNER`. It should list the long description and the photo-location warning;
+  - (d) the "Blog check" action opened an Issue "Post needs attention: test-post-please-ignore", assigned to the author and mentioning `BLOG_OWNER`. It should list the missing cover description and the photo-location warning;
   - (e) `/blog/` now has the footer Blog link and is indexable.
-- [ ] **Step 5: Fix it in the editor.** Shorten the description and Publish. The Issue updates; the location warning remains, because the original upload is public. Then delete the image and re-upload a location-free photo (or remove the cover), and Publish. The Issue closes itself with "Fixed."
-- [ ] **Step 6: Retire the test post.** Turn on "Hide this post" and Publish. The page 404s within about 3 minutes, and the blog returns to "No posts yet". If this was the only post, the footer link disappears too.
-- [ ] **Step 7: Screenshots for `docs/authoring-guide.md`.** Capture these and add them under `docs/images/` in `lidr-blog`, linked from the guide:
+- [ ] **Step 5: Fix it in the editor.** Fill in "Describe the cover photo" and Publish. The Issue updates; the location warning remains, because the original upload is still in the repo. The warning only clears once the original file is deleted via the media library: remove it from the post (or swap in a location-free photo), delete the original in the media library, and Publish. The Issue closes itself with the comment "No problems found at commit …. Closing this issue."
+- [ ] **Step 6: Further live checks.**
+  - The login popup handshake survives: after authorising, the editor loads and no "Open the editor at…" message appears.
+  - An invited collaborator (Write on `lidr-blog`, not on `lidr.io`) can sign in and publish.
+  - No CSP violations in the console after login, and none when opening an existing entry.
+  - The Claude Code route: install the skill from `docs/claude-code/new-blog-post/SKILL.md`, run `/new-blog-post`, and stop at the approval step without publishing.
+- [ ] **Step 7: Retire the test post.** Turn on "Hide this post" and Publish. The page 404s within about 3 minutes, and the blog returns to "No posts yet". If this was the only post, the footer link disappears too.
+- [ ] **Step 8: Screenshots for `docs/authoring-guide.md`.** Capture these and add them under `docs/images/` in `lidr-blog`, linked from the guide:
   - the login screen;
   - the new-post form with the preview;
   - the Publish menu;
   - an Issue email.
   Commit in `lidr-blog` with a non-post path, so it won't trigger the publish workflow.
-- [ ] **Step 8: Hand over.** Tell the owner:
+- [ ] **Step 9: Hand over.** Tell the owner:
   - authors can now be invited (§5);
   - point them at `docs/authoring-guide.md`;
   - the Claude Code skill and the Claude.ai instructions are ready.

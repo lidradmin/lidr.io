@@ -1,0 +1,34 @@
+name: Blog code vs live content
+on:
+  pull_request:
+    paths: ["lib/blog/**", "scripts/blog/**", "app/blog/**", "components/blog/**", "workers/**", "package-lock.json", ".github/workflows/blog-content.yml"]
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: blog-content-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  check:
+    # GitHub-hosted only: never run this public repo's jobs on self-hosted runners.
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+        env:
+          PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD: "1"
+      - run: npx vitest run
+      - name: Clone live blog content
+        run: git clone --quiet --filter=blob:none https://github.com/lidradmin/lidr-blog.git "$RUNNER_TEMP/content"
+      - name: Live content still builds with this change (no post may go offline)
+        env:
+          BLOG_CONTENT_DIR: ${{ runner.temp }}/content
+          BLOG_FAIL_ON: hard
+        run: npx tsx scripts/blog/prepare.ts --check --report "$RUNNER_TEMP/report.json"

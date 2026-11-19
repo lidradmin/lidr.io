@@ -64,6 +64,8 @@ Separating the repos means:
 
 ## 1. Content repo layout (`lidradmin/lidr-blog`)
 
+> **Superseded during execution:** the content repo is data-only (no `scripts/` or `.claude/`); the Claude Code skill lives at `docs/claude-code/new-blog-post/SKILL.md` and the checker at `scripts/blog/check-content.sh <content-dir> [slug]` in the site repo; `CF_DEPLOY_HOOK` is an Environment secret (`production`, `main` only).
+
 ```
 posts/<slug>.md
 images/<slug>/<file>.(jpg|png|webp)
@@ -323,6 +325,8 @@ description as the intro.
   workflows require approval.
 
 ## 10. Claude support
+
+> **Superseded during execution:** the content repo is data-only (no `scripts/` or `.claude/`); the Claude Code skill lives at `docs/claude-code/new-blog-post/SKILL.md` and the checker at `scripts/blog/check-content.sh <content-dir> [slug]` in the site repo; `CF_DEPLOY_HOOK` is an Environment secret (`production`, `main` only).
 
 - **Claude Code skill** in `lidr-blog/.claude/skills/new-blog-post/`. Authors
   clone only the content repo. Steps:

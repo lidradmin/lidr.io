@@ -11,3 +11,13 @@
 # The RSS feed is a static file under `output: "export"`; route handler headers don't apply.
 /blog/rss.xml
   Content-Type: application/rss+xml; charset=utf-8
+
+# Blog editor (spec §9). Script sources are pinned to the exact Decap version
+# loaded by public/admin/index.html — update both together.
+/admin/*
+  Content-Security-Policy: default-src 'self'; script-src 'self' https://cdn.jsdelivr.net/npm/decap-cms@3.18.0/; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https://raw.githubusercontent.com https://avatars.githubusercontent.com; connect-src 'self' https://api.github.com https://cms-auth.lidr.io https://cdn.jsdelivr.net; font-src 'self' data:; frame-src 'self' blob:; frame-ancestors 'none'; base-uri 'self'; form-action 'self'; object-src 'none'
+  X-Robots-Tag: noindex, nofollow
+  X-Frame-Options: DENY
+  Referrer-Policy: same-origin
+  Cross-Origin-Opener-Policy: same-origin-allow-popups
+  Cache-Control: no-store

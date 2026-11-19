@@ -1,0 +1,23 @@
+/* Editor preview styles. Values mirror styles/tokens.css and
+   components/Prose/Prose.module.css — keep in sync if those change. */
+@font-face { font-family: "Amenti"; src: url("/admin/fonts/Amenti-Medium.woff2") format("woff2"); font-weight: 500; font-display: swap; }
+@font-face { font-family: "Montserrat"; src: url("/admin/fonts/Montserrat-Variable-latin.woff2") format("woff2"); font-weight: 100 900; font-display: swap; }
+body { margin: 0; background: #fff; color: #2a2a2a; font-family: "Montserrat", -apple-system, "Segoe UI", sans-serif; font-size: 17px; line-height: 1.6; -webkit-font-smoothing: antialiased; }
+.post { max-width: 728px; margin: 0 auto; padding: 32px 15px 60px; }
+.notice { background: #f2e32b; color: #1f1f1f; padding: 10px 14px; border-radius: 10px; font-size: 14px; font-weight: 600; }
+.crumb { color: #555; font-size: 14px; margin: 0 0 16px; }
+.title { font-family: "Amenti", serif; font-weight: 500; color: #192c27; font-size: 40px; line-height: 1.12; margin: 0; overflow-wrap: anywhere; }
+.bar { width: 64px; height: 4px; background: #f2e32b; margin: 20px 0; }
+.meta { display: flex; gap: 16px; color: #555; font-size: 14px; margin: 0 0 30px; }
+.cover { display: block; width: 100%; aspect-ratio: 16 / 9; object-fit: cover; border-radius: 20px; margin-bottom: 40px; }
+.prose h2, .prose h3, .prose h4 { font-family: "Amenti", serif; font-weight: 500; color: #192c27; line-height: 1.5; margin: 1.5em 0 0.5em; }
+.prose h2 { font-size: 35px; } .prose h3 { font-size: 30px; } .prose h4 { font-size: 25px; }
+.prose p { margin: 0 0 1em; }
+.prose ul, .prose ol { margin: 0 0 1em; padding-left: 2em; }
+.prose a { color: #192c27; text-decoration: underline; }
+.prose img { display: block; width: 100%; height: auto; border-radius: 15px; margin: 24px 0; }
+.prose blockquote { margin: 24px 0; padding: 4px 0 4px 20px; border-left: 4px solid #192c27; color: #192c27; font-family: "Amenti", serif; font-size: 18px; }
+.prose table { border-collapse: collapse; width: 100%; font-size: 16px; }
+.prose th, .prose td { border: 1px solid #eee; padding: 8px 12px; text-align: left; }
+.prose th { background: #f5f5f5; }
+@media (max-width: 689px) { .title { font-size: 30px; } }

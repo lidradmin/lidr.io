@@ -50,3 +50,5 @@ next-env.d.ts
 /.blog/
 /.blog-content/
 /public/images/blog/
+/public/admin/config.yml
+/public/admin/fonts/

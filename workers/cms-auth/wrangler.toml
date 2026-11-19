@@ -1,0 +1,14 @@
+name = "lidr-cms-auth"
+main = "src/index.ts"
+compatibility_date = "2026-11-01"
+workers_dev = false
+# `wrangler deploy` creates the custom domain (DNS record and certificate) itself.
+routes = [{ pattern = "cms-auth.lidr.io", custom_domain = true }]
+
+[vars]
+ALLOWED_ORIGIN = "https://lidr.io"
+# Must match the GitHub App's registered callback URL exactly.
+CALLBACK_URL = "https://cms-auth.lidr.io/callback"
+
+# Secrets (set with `npx wrangler@4 secret put …`, never committed):
+#   GITHUB_CLIENT_ID, GITHUB_CLIENT_SECRET

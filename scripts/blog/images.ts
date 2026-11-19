@@ -15,7 +15,7 @@ const REAL_FORMATS = ["jpeg", "png", "webp"];
 const MAX_WEBP_DIMENSION = 16383;
 const UNKNOWN_FOLDER = "_images";
 
-const soft = (message: string): Problem => ({ level: "soft", field: "images", message });
+const soft = (message: string, field = "images"): Problem => ({ level: "soft", field, message });
 
 function hasGps(meta: Metadata): boolean {
   if (meta.exif) {
@@ -66,7 +66,7 @@ async function processFile(opts: {
       return { problems: [soft(`"${file}" isn't a JPEG, PNG or WebP photo, so it was left out.`)] };
     }
     if (hasGps(meta)) {
-      problems.push(soft(`"${file}" contains the location where it was taken. The published copy has it removed, but the original upload is public. Turn off location before uploading photos.`));
+      problems.push(soft(`"${file}" contains the location where it was taken. The published copy has it removed, but the original upload is public. Turn off location before uploading photos.`, "location"));
     }
     if ((meta.pages ?? 1) > 1) {
       problems.push(soft(`"${file}" is animated. Only its first frame is used.`));

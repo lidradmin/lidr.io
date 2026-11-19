@@ -29,6 +29,7 @@ export function formatProblems(report: BlogReport): string[] {
 }
 
 const soft = (field: string, message: string): Problem => ({ level: "soft", field, message });
+const BLOG_LINK = /<a\b[^>]*\shref="(?:https?:\/\/(?:www\.)?lidr\.io)?\/blog\/([^"#?]*)"/g;
 const BLOG_PATH = /^\/blog\/([^/?#]+)\/$/;
 
 export async function buildBlogData(opts: {
@@ -254,6 +255,36 @@ export async function buildBlogData(opts: {
   built.sort((a, b) => b.date.localeCompare(a.date) || a.slug.localeCompare(b.slug));
   const related = computeRelated(built);
   const posts: BuiltPost[] = built.map((p) => ({ ...p, related: related.get(p.slug) ?? [] }));
+
+  // Content lint: duplicate titles, bad or dangling links. Last-good posts are skipped (they already carry a "previous version" message).
+  const linted = posts.filter((p) => p.source !== "last-good");
+  const byTitle = new Map<string, string[]>();
+  for (const p of linted) {
+    const k = p.title.trim().replace(/\s+/g, " ").toLowerCase();
+    byTitle.set(k, [...(byTitle.get(k) ?? []), p.slug]);
+  }
+  for (const slugs of byTitle.values()) {
+    if (slugs.length < 2) continue;
+    for (const s of slugs) {
+      add(s, [soft("title", `Another post has the same title (${slugs.filter((x) => x !== s).join(", ")}). Give each post its own title so Google doesn't treat them as duplicates.`)]);
+    }
+  }
+  const liveTargets = new Set([...posts.map((p) => p.slug), ...finalRedirects.map((r) => slugOf(r.from))]);
+  for (const p of linted) {
+    const reported = new Set<string>();
+    for (const m of p.html.matchAll(BLOG_LINK)) {
+      const path = m[1].replace(/\/?(?:index\.html)?$/, "");
+      if (path === "" || path === "rss.xml" || /^(?:tag|page)(?:\/|$)/.test(path) || reported.has(path)) continue;
+      reported.add(path);
+      if (!RULES.slugPattern.test(path)) {
+        add(p.slug, [soft("links", `This post links to /blog/${path}, which isn't a valid post address. Check the link.`)]);
+      } else if (postSlugs.has(path)) {
+        if (!liveTargets.has(path)) add(p.slug, [soft("links", `This post links to /blog/${path}/, which isn't published yet (it may be a draft). Publish it or remove the link.`)]);
+      } else if (!liveTargets.has(path)) {
+        add(p.slug, [soft("links", `This post links to /blog/${path}/, which doesn't exist. Fix or remove the link.`)]);
+      }
+    }
+  }
 
   const counts = new Map<string, number>();
   posts.forEach((p) => p.tags.forEach((t) => counts.set(t, (counts.get(t) ?? 0) + 1)));
