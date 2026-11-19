@@ -387,3 +387,57 @@ describe("content lint", () => {
     expect((r.report.problems["a"] ?? []).some((p) => p.field === "links")).toBe(false);
   });
 });
+
+describe("content lint refinements", () => {
+  const withBody = (title: string, text: string) => post(title).replace(BODY, text);
+  const linkMsgs = (r: { report: BlogReport }, k: string) => (r.report.problems[k] ?? []).filter((p) => p.field === "links").map((p) => p.message);
+  test("link to a draft says it isn't published yet; unknown says doesn't exist", async () => {
+    const r = await build(mkContent({ "a.md": withBody("A post linking around", `[d](/blog/drafty/) [u](/blog/unknown/) ${BODY}`), "drafty.md": post("A draft post here", "draft: true\n") }));
+    const m = linkMsgs(r, "a");
+    expect(m).toHaveLength(2);
+    expect(m.find((x) => /drafty/.test(x))).toMatch(/isn't published yet \(it may be a draft\)/);
+    expect(m.find((x) => /unknown/.test(x))).toMatch(/doesn't exist/);
+  });
+  test("uppercase, underscore and sub-path links are invalid addresses", async () => {
+    const r = await build(mkContent({ "a.md": withBody("A post with bad links", `[x](/blog/My-Post/) [y](/blog/my_post/) [z](/blog/a/b/) ${BODY}`) }));
+    const m = linkMsgs(r, "a");
+    expect(m).toHaveLength(3);
+    for (const x of m) expect(x).toMatch(/isn't a valid post address/);
+    expect(m.join(" ")).toContain("/blog/My-Post");
+  });
+  test("tag, page, index, rss, query, fragment and http forms", async () => {
+    const text = `[t](/blog/tag/x/) [p](/blog/page/2/) [i](/blog/) [r](/blog/rss.xml) [q](/blog/b/?x=1) [f](/blog/b/#frag) [h](http://lidr.io/blog/missing/) [ix](/blog/b/index.html) ${BODY}`;
+    const r = await build(mkContent({ "a.md": withBody("A post with many forms", text), "b.md": post("The other post here") }));
+    const m = linkMsgs(r, "a");
+    expect(m).toHaveLength(1);
+    expect(m[0]).toMatch(/missing/);
+  });
+  test("whitespace and three-way duplicate titles", async () => {
+    const r = await build(mkContent({ "a.md": post("Same   title here"), "b.md": post("Same title here"), "c.md": post("SAME title  here") }));
+    for (const s of ["a", "b", "c"]) {
+      const t = (r.report.problems[s] ?? []).filter((p) => p.field === "title");
+      expect(t).toHaveLength(1);
+      expect(t[0].message).toMatch(/same title/i);
+    }
+  });
+  test("last-good posts skip title and link lint", async () => {
+    const dir = mkContent({});
+    git(dir, "init", "-q");
+    writeFileSync(join(dir, "posts", "p.md"), withBody("Duplicated title post", `[g](/blog/gone/) ${BODY}`));
+    writeFileSync(join(dir, "posts", "q.md"), post("Duplicated title post"));
+    git(dir, "add", ".");
+    git(dir, "commit", "-q", "-m", "v1");
+    writeFileSync(join(dir, "posts", "p.md"), withBody("Duplicated title post", `BOOM [g](/blog/gone/) ${BODY}`));
+    git(dir, "add", ".");
+    git(dir, "commit", "-q", "-m", "v2");
+    const r = await build(dir);
+    expect(r.data.posts.find((x) => x.slug === "p")!.source).toBe("last-good");
+    expect(linkMsgs(r, "p")).toHaveLength(0);
+    expect((r.report.problems["p"] ?? []).some((p) => p.field === "title")).toBe(false);
+    expect((r.report.problems["q"] ?? []).some((p) => p.field === "title")).toBe(false);
+  });
+  test("a code block containing a literal href is not a link", async () => {
+    const r = await build(mkContent({ "a.md": withBody("A post with code sample", `\`\`\`\n<a href="/blog/x/">x</a>\n\`\`\`\n\nInline \`<a href="/blog/y/">\` too. ${BODY}`) }));
+    expect(linkMsgs(r, "a")).toHaveLength(0);
+  });
+});

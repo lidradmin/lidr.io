@@ -29,6 +29,7 @@ export function formatProblems(report: BlogReport): string[] {
 }
 
 const soft = (field: string, message: string): Problem => ({ level: "soft", field, message });
+const BLOG_LINK = /<a\b[^>]*\shref="(?:https?:\/\/(?:www\.)?lidr\.io)?\/blog\/([^"#?]*)"/g;
 const BLOG_PATH = /^\/blog\/([^/?#]+)\/$/;
 
 export async function buildBlogData(opts: {
@@ -255,10 +256,11 @@ export async function buildBlogData(opts: {
   const related = computeRelated(built);
   const posts: BuiltPost[] = built.map((p) => ({ ...p, related: related.get(p.slug) ?? [] }));
 
-  // Content lint: duplicate titles, links to posts that don't exist.
+  // Content lint: duplicate titles, bad or dangling links. Last-good posts are skipped (they already carry a "previous version" message).
+  const linted = posts.filter((p) => p.source !== "last-good");
   const byTitle = new Map<string, string[]>();
-  for (const p of posts) {
-    const k = p.title.trim().toLowerCase();
+  for (const p of linted) {
+    const k = p.title.trim().replace(/\s+/g, " ").toLowerCase();
     byTitle.set(k, [...(byTitle.get(k) ?? []), p.slug]);
   }
   for (const slugs of byTitle.values()) {
@@ -268,12 +270,20 @@ export async function buildBlogData(opts: {
     }
   }
   const liveTargets = new Set([...posts.map((p) => p.slug), ...finalRedirects.map((r) => slugOf(r.from))]);
-  const RESERVED = new Set(["tag", "page", "rss.xml"]);
-  const LINK = /href="(?:https:\/\/(?:www\.)?lidr\.io)?\/blog\/([a-z0-9-]+)\/?(?:[#?][^"]*)?"/g;
-  for (const p of posts) {
-    const missing = new Set<string>();
-    for (const m of p.html.matchAll(LINK)) if (!RESERVED.has(m[1]) && !liveTargets.has(m[1])) missing.add(m[1]);
-    for (const s of missing) add(p.slug, [soft("links", `This post links to /blog/${s}/, which doesn't exist. Fix or remove the link.`)]);
+  for (const p of linted) {
+    const reported = new Set<string>();
+    for (const m of p.html.matchAll(BLOG_LINK)) {
+      const path = m[1].replace(/\/?(?:index\.html)?$/, "");
+      if (path === "" || path === "rss.xml" || /^(?:tag|page)(?:\/|$)/.test(path) || reported.has(path)) continue;
+      reported.add(path);
+      if (!RULES.slugPattern.test(path)) {
+        add(p.slug, [soft("links", `This post links to /blog/${path}, which isn't a valid post address. Check the link.`)]);
+      } else if (postSlugs.has(path)) {
+        if (!liveTargets.has(path)) add(p.slug, [soft("links", `This post links to /blog/${path}/, which isn't published yet (it may be a draft). Publish it or remove the link.`)]);
+      } else if (!liveTargets.has(path)) {
+        add(p.slug, [soft("links", `This post links to /blog/${path}/, which doesn't exist. Fix or remove the link.`)]);
+      }
+    }
   }
 
   const counts = new Map<string, number>();
