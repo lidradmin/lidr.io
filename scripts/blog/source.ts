@@ -46,8 +46,9 @@ export function resolveContentDir(env: NodeJS.ProcessEnv | Record<string, string
         env: { ...process.env, GIT_TERMINAL_PROMPT: "0", GIT_LFS_SKIP_SMUDGE: "1" },
       });
     } catch (err) {
-      const stderr = (err as { stderr?: Buffer | string }).stderr?.toString().trim() ?? "";
-      throw new Error(`Could not fetch blog content from ${redact(url)}: ${redact(stderr)}`);
+      const e = err as { stderr?: Buffer | string; code?: string; signal?: string };
+      const detail = redact(e.stderr?.toString().trim() ?? "") || e.code || e.signal || "unknown error";
+      throw new Error(`Could not fetch blog content from ${redact(url)}: ${detail}`);
     }
     return cloneTarget;
   }

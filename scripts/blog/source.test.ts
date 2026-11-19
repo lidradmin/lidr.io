@@ -73,3 +73,14 @@ test("refuses a clone target not named .blog-content", () => {
   expect(() => resolveContentDir({ BLOG_CONTENT_REPO: "/x" }, dir)).toThrow(/Refusing/);
   expect(existsSync(dir)).toBe(true);
 });
+
+test("error falls back to the error code when git prints nothing", () => {
+  const target = join(mkdtempSync(join(tmpdir(), "t-")), ".blog-content");
+  const oldPath = process.env.PATH;
+  process.env.PATH = mkdtempSync(join(tmpdir(), "nopath-"));
+  try {
+    expect(() => resolveContentDir({ BLOG_CONTENT_REPO: "/x" }, target)).toThrow(/Could not fetch blog content from \/x: ENOENT/);
+  } finally {
+    process.env.PATH = oldPath;
+  }
+});

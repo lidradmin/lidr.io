@@ -87,3 +87,16 @@ test("throws when a blob cannot be read", () => {
   rmSync(join(dir, ".git", "objects", oid.slice(0, 2), oid.slice(2)), { force: true });
   expect(() => findLastGood(dir, "p", isGood)).toThrow(/Could not read history for p/);
 });
+
+test("throws when git log fails in a corrupted repo", () => {
+  const dir = repoWith(["title: Good one\n"]);
+  const head = git(dir, "rev-parse", "HEAD").trim();
+  rmSync(join(dir, ".git", "objects", head.slice(0, 2), head.slice(2)), { force: true });
+  expect(() => findLastGood(dir, "p", isGood)).toThrow(/Could not read history for p/);
+});
+
+test("returns null for a repo with no commits", () => {
+  const dir = mkdtempSync(join(tmpdir(), "empty-"));
+  git(dir, "init", "-q");
+  expect(findLastGood(dir, "p", isGood)).toBeNull();
+});

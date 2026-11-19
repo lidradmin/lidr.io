@@ -30,13 +30,18 @@ export function findLastGood(contentDir: string, slug: string, isGood: (raw: str
   } catch {
     return null;
   }
+  try {
+    run(contentDir, ["rev-parse", "--verify", "-q", "HEAD"]);
+  } catch {
+    return null; // repo has no commits yet
+  }
   let shas: string[];
   try {
     shas = run(contentDir, ["log", "--topo-order", `--max-count=${MAX_VERSIONS}`, "--format=%H", "--", path])
       .split("\n")
       .filter(Boolean);
-  } catch {
-    return null;
+  } catch (err) {
+    throw new Error(`Could not read history for ${slug}: ${(err as Error).message}`);
   }
   for (const sha of shas) {
     // Trees are local even in blob:none clones; only blobs may need a fetch.
