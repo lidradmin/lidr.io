@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { BlogIndex } from "../../../../components/blog/BlogIndex";
 import { getPosts, getTags, paramsOrPlaceholder, PLACEHOLDER } from "../../../../lib/blog/data";
 import { pageCount, pageSlice } from "../../../../lib/blog/paginate";
+import { blogOpenGraph, blogTwitter, RSS_URL } from "../../../../lib/blog/seo";
 
 type Props = { params: Promise<{ n: string }> };
 
@@ -17,7 +18,15 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { n } = await params;
   if (n === PLACEHOLDER) return {};
   const url = `https://lidr.io/blog/page/${n}/`;
-  return { title: `Blog: Page ${n}`, alternates: { canonical: url }, openGraph: { url, siteName: "Lidr.io" } };
+  const title = `Blog: Page ${n}`;
+  const description = `Page ${n} of Lidr.io guides for construction site teams on photo records and reporting.`;
+  return {
+    title,
+    description,
+    alternates: { canonical: url, types: { "application/rss+xml": RSS_URL } },
+    openGraph: blogOpenGraph({ title, description, url }),
+    twitter: blogTwitter(title, description),
+  };
 }
 
 export default async function BlogPageN({ params }: Props) {

@@ -1,6 +1,7 @@
 import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
+import { renderOgImage } from "./og";
 import { buildBlogData, countProblems, formatProblems } from "./pipeline";
 import { resolveContentDir } from "./source";
 
@@ -36,6 +37,11 @@ async function main() {
     mkdirSync(join(cwd, ".blog"), { recursive: true });
     writeFileSync(join(cwd, ".blog/data.json"), JSON.stringify(data));
     writeFileSync(join(cwd, ".blog/report.json"), JSON.stringify(report, null, 2));
+    // Default share image for the index, page-N and tag pages. Always rendered (even when the
+    // blog is disabled) because /blog/ links it; a failure here is a code bug, so let it throw.
+    const ogDir = join(publicDir, "images", "blog", "_og");
+    mkdirSync(ogDir, { recursive: true });
+    writeFileSync(join(ogDir, "_blog.png"), await renderOgImage({ title: "Lidr.io Blog", tagName: "Guides for site teams" }));
   }
 
   if (reportPath) {

@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { BlogIndex } from "../../components/blog/BlogIndex";
 import { getPosts, getTags, hasPosts } from "../../lib/blog/data";
 import { pageCount, pageSlice } from "../../lib/blog/paginate";
+import { blogOpenGraph, blogTwitter, RSS_URL } from "../../lib/blog/seo";
 
 const TITLE = "Blog: Site Photo and Reporting Guides";
 const DESCRIPTION = "Practical guides for construction teams on capturing, organising and reporting site photos.";
@@ -11,9 +12,10 @@ export const metadata: Metadata = {
   description: DESCRIPTION,
   alternates: {
     canonical: "https://lidr.io/blog/",
-    types: { "application/rss+xml": "https://lidr.io/blog/rss.xml" },
+    types: { "application/rss+xml": RSS_URL },
   },
-  openGraph: { title: TITLE, description: DESCRIPTION, url: "https://lidr.io/blog/", siteName: "Lidr.io", type: "website" },
+  openGraph: blogOpenGraph({ title: TITLE, description: DESCRIPTION, url: "https://lidr.io/blog/" }),
+  twitter: blogTwitter(TITLE, DESCRIPTION),
   // An empty blog shouldn't be indexed.
   robots: hasPosts() ? undefined : { index: false, follow: true },
 };
