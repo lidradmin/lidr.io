@@ -16,6 +16,9 @@ describe("CMS config mirrors RULES (single source of truth)", () => {
     expect(matches(t, "x".repeat(RULES.title.max))).toBe(true);
     expect(matches(t, "x".repeat(RULES.title.min - 1))).toBe(false);
     expect(matches(t, "x".repeat(RULES.title.max + 1))).toBe(false);
+    expect(matches(t, "A title_with underscore")).toBe(false);
+    expect(matches(t, "A title~with tilde")).toBe(false);
+    expect(matches(t, "A perfectly normal title")).toBe(true);
   });
   test("description length (multi-line allowed)", () => {
     const d = field("description");
@@ -26,7 +29,10 @@ describe("CMS config mirrors RULES (single source of truth)", () => {
     expect(field("tags")).toMatchObject({ min: RULES.tags.min, max: RULES.tags.max, multiple: true });
   });
   test("image size limit", () => {
-    expect(cfg.media_library.config.max_file_size).toBe(RULES.maxImageBytes);
+    expect(cfg).not.toHaveProperty("media_library");
+    const media = (f: Field) => (f.media_library as { config: { max_file_size: number } }).config.max_file_size;
+    expect(media(field("cover"))).toBe(RULES.maxImageBytes);
+    expect(media(field("body"))).toBe(RULES.maxImageBytes);
   });
   test("redirect pattern is the validator's", () => {
     expect(field("redirectTo").pattern![0]).toBe(REDIRECT_PATTERN.source);
@@ -44,6 +50,16 @@ describe("CMS config mirrors RULES (single source of truth)", () => {
     expect(cfg).not.toHaveProperty("publish_mode");
     expect(blog).toMatchObject({ folder: "posts", media_folder: "/images/{{slug}}", public_folder: "/images/blog/{{slug}}", delete: false });
     expect(field("body")).toMatchObject({ widget: "markdown", sanitize_preview: true });
+  });
+  test("no trailing full stops in pattern messages; no picker_utc/date_format", () => {
+    for (const f of blog.fields) {
+      if (f.pattern) expect(f.pattern[1].endsWith(".")).toBe(false);
+      expect(f).not.toHaveProperty("picker_utc");
+      expect(f).not.toHaveProperty("date_format");
+    }
+    expect(cfg).toMatchObject({ logo: { src: "https://lidr.io/favicon-270x270.png" } });
+    expect(cfg).not.toHaveProperty("logo_url");
+    expect(cfg.backend.commit_messages.update).toBe('Update {{collection}} "{{slug}}"');
   });
   test("options override repo and auth URL", () => {
     const c = buildCmsConfig({ repo: "me/test", branch: "main", authBaseUrl: "https://auth.example", siteUrl: "https://example.com" });

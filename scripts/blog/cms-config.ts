@@ -17,7 +17,7 @@ export const DEFAULT_CMS_OPTIONS: CmsOptions = {
 
 const lengthPattern = (min: number, max: number, what: string): [string, string] => [
   `^[\\s\\S]{${min},${max}}$`,
-  `${what} must be ${min}–${max} characters.`,
+  `${what} must be ${min}–${max} characters`,
 ];
 
 const dateField = (name: string, label: string, required: boolean, hint?: string) => ({
@@ -25,9 +25,7 @@ const dateField = (name: string, label: string, required: boolean, hint?: string
   label,
   widget: "datetime",
   format: "YYYY-MM-DD",
-  date_format: "D MMM YYYY",
   time_format: false,
-  picker_utc: true,
   required,
   ...(required ? { default: "{{now}}" } : {}),
   ...(hint ? { hint } : {}),
@@ -43,20 +41,19 @@ export function buildCmsConfig(o: CmsOptions = DEFAULT_CMS_OPTIONS) {
       base_url: o.authBaseUrl,
       auth_endpoint: "auth",
       commit_messages: {
-        create: 'Publish blog post "{{slug}}"',
-        update: 'Update blog post "{{slug}}"',
-        delete: 'Delete blog post "{{slug}}"',
+        create: 'Create {{collection}} "{{slug}}"',
+        update: 'Update {{collection}} "{{slug}}"',
+        delete: 'Delete {{collection}} "{{slug}}"',
         uploadMedia: 'Upload "{{path}}"',
         deleteMedia: 'Delete "{{path}}"',
       },
     },
     site_url: o.siteUrl,
     display_url: o.siteUrl,
-    logo_url: `${o.siteUrl}/favicon-270x270.png`,
+    logo: { src: `${o.siteUrl}/favicon-270x270.png` },
     locale: "en",
     media_folder: "images",
     public_folder: "/images/blog",
-    media_library: { name: "default", config: { max_file_size: RULES.maxImageBytes } },
     slug: { encoding: "ascii", clean_accents: true, sanitize_replacement: "-" },
     collections: [
       {
@@ -80,7 +77,10 @@ export function buildCmsConfig(o: CmsOptions = DEFAULT_CMS_OPTIONS) {
             name: "title",
             label: "Title",
             widget: "string",
-            pattern: lengthPattern(RULES.title.min, RULES.title.max, "The title"),
+            pattern: [
+              `^(?![\\s\\S]*[_~])[\\s\\S]{${RULES.title.min},${RULES.title.max}}$`,
+              `The title must be ${RULES.title.min}–${RULES.title.max} characters and can't contain _ or ~`,
+            ],
             hint: `The page heading and the blue link in Google. ${RULES.title.min}–${RULES.title.max} characters.`,
           },
           {
@@ -112,7 +112,7 @@ export function buildCmsConfig(o: CmsOptions = DEFAULT_CMS_OPTIONS) {
             widget: "image",
             required: false,
             choose_url: false,
-            hint: `Optional. JPEG, PNG or WebP up to ${maxMb} MB. Turn off location on your phone's camera before taking site photos.`,
+            hint: `Type the title first, then add photos. Optional. JPEG, PNG or WebP up to ${maxMb} MB. Turn off location on your phone's camera before taking site photos.`,
             media_library: { config: { max_file_size: RULES.maxImageBytes } },
           },
           {
@@ -136,6 +136,8 @@ export function buildCmsConfig(o: CmsOptions = DEFAULT_CMS_OPTIONS) {
             label: "Post",
             widget: "markdown",
             sanitize_preview: true,
+            hint: "Type the title first before adding photos. Use 'Heading 2' or smaller for headings.",
+            media_library: { config: { max_file_size: RULES.maxImageBytes } },
             modes: ["rich_text", "raw"],
             buttons: ["bold", "italic", "link", "heading-two", "heading-three", "quote", "bulleted-list", "numbered-list"],
             editor_components: ["image"],
@@ -145,6 +147,7 @@ export function buildCmsConfig(o: CmsOptions = DEFAULT_CMS_OPTIONS) {
       {
         name: "settings",
         label: "Settings",
+        label_singular: "Setting",
         delete: false,
         editor: { preview: false },
         files: [
