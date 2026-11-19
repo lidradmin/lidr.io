@@ -4,7 +4,7 @@ import type { Problem } from "../../lib/blog/types";
 
 const SHA = /^[0-9a-f]{40}$/;
 const git = (cwd: string, args: string[]) =>
-  execFileSync("git", args, { cwd, stdio: ["ignore", "pipe", "ignore"], timeout: 30_000, env: { ...process.env, GIT_TERMINAL_PROMPT: "0" } }).toString();
+  execFileSync("git", args, { cwd, stdio: ["ignore", "pipe", "ignore"], timeout: 30_000, maxBuffer: 16 * 1024 * 1024, env: { ...process.env, GIT_TERMINAL_PROMPT: "0" } }).toString();
 
 /**
  * For posts whose TEXT changed since `sinceSha` but whose `updated` date
@@ -15,7 +15,7 @@ export function staleUpdatedProblems(contentDir: string, sinceSha: string): Reco
   if (!SHA.test(sinceSha) || /^0+$/.test(sinceSha)) return {};
   let files: string[];
   try {
-    files = git(contentDir, ["diff", "--name-only", "--diff-filter=M", sinceSha, "HEAD", "--", "posts/"])
+    files = git(contentDir, ["diff", "--relative", "--name-only", "--diff-filter=M", sinceSha, "HEAD", "--", "./posts/"])
       .split("\n")
       .filter((f) => /^posts\/[a-z0-9-]+\.md$/.test(f));
   } catch {
@@ -24,8 +24,8 @@ export function staleUpdatedProblems(contentDir: string, sinceSha: string): Reco
   const out: Record<string, Problem[]> = {};
   for (const f of files) {
     try {
-      const before = parsePostFile(git(contentDir, ["show", `${sinceSha}:${f}`]));
-      const after = parsePostFile(git(contentDir, ["show", `HEAD:${f}`]));
+      const before = parsePostFile(git(contentDir, ["show", `${sinceSha}:./${f}`]));
+      const after = parsePostFile(git(contentDir, ["show", `HEAD:./${f}`]));
       if (!before.ok || !after.ok) continue;
       const textChanged = before.body.trim() !== after.body.trim();
       const updatedSame = String(before.data.updated ?? "") === String(after.data.updated ?? "");
