@@ -157,7 +157,7 @@ describe("validatePost — hardening", () => {
       expect(r.problems).toEqual([]);
     }
   );
-  test.each(["maybe", 1, "tru"])("unknown draft %j hides the post with a soft problem (I4)", (v) => {
+  test.each(["maybe", 2, "tru"])("unknown draft %j hides the post with a soft problem (I4)", (v) => {
     const r = run({ ...GOOD, draft: v });
     expect(r.meta?.draft).toBe(true);
     expect(r.problems[0]).toMatchObject({ level: "soft", field: "draft" });
@@ -183,6 +183,48 @@ describe("validatePost — hardening", () => {
   test("image-only post with no description falls back to the title (minor)", () => {
     const r = validatePost({ slug: "a", data: { ...GOOD, description: "" }, body: "![](x.jpg)", plainText: "", tags: TAGS });
     expect(r.meta?.description).toBe(GOOD.title);
+  });
+});
+
+describe("validatePost — follow-ups", () => {
+  const R = "/blog/other/";
+  test("redirect with empty body keeps meta and no problems (R1)", () => {
+    const r = run({ ...GOOD, redirectTo: R }, "   ");
+    expect(r.problems).toEqual([]);
+    expect(r.meta).toMatchObject({ redirectTo: R, tags: [], draft: false, description: "" });
+  });
+  test("redirect with no title uses the slug (R1)", () => {
+    const r = run({ date: "2026-11-12", redirectTo: R });
+    expect(r.problems).toEqual([]);
+    expect(r.meta).toMatchObject({ redirectTo: R, title: "a-post" });
+  });
+  test("redirect with no date has empty date (R1)", () => {
+    const r = run({ title: "Hello there", redirectTo: R });
+    expect(r.problems).toEqual([]);
+    expect(r.meta).toMatchObject({ redirectTo: R, date: "", title: "Hello there" });
+  });
+  test("redirect with a bad slug is still hard (R1)", () => {
+    expect(run({ ...GOOD, redirectTo: R }, "x", "Bad Slug").meta).toBeNull();
+  });
+  test("front-matter over 32 KB is hard (M1)", () => {
+    const r = parsePostFile(`---\ntitle: Hi\nnote: ${"x".repeat(40 * 1024)}\n---\nBody`);
+    expect(r.ok).toBe(false);
+    if (!r.ok) expect(r.problem.message).toBe("The settings at the top of the post are too long. Open it in lidr.io/admin and Publish again.");
+  });
+  test("canonical is stored as url.href (M2)", () => {
+    expect(run({ ...GOOD, canonical: "https://lidr.io/a b" }).meta?.canonical).toBe("https://lidr.io/a%20b");
+  });
+  test.each([[0, false], [1, true]])("draft number %j -> %j (M3)", (v, expected) => {
+    const r = run({ ...GOOD, draft: v });
+    expect(r.meta?.draft).toBe(expected);
+    expect(r.problems).toEqual([]);
+  });
+  test.each(["0000-01-01", "2200-01-01", "1999-12-31"])("year out of range %s rejected (M4)", (d) => {
+    expect(run({ ...GOOD, date: d }).meta).toBeNull();
+  });
+  test("year 2000 and 2100 accepted (M4)", () => {
+    expect(run({ ...GOOD, date: "2000-01-01" }).meta?.date).toBe("2000-01-01");
+    expect(run({ ...GOOD, date: "2100-12-31" }).meta?.date).toBe("2100-12-31");
   });
 });
 

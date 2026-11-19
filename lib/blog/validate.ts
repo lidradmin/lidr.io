@@ -33,6 +33,13 @@ export function parsePostFile(raw: string): ParsedFile {
   if (close === -1) {
     return { ok: false, problem: hard("front-matter", WRONG_FORMAT, "No closing --- line") };
   }
+  const fmText = lines.slice(1, close).join("\n");
+  if (fmText.length > 32 * 1024) {
+    return {
+      ok: false,
+      problem: hard("front-matter", "The settings at the top of the post are too long. Open it in lidr.io/admin and Publish again.", `${fmText.length} characters`),
+    };
+  }
   let data: unknown;
   try {
     data = parseYaml(lines.slice(1, close).join("\n"), { uniqueKeys: true });
@@ -59,10 +66,11 @@ export function parsePostFile(raw: string): ParsedFile {
 }
 
 function toDateString(v: unknown): string | null {
-  if (v instanceof Date && !Number.isNaN(v.getTime())) return v.toISOString().slice(0, 10);
+  if (v instanceof Date && !Number.isNaN(v.getTime())) return toDateString(v.toISOString().slice(0, 10));
   if (typeof v === "string" && RULES.datePattern.test(v)) {
     const d = new Date(`${v}T00:00:00Z`);
-    if (!Number.isNaN(d.getTime()) && d.toISOString().slice(0, 10) === v) return v;
+    const year = d.getUTCFullYear();
+    if (!Number.isNaN(d.getTime()) && d.toISOString().slice(0, 10) === v && year >= 2000 && year <= 2100) return v;
   }
   return null;
 }
@@ -93,13 +101,10 @@ export function validatePost(input: {
     p.push(hard("slug", `The file name "${slug}" must use only lowercase letters, numbers and hyphens. The file name can't be changed in the editor; contact the site owner.`));
   }
   const title = str(data.title);
-  if (!title) p.push(hard("title", "The post has no title."));
   const date = toDateString(data.date);
-  if (!date) p.push(hard("date", "The publish date is missing or isn't a real date (for example 2026-11-12). Pick a date in the editor."));
-  if (!input.body.trim()) p.push(hard("body", "The post has no text."));
-  if (p.length > 0 || !date) return { meta: null, problems: p };
 
-  // A retired post that redirects elsewhere shouldn't nag its author.
+  // A retired post that redirects elsewhere only needs a valid slug and
+  // shouldn't nag its author, even if it was emptied.
   let redirectTo: string | undefined;
   let redirectBad = false;
   if (data.redirectTo !== undefined && data.redirectTo !== null && data.redirectTo !== "") {
@@ -108,20 +113,17 @@ export function validatePost(input: {
       redirectTo = r;
     } else redirectBad = true;
   }
-  if (redirectTo) {
+  if (redirectTo && p.length === 0) {
     return {
-      meta: {
-        slug,
-        title,
-        description: str(data.description) || excerpt(input.plainText) || title,
-        date,
-        tags: [],
-        draft: false,
-        redirectTo,
-      },
+      meta: { slug, title: title || slug, description: "", date: date ?? "", tags: [], draft: false, redirectTo },
       problems: [],
     };
   }
+
+  if (!title) p.push(hard("title", "The post has no title."));
+  if (!date) p.push(hard("date", "The publish date is missing or isn't a real date (for example 2026-11-12). Pick a date in the editor."));
+  if (!input.body.trim()) p.push(hard("body", "The post has no text."));
+  if (p.length > 0 || !date) return { meta: null, problems: p };
 
   const { title: tr, description: dr, tags: tg } = RULES;
   if (title.length < tr.min || title.length > tr.max) {
@@ -196,7 +198,7 @@ export function validatePost(input: {
       }
     }
     if (url && url.protocol === "https:" && url.hostname) {
-      canonical = (data.canonical as string).trim();
+      canonical = url.href;
       if (!OWN_HOSTS.includes(url.hostname)) {
         p.push(soft("canonical", `This post tells Google its original is on ${url.hostname}. If that's not intended, remove the canonical setting.`));
       }
@@ -207,6 +209,8 @@ export function validatePost(input: {
   let draft = false;
   const d = data.draft;
   if (typeof d === "boolean") draft = d;
+  else if (d === 0) draft = false;
+  else if (d === 1) draft = true;
   else if (d !== undefined && d !== null && d !== "") {
     const v = typeof d === "string" ? d.trim().toLowerCase() : "";
     if (["true", "yes", "on"].includes(v)) draft = true;
