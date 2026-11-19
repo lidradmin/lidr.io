@@ -53,6 +53,7 @@ describe("processImages", () => {
     const { problems } = await processImages({ contentDir, publicDir });
     const msgs = problems["my-post"].map((p) => p.message).join("\n");
     expect(msgs).toMatch(/gps\.jpg.*location/);
+    expect(problems["my-post"].find((p) => /gps\.jpg/.test(p.message))).toMatchObject({ level: "soft", field: "location" });
     expect(msgs).toMatch(/phone\.heic.*JPEG/);
   });
 });

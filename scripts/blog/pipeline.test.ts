@@ -56,7 +56,7 @@ describe("buildBlogData with fixtures", () => {
   test("problems are reported per post", () => {
     expect(report.problems["broken"][0]).toMatchObject({ level: "hard", field: "title" });
     expect(report.problems["soft-problems-example"].map((p) => p.field).sort()).toEqual(["description", "tags"]);
-    expect(report.problems["photo-reports-that-hold-up"].some((p) => /location/.test(p.message))).toBe(true);
+    expect(report.problems["photo-reports-that-hold-up"].some((p) => p.field === "location" && /location/.test(p.message))).toBe(true);
   });
   test("cover and OG images are resolved", () => {
     const welcome = data.posts[0];

@@ -4,15 +4,19 @@ import { dirname, join } from "node:path";
 import { stringify as stringifyYaml } from "yaml";
 import { staleUpdatedProblems } from "./changes";
 import { buildCmsConfig, DEFAULT_CMS_OPTIONS } from "./cms-config";
+import { RULES } from "../../lib/blog/rules";
 import { renderOgImage } from "./og";
 import { buildBlogData, countProblems, formatProblems } from "./pipeline";
 import { resolveContentDir } from "./source";
+import { splitForSlug, strictFailures } from "./strict";
 
 /**
  * npm run blog:prepare — runs before `next build` / `next dev`.
  *   writes .blog/data.json (read by the Next pages) and .blog/report.json
  *   writes optimised images + OG images into public/images/blog/
  * npm run blog:check — same, strict, outputs to a temp dir (CI / Claude skill).
+ *   --only <slug>: scope the strict check to one post (the Claude skill). Other posts'
+ *   problems are listed under "Not yours" and only fail the check if they are hard.
  */
 async function main() {
   const cwd = process.cwd();
@@ -21,6 +25,9 @@ async function main() {
   const ri = process.argv.indexOf("--report");
   const reportPath = ri >= 0 ? process.argv[ri + 1] : undefined;
   if (ri >= 0 && !reportPath) throw new Error("--report needs a file path");
+  const oi = process.argv.indexOf("--only");
+  const only = oi >= 0 ? process.argv[oi + 1] : undefined;
+  if (oi >= 0 && (!only || !RULES.slugPattern.test(only))) throw new Error("--only needs a post slug (lowercase words joined by hyphens)");
   const contentDir = resolveContentDir(process.env, join(cwd, ".blog-content"));
   const publicDir = check ? mkdtempSync(join(tmpdir(), "blog-check-")) : join(cwd, "public");
   if (!check) {
@@ -85,9 +92,26 @@ async function main() {
       ? `blog: ${data.posts.length} post(s), ${data.tags.length} tag(s), ${data.redirects.length} redirect(s), ${problems.length} item(s) with problems`
       : "blog: disabled (set BLOG_CONTENT_REPO or BLOG_CONTENT_DIR to enable)"
   );
-  for (const line of formatProblems(report)) console.warn(line);
-  if (strict && problemCount > 0) {
-    console.error(`blog: ${problemCount} problem(s) found and BLOG_STRICT=1`);
+  if (only) {
+    const { yours, notYours } = splitForSlug(report, only);
+    console.warn(`Your post (${only}):`);
+    const mine = formatProblems(yours);
+    for (const line of mine.length ? mine : ["  no problems"]) console.warn(line);
+    const others = formatProblems(notYours);
+    if (others.length) {
+      console.warn("Not yours (for information):");
+      for (const line of others) console.warn(line);
+    }
+  } else {
+    for (const line of formatProblems(report)) console.warn(line);
+  }
+  const failures = strictFailures(report, only);
+  if (strict && failures.length > 0) {
+    console.error(
+      only
+        ? `blog: ${failures.length} problem(s) block this check (all problems on ${only} except location warnings, plus hard problems anywhere) and BLOG_STRICT=1`
+        : `blog: ${problemCount} problem(s) found and BLOG_STRICT=1`
+    );
     process.exit(1);
   }
   const hard = Object.values(report.problems).flat().filter((p) => p.level === "hard").length;
