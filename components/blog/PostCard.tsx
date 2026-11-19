@@ -10,6 +10,8 @@ type Props = {
   headingLevel?: "h2" | "h3";
   /** Load the cover immediately (above-the-fold cards). Featured cards are always eager + high priority. */
   eager?: boolean;
+  /** Primary topic name, shown on the no-cover fallback block. */
+  tagName?: string;
 };
 
 const CARD_SIZES = "(min-width: 1024px) 400px, (min-width: 640px) 45vw, 90vw";
@@ -20,7 +22,7 @@ const FEATURED_SIZES = "(min-width: 1024px) 620px, (min-width: 900px) 48vw, 90vw
  * the whole card so the card is clickable while the accessible name stays
  * just the title.
  */
-export function PostCard({ post, variant = "card", headingLevel = "h2", eager }: Props) {
+export function PostCard({ post, variant = "card", headingLevel = "h2", eager, tagName }: Props) {
   const Heading = headingLevel;
   const featured = variant === "featured";
   return (
@@ -36,7 +38,8 @@ export function PostCard({ post, variant = "card", headingLevel = "h2", eager }:
         />
       ) : (
         <div className={`${styles.cardMedia} ${styles.cardFallback}`} aria-hidden="true">
-          <span>{post.title}</span>
+          <span className={styles.cardFallbackBar} />
+          <span>{tagName ?? "Lidr.io"}</span>
         </div>
       )}
       <div className={styles.cardBody}>

@@ -53,7 +53,12 @@ export function PostArticle({ post, tags, related }: Props) {
         <section className={styles.related} aria-labelledby="related-heading">
           <h2 id="related-heading" className={styles.relatedHeading}>More on {primary.name.toLowerCase()}</h2>
           <div className={styles.relatedGrid}>
-            {related.map((p) => <PostCard key={p.slug} post={p} headingLevel="h3" />)}
+            {related.map((p) => <PostCard
+                key={p.slug}
+                post={p}
+                headingLevel="h3"
+                tagName={p.tags[0] ? tags.find((t) => t.slug === p.tags[0])?.name : undefined}
+              />)}
           </div>
         </section>
       )}

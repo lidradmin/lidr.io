@@ -20,6 +20,9 @@ type Props = {
 /** Cards loaded eagerly when there is no featured card (page 2+, tag pages). */
 const EAGER_CARDS = 3;
 
+const tagNameFor = (post: BuiltPost, tags: TagPage[]) =>
+  post.tags[0] ? tags.find((t) => t.slug === post.tags[0])?.name : undefined;
+
 export function BlogIndex({
   heading,
   intro,
@@ -64,10 +67,15 @@ export function BlogIndex({
           <p className={styles.empty}>No posts yet. Check back soon.</p>
         ) : (
           <>
-            {featured && <PostCard post={featured} variant="featured" />}
+            {featured && <PostCard post={featured} variant="featured" tagName={tagNameFor(featured, tags)} />}
             <div className={styles.grid}>
               {posts.map((p, i) => (
-                <PostCard key={p.slug} post={p} eager={!featured && i < EAGER_CARDS} />
+                <PostCard
+                  key={p.slug}
+                  post={p}
+                  eager={!featured && i < EAGER_CARDS}
+                  tagName={tagNameFor(p, tags)}
+                />
               ))}
             </div>
           </>
