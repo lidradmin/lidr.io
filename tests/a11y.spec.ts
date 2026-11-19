@@ -13,6 +13,10 @@ const PAGES = [
   "/fair-use-policy/",
   "/complaints-policy/",
   "/download/",
+  "/blog/",
+  "/blog/page/2/",
+  "/blog/photo-reports-that-hold-up/",
+  "/blog/tag/reporting/",
 ];
 
 for (const page of PAGES) {

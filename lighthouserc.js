@@ -5,6 +5,8 @@ module.exports = {
         "http://localhost:4173/",
         "http://localhost:4173/about/",
         "http://localhost:4173/pricing/",
+        "http://localhost:4173/blog/",
+        "http://localhost:4173/blog/photo-reports-that-hold-up/",
       ],
       numberOfRuns: 1,
       startServerCommand: "npx serve out -l 4173",
