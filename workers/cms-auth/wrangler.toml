@@ -1,0 +1,11 @@
+name = "lidr-cms-auth"
+main = "src/index.ts"
+compatibility_date = "2026-11-01"
+workers_dev = false
+
+[vars]
+ALLOWED_ORIGIN = "https://lidr.io"
+
+# Secrets (set with `npx wrangler@4 secret put …`, never committed):
+#   GITHUB_CLIENT_ID, GITHUB_CLIENT_SECRET
+# Custom domain cms-auth.lidr.io: add under the Worker's Settings → Domains & Routes.
