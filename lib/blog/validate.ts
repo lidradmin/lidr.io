@@ -87,6 +87,14 @@ export function excerpt(text: string, max: number = RULES.excerptLength): string
   return `${t.slice(0, cut > 0 ? cut : max).replace(/[\s.,;:!?\-–—]+$/, "")}…`;
 }
 
+// An ALL-CAPS phrase in square brackets that isn't a Markdown link's text.
+const PLACEHOLDER = /\[([A-Z][A-Z0-9 _/-]{1,60})\](?!\()/;
+
+export function findPlaceholder(text: string): string | null {
+  const m = PLACEHOLDER.exec(text);
+  return m ? m[0] : null;
+}
+
 export function validatePost(input: {
   slug: string;
   data: Record<string, unknown>;
@@ -123,6 +131,12 @@ export function validatePost(input: {
   if (!title) p.push(hard("title", "The post has no title."));
   if (!date) p.push(hard("date", "The publish date is missing or isn't a real date (for example 2026-11-12). Pick a date in the editor."));
   if (!input.body.trim()) p.push(hard("body", "The post has no text."));
+  // Drafting placeholders such as [NEEDS SOURCE] or [RELATED POST LINK] must
+  // never reach readers: with no review step, this check is the safety net.
+  for (const [field, text] of [["title", title], ["description", str(data.description)], ["body", input.body]] as const) {
+    const found = findPlaceholder(text);
+    if (found) p.push(hard(field, `The ${field === "body" ? "post" : field} still contains the placeholder ${found}. Replace it with the real text or link, or delete it, then Publish again.`));
+  }
   if (p.length > 0 || !date) return { meta: null, problems: p };
 
   const { title: tr, description: dr, tags: tg } = RULES;
