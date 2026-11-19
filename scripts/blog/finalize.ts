@@ -1,4 +1,4 @@
-import { existsSync, readdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import { existsSync, readdirSync, readFileSync, rmdirSync, rmSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { PLACEHOLDER } from "../../lib/blog/data";
 import type { BlogData } from "../../lib/blog/types";
@@ -15,7 +15,14 @@ function removePlaceholders(dir: string) {
 
 export function finalizeOut(outDir: string, data: BlogData) {
   const blogDir = join(outDir, "blog");
-  if (existsSync(blogDir)) removePlaceholders(blogDir);
+  if (existsSync(blogDir)) {
+    removePlaceholders(blogDir);
+    // Pagination/tag index dirs that only held placeholders are now empty; drop them.
+    for (const d of ["page", "tag"]) {
+      const dir = join(blogDir, d);
+      if (existsSync(dir) && readdirSync(dir).length === 0) rmdirSync(dir);
+    }
+  }
   if (data.redirects.length) {
     const lines = data.redirects.flatMap(({ from, to }) => [`${from}  ${to}  301`, `${from.replace(/\/$/, "")}  ${to}  301`]);
     const file = join(outDir, "_redirects");

@@ -48,9 +48,10 @@ function isBlank(n: ElementContent): boolean {
   return n.type === "text" && n.value.trim() === "";
 }
 
-function rehypeBlogImages(opts: { images: ImageManifest; warnings: Problem[] }) {
+function rehypeBlogImages(opts: { images: ImageManifest; warnings: Problem[]; hasCover: boolean }) {
   return (tree: Root) => {
-    let first = true;
+    // With a cover photo the cover is the LCP image, so no body image is eager.
+    let first = !opts.hasCover;
     let removed = false;
     visit(tree, "element", (node: Element, index, parent) => {
       if (node.tagName !== "img" || !parent || index === undefined) return;
@@ -112,6 +113,21 @@ function rehypeBlogImages(opts: { images: ImageManifest; warnings: Problem[] }) 
   };
 }
 
+/** The post title is the page's only h1; body h1s become h2 (one warning per post). */
+function rehypeDemoteH1(opts: { warnings: Problem[] }) {
+  return (tree: Root) => {
+    let warned = false;
+    visit(tree, "element", (node: Element) => {
+      if (node.tagName !== "h1") return;
+      node.tagName = "h2";
+      if (!warned) {
+        warned = true;
+        opts.warnings.push(soft("body", "Use 'Heading 2' or smaller inside the post. The title is the only main heading."));
+      }
+    });
+  };
+}
+
 /** Links whose href was stripped by sanitize: keep the text, drop the <a>, warn. */
 function rehypeUnwrapDeadLinks(opts: { warnings: Problem[] }) {
   return (tree: Root) => {
@@ -160,7 +176,7 @@ function rehypeWrapTables() {
 
 export async function renderMarkdown(
   md: string,
-  opts: { images: ImageManifest }
+  opts: { images: ImageManifest; hasCover?: boolean }
 ): Promise<{ html: string; words: number; warnings: Problem[] }> {
   const warnings: Problem[] = [];
   const file = await unified()
@@ -171,6 +187,7 @@ export async function renderMarkdown(
     // prefixes footnote ids, so don't let sanitize prefix them a second time.
     .use(rehypeSanitize, { ...defaultSchema, clobberPrefix: "" })
     .use(rehypeUnwrapDeadLinks, { warnings })
+    .use(rehypeDemoteH1, { warnings })
     .use(rehypeSlug, { prefix: "h-" }) // avoids colliding with the layout's id="main"
     .use(rehypeAutolinkHeadings, {
       behavior: "append",
@@ -181,7 +198,7 @@ export async function renderMarkdown(
         return !(Array.isArray(c) && c.includes("sr-only"));
       },
     })
-    .use(rehypeBlogImages, { images: opts.images, warnings })
+    .use(rehypeBlogImages, { images: opts.images, warnings, hasCover: !!opts.hasCover })
     .use(rehypeExternalLinks)
     .use(rehypeWrapTables)
     .use(rehypeStringify)

@@ -55,3 +55,20 @@ test("no redirects leaves _redirects untouched; no out/blog does not throw", () 
   finalizeOut(out, { ...empty, redirects: [] });
   expect(readFileSync(join(out, "_redirects"), "utf8")).toBe("/a  /b  301");
 });
+
+test("removes blog/page and blog/tag when emptied, keeps them when not", () => {
+  const out = mkdtempSync(join(tmpdir(), "out-"));
+  mkdirSync(join(out, "blog/page/__empty"), { recursive: true });
+  mkdirSync(join(out, "blog/tag/__empty"), { recursive: true });
+  finalizeOut(out, { enabled: true, posts: [], tags: [], redirects: [] });
+  expect(existsSync(join(out, "blog/page"))).toBe(false);
+  expect(existsSync(join(out, "blog/tag"))).toBe(false);
+
+  const out2 = mkdtempSync(join(tmpdir(), "out-"));
+  mkdirSync(join(out2, "blog/page/2"), { recursive: true });
+  mkdirSync(join(out2, "blog/page/__empty"), { recursive: true });
+  mkdirSync(join(out2, "blog/tag/__empty"), { recursive: true });
+  finalizeOut(out2, { enabled: true, posts: [], tags: [], redirects: [] });
+  expect(existsSync(join(out2, "blog/page/2"))).toBe(true);
+  expect(existsSync(join(out2, "blog/tag"))).toBe(false);
+});

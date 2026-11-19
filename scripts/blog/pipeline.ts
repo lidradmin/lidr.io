@@ -94,9 +94,9 @@ export async function buildBlogData(opts: {
   const redirects: BlogData["redirects"] = [];
 
   type Rendered = Awaited<ReturnType<typeof renderMarkdown>>;
-  const render = async (body: string): Promise<{ rendered: Rendered } | { error: string }> => {
+  const render = async (body: string, m: PostMeta): Promise<{ rendered: Rendered } | { error: string }> => {
     try {
-      return { rendered: await renderMarkdown(body, { images: manifest }) };
+      return { rendered: await renderMarkdown(body, { images: manifest, hasCover: !!(m.cover && lookupImage(manifest, m.cover)) }) };
     } catch (err) {
       return { error: err instanceof Error ? err.message : String(err) };
     }
@@ -120,7 +120,7 @@ export async function buildBlogData(opts: {
 
     if (publishable(meta)) {
       renderAttempts++;
-      const r = await render(body);
+      const r = await render(body, meta);
       if ("rendered" in r) rendered = r.rendered;
       else {
         renderFailures++;
@@ -136,7 +136,7 @@ export async function buildBlogData(opts: {
         const a = analyse(slug, raw, tags);
         if (!a.meta) continue;
         if (publishable(a.meta)) {
-          const r = await render(a.body);
+          const r = await render(a.body, a.meta);
           if (!("rendered" in r)) continue;
           rendered = r.rendered;
           add(slug, [soft("post", "Your latest change has a problem, so the previous version is still live. Fix the problem above and publish again.")]);
@@ -163,7 +163,7 @@ export async function buildBlogData(opts: {
     let cover: BuiltPost["cover"];
     if (meta.cover) {
       const img = lookupImage(manifest, meta.cover);
-      if (img) cover = { ...img, alt: meta.coverAlt ?? meta.title };
+      if (img) cover = { ...img, alt: meta.coverAlt ?? "" };
       else add(slug, [soft("cover", `Cover photo not found: ${meta.cover}. Upload it again in the editor.`)]);
     }
 

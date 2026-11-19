@@ -193,6 +193,17 @@ describe("redirects", () => {
 });
 
 describe("covers", () => {
+  test("cover without alt gets empty alt; body images are all lazy when a cover exists", async () => {
+    const dir = mkContent({ "a.md": post("A", "cover: /images/blog/a/cover.jpg\n").replace(BODY, `![x](/images/blog/a/cover.jpg)\n\n${BODY}`) });
+    mkdirSync(join(dir, "images", "a"), { recursive: true });
+    copyFileSync(join(FIXTURES, "images/welcome-to-the-lidr-blog/cover.jpg"), join(dir, "images/a/cover.jpg"));
+    const r = await build(dir);
+    const p = r.data.posts[0];
+    expect(p.cover?.alt).toBe("");
+    expect(p.html).toContain("<picture>");
+    expect(p.html).not.toContain("fetchpriority");
+    expect(p.html).toContain('loading="lazy"');
+  });
   test.each(["__proto__", "constructor"])("cover %s is not found", async (cover) => {
     const r = await build(mkContent({ "a.md": post("A", `cover: ${cover}\n`) }));
     expect(r.data.posts[0].cover).toBeUndefined();

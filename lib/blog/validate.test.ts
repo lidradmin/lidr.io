@@ -69,10 +69,11 @@ describe("validatePost — soft problems keep the post", () => {
     const r = validatePost({ slug: "a", data: { ...GOOD, tags: ["site-photos", "reporting", "a-tag", "b-tag"] }, body: "b", plainText: "b", tags });
     expect(r.meta?.tags).toHaveLength(3);
   });
-  test("cover without alt falls back to title", () => {
+  test("cover without alt keeps alt empty and warns", () => {
     const r = run({ ...GOOD, cover: "/images/blog/a/c.jpg" });
-    expect(r.meta?.coverAlt).toBe(GOOD.title);
+    expect(r.meta?.coverAlt).toBe("");
     expect(r.problems[0].field).toBe("coverAlt");
+    expect(r.problems[0].message).toBe("The cover photo has no description (alt text). Describe what the photo shows so screen readers can understand it.");
   });
   test("updated earlier than date is ignored", () => {
     const r = run({ ...GOOD, updated: "2026-01-01" });

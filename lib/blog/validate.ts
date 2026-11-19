@@ -177,10 +177,9 @@ export function validatePost(input: {
   }
 
   const cover = str(data.cover) || undefined;
-  let coverAlt = str(data.coverAlt);
+  const coverAlt = str(data.coverAlt);
   if (cover && !coverAlt) {
-    p.push(soft("coverAlt", "The cover photo has no description (alt text), so the title is used. Describe what the photo shows."));
-    coverAlt = title;
+    p.push(soft("coverAlt", "The cover photo has no description (alt text). Describe what the photo shows so screen readers can understand it."));
   }
 
   if (redirectBad) {

@@ -118,6 +118,25 @@ describe("renderMarkdown", () => {
     expect(ids.length).toBeGreaterThan(2);
     for (const id of ids) expect(id.startsWith("user-content-") || id.startsWith("h-") || id === "footnote-label").toBe(true);
   });
+  test("body h1 is demoted to h2 with one warning, ids intact", async () => {
+    const r = await renderMarkdown("# One\n\n# Two", { images: {} });
+    expect(r.html).not.toContain("<h1");
+    expect(r.html).toContain('<h2 id="h-one">One');
+    expect(r.html).toContain('<h2 id="h-two">Two');
+    const w = r.warnings.filter((x) => /Heading 2/.test(x.message));
+    expect(w).toHaveLength(1);
+    expect(w[0].message).toBe("Use 'Heading 2' or smaller inside the post. The title is the only main heading.");
+    expect(w[0].level).toBe("soft");
+  });
+  test("no h1 warning when there is no h1", async () => {
+    const r = await renderMarkdown("## Fine", { images: {} });
+    expect(r.warnings).toEqual([]);
+  });
+  test("hasCover makes every body image lazy and none high priority", async () => {
+    const r = await renderMarkdown("![a](/images/blog/p/site.jpg)\n\n![b](/images/blog/p/site.jpg)", { images: IMAGES, hasCover: true });
+    expect(r.html).not.toContain("fetchpriority");
+    expect(r.html.match(/loading="lazy"/g)).toHaveLength(2);
+  });
   test("alt warning only for kept images", async () => {
     const r = await renderMarkdown("![](/images/blog/p/missing.jpg)", { images: IMAGES });
     expect(r.warnings).toHaveLength(1);
