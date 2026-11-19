@@ -3,6 +3,8 @@ export type Problem = {
   level: "hard" | "soft";
   field: string;
   message: string;
+  /** Raw technical detail (e.g. parser message), not shown to authors by default. */
+  detail?: string;
 };
 
 export type TagDef = { slug: string; name: string; description: string };
