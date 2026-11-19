@@ -16,9 +16,18 @@ async function main() {
   const strict = process.env.BLOG_STRICT === "1";
   const contentDir = resolveContentDir(process.env, join(cwd, ".blog-content"));
   const publicDir = check ? mkdtempSync(join(tmpdir(), "blog-check-")) : join(cwd, "public");
-  if (!check) rmSync(join(publicDir, "images", "blog"), { recursive: true, force: true });
+  if (!check) {
+    rmSync(join(publicDir, "images", "blog"), { recursive: true, force: true });
+    rmSync(join(cwd, ".blog"), { recursive: true, force: true });
+  }
 
-  const { data, report } = await buildBlogData({ contentDir, publicDir, strict });
+  let result;
+  try {
+    result = await buildBlogData({ contentDir, publicDir, strict });
+  } finally {
+    if (check) rmSync(publicDir, { recursive: true, force: true });
+  }
+  const { data, report } = result;
 
   if (!check) {
     mkdirSync(join(cwd, ".blog"), { recursive: true });
