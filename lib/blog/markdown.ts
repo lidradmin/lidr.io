@@ -1,7 +1,7 @@
-import type { Element, Root } from "hast";
+import type { Element, ElementContent, Root } from "hast";
 import { toString as mdToString } from "mdast-util-to-string";
 import rehypeAutolinkHeadings from "rehype-autolink-headings";
-import rehypeSanitize from "rehype-sanitize";
+import rehypeSanitize, { defaultSchema } from "rehype-sanitize";
 import rehypeSlug from "rehype-slug";
 import rehypeStringify from "rehype-stringify";
 import remarkGfm from "remark-gfm";
@@ -21,30 +21,50 @@ const soft = (field: string, message: string): Problem => ({ level: "soft", fiel
 
 export function markdownToPlainText(md: string): string {
   const tree = unified().use(remarkParse).use(remarkGfm).parse(md);
+  // Code isn't prose: drop code blocks and inline code before extracting text.
+  visit(tree, (node, index, parent) => {
+    if ((node.type === "code" || node.type === "inlineCode") && parent && index !== undefined) {
+      parent.children.splice(index, 1);
+      return [SKIP, index];
+    }
+  });
   // Join block-level text with spaces, then normalise whitespace.
-  const blocks = (tree.children ?? []).map((n) => mdToString(n));
+  const blocks = (tree.children ?? []).map((n) => mdToString(n, { includeImageAlt: false }));
   return blocks.join(" ").replace(/\s+/g, " ").trim();
+}
+
+function lookupImage(images: ImageManifest, src: string): ImageVariant | undefined {
+  if (Object.hasOwn(images, src)) return images[src];
+  try {
+    const decoded = decodeURIComponent(src);
+    if (Object.hasOwn(images, decoded)) return images[decoded];
+  } catch {
+    // malformed escape: treat as unknown
+  }
+  return undefined;
+}
+
+function isBlank(n: ElementContent): boolean {
+  return n.type === "text" && n.value.trim() === "";
 }
 
 function rehypeBlogImages(opts: { images: ImageManifest; warnings: Problem[] }) {
   return (tree: Root) => {
     let first = true;
+    let removed = false;
     visit(tree, "element", (node: Element, index, parent) => {
       if (node.tagName !== "img" || !parent || index === undefined) return;
       const src = String(node.properties.src ?? "");
       const alt = String(node.properties.alt ?? "");
+      const img = lookupImage(opts.images, src);
+      if (!img) {
+        opts.warnings.push(soft("images", `Only photos uploaded in the editor can be shown. This image was removed: ${src}`));
+        parent.children.splice(index, 1);
+        removed = true;
+        return [SKIP, index];
+      }
       if (!alt) {
         opts.warnings.push(soft("images", `A photo has no alt text (${src}). Describe what it shows so screen readers and Google understand it.`));
-      }
-      if (!src.startsWith("/images/blog/")) {
-        node.properties.loading = "lazy";
-        return;
-      }
-      const img = opts.images[src];
-      if (!img) {
-        opts.warnings.push(soft("images", `Photo not found: ${src}. Upload it again in the editor.`));
-        parent.children.splice(index, 1);
-        return [SKIP, index];
       }
       const picture: Element = {
         type: "element",
@@ -60,7 +80,7 @@ function rehypeBlogImages(opts: { images: ImageManifest; warnings: Problem[] }) 
               alt,
               width: img.width,
               height: img.height,
-              ...(first ? {} : { loading: "lazy" }),
+              ...(first ? { fetchPriority: "high" } : { loading: "lazy" }),
               decoding: "async",
             },
             children: [],
@@ -71,15 +91,34 @@ function rehypeBlogImages(opts: { images: ImageManifest; warnings: Problem[] }) 
       parent.children[index] = picture;
       return SKIP;
     });
+    if (removed) {
+      // Drop paragraphs left empty by a removed image.
+      visit(tree, "element", (node: Element, index, parent) => {
+        if (node.tagName !== "p" || !parent || index === undefined) return;
+        if (node.children.every(isBlank)) {
+          parent.children.splice(index, 1);
+          return [SKIP, index];
+        }
+      });
+    }
   };
+}
+
+function isExternal(href: string): boolean {
+  try {
+    const u = new URL(href, "https://lidr.io/");
+    if (u.protocol !== "http:" && u.protocol !== "https:") return false;
+    return u.hostname !== "lidr.io" && u.hostname !== "www.lidr.io";
+  } catch {
+    return false;
+  }
 }
 
 function rehypeExternalLinks() {
   return (tree: Root) => {
     visit(tree, "element", (node: Element) => {
       if (node.tagName !== "a") return;
-      const href = String(node.properties.href ?? "");
-      if (/^https?:\/\//.test(href) && !/^https:\/\/(www\.)?lidr\.io(\/|$)/.test(href)) {
+      if (isExternal(String(node.properties.href ?? ""))) {
         node.properties.rel = ["noopener", "noreferrer"];
       }
     });
@@ -105,9 +144,19 @@ export async function renderMarkdown(
     .use(remarkParse)
     .use(remarkGfm)
     .use(remarkRehype) // raw HTML is dropped (allowDangerousHtml is off)
-    .use(rehypeSanitize) // default GitHub schema: no scripts, handlers, javascript: URLs
-    .use(rehypeSlug)
-    .use(rehypeAutolinkHeadings, { behavior: "wrap" })
+    // Default GitHub schema: no scripts, handlers, javascript: URLs. remark-rehype already
+    // prefixes footnote ids, so don't let sanitize prefix them a second time.
+    .use(rehypeSanitize, { ...defaultSchema, clobberPrefix: "" })
+    .use(rehypeSlug, { prefix: "h-" }) // avoids colliding with the layout's id="main"
+    .use(rehypeAutolinkHeadings, {
+      behavior: "append",
+      properties: { className: ["heading-anchor"], ariaHidden: "true", tabIndex: -1 },
+      content: { type: "text", value: "#" },
+      test: (node) => {
+        const c = node.properties?.className;
+        return !(Array.isArray(c) && c.includes("sr-only"));
+      },
+    })
     .use(rehypeBlogImages, { images: opts.images, warnings })
     .use(rehypeExternalLinks)
     .use(rehypeWrapTables)

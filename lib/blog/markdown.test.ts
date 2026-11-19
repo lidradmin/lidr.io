@@ -23,7 +23,7 @@ describe("renderMarkdown", () => {
   });
   test("headings get ids and wrapping anchor links", async () => {
     const r = await renderMarkdown("## Why photos matter", { images: {} });
-    expect(r.html).toContain('<h2 id="why-photos-matter"><a href="#why-photos-matter">');
+    expect(r.html).toContain('<h2 id="h-why-photos-matter">Why photos matter<a class="heading-anchor" aria-hidden="true" tabindex="-1" href="#h-why-photos-matter">#</a></h2>');
   });
   test("known images become <picture> with webp source and dimensions", async () => {
     const r = await renderMarkdown("![A scaffold](/images/blog/p/site.jpg)", { images: IMAGES });
@@ -34,6 +34,74 @@ describe("renderMarkdown", () => {
   test("first image is eager, later images lazy", async () => {
     const r = await renderMarkdown("![a](/images/blog/p/site.jpg)\n\n![b](/images/blog/p/site.jpg)", { images: IMAGES });
     expect(r.html.match(/loading="lazy"/g)).toHaveLength(1);
+    const imgs = r.html.match(/<img [^>]*>/g)!;
+    expect(imgs[0]).toContain('fetchpriority="high"');
+    expect(imgs[0]).not.toContain("loading=");
+    expect(imgs[1]).toContain('loading="lazy"');
+    expect(imgs[1]).not.toContain("fetchpriority");
+  });
+  test("when the first image is missing, the next kept image is eager", async () => {
+    const r = await renderMarkdown("![x](/images/blog/p/missing.jpg)\n\n![b](/images/blog/p/site.jpg)", { images: IMAGES });
+    expect(r.html).not.toContain("loading=");
+    expect(r.html).toContain('fetchpriority="high"');
+    expect(r.warnings).toHaveLength(1);
+  });
+  test("footnote links round-trip to ids", async () => {
+    const r = await renderMarkdown("Hi[^1]\n\n[^1]: Note.", { images: {} });
+    const ids = [...r.html.matchAll(/ id="([^"]+)"/g)].map((m) => m[1]);
+    const hrefs = [...r.html.matchAll(/href="#([^"]+)"/g)].map((m) => m[1]);
+    expect(hrefs.length).toBeGreaterThan(0);
+    for (const h of hrefs) expect(ids).toContain(h);
+  });
+  test.each([
+    ["http", "![a](http://x.com/a.png)"],
+    ["https", "![a](https://x.com/a.png)"],
+    ["protocol-relative", "![a](//x.com/a.png)"],
+    ["relative", "![a](foo/a.png)"],
+    ["data", "![a](data:image/png;base64,AAAA)"],
+    ["unlisted blog path", "![a](/images/blog/p/nope.jpg)"],
+  ])("non-manifest image (%s) is removed with one warning", async (_n, md) => {
+    const r = await renderMarkdown(md, { images: IMAGES });
+    expect(r.html).not.toContain("<img");
+    expect(r.html).not.toContain("<p></p>");
+    expect(r.warnings).toHaveLength(1);
+    expect(r.warnings[0].message).toMatch(/^Only photos uploaded in the editor can be shown\. This image was removed: /);
+  });
+  test("percent-encoded src matches a manifest key with spaces", async () => {
+    const images = { "/images/blog/p/my site.jpg": IMAGES["/images/blog/p/site.jpg"] };
+    const r = await renderMarkdown("![a](/images/blog/p/my%20site.jpg)", { images });
+    expect(r.html).toContain("<picture>");
+    expect(r.warnings).toEqual([]);
+  });
+  test("heading containing a link has no nested anchors; anchor is a sibling", async () => {
+    const r = await renderMarkdown("## See [docs](/x/)", { images: {} });
+    expect(r.html).not.toMatch(/<a[^>]*>(?:(?!<\/a>).)*<a /);
+    expect(r.html).toContain('<a href="/x/">docs</a>');
+  });
+  test("footnote label heading gets no anchor", async () => {
+    const r = await renderMarkdown("Hi[^1]\n\n[^1]: Note.", { images: {} });
+    const h = r.html.match(/<h2[^>]*sr-only[^>]*>[\s\S]*?<\/h2>/)![0];
+    expect(h).not.toContain("<a");
+  });
+  test("## Main does not collide with the layout main id", async () => {
+    const r = await renderMarkdown("## Main", { images: {} });
+    expect(r.html).toContain('id="h-main"');
+    expect(r.html).not.toContain('id="main"');
+  });
+  test.each([
+    ["//example.com/x", true],
+    ["https://example.com/x", true],
+    ["http://lidr.io/x", false],
+    ["https://www.lidr.io/x", false],
+    ["/features/", false],
+  ])("external link detection %s", async (href, ext) => {
+    const r = await renderMarkdown(`[t](${href})`, { images: {} });
+    expect(r.html.includes('rel="noopener noreferrer"')).toBe(ext);
+  });
+  test("alt warning only for kept images", async () => {
+    const r = await renderMarkdown("![](/images/blog/p/missing.jpg)", { images: IMAGES });
+    expect(r.warnings).toHaveLength(1);
+    expect(r.warnings[0].message).not.toMatch(/alt text/);
   });
   test("missing image is removed with a soft warning", async () => {
     const r = await renderMarkdown("![x](/images/blog/p/missing.jpg)", { images: {} });
@@ -53,6 +121,10 @@ describe("renderMarkdown", () => {
     const r = await renderMarkdown("one two three", { images: {} });
     expect(r.words).toBe(3);
   });
+});
+
+test("markdownToPlainText skips code and image alt", () => {
+  expect(markdownToPlainText("Hi `code` there\n\n```\nconst a = 1;\n```\n\n![alt text](/x.png)")).toBe("Hi there");
 });
 
 test("markdownToPlainText", () => {
