@@ -7,6 +7,7 @@ export function pageCount(total: number): number {
 }
 
 export function pageSlice<T>(items: T[], page: number): { featured?: T; items: T[] } {
+  if (!Number.isInteger(page) || page < 1) return { items: [] };
   if (page === 1) return { featured: items[0], items: items.slice(1, FIRST_PAGE_SIZE) };
   const start = FIRST_PAGE_SIZE + (page - 2) * PAGE_SIZE;
   return { items: items.slice(start, start + PAGE_SIZE) };

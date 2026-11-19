@@ -1,3 +1,4 @@
+// Dates are ISO YYYY-MM-DD strings, so string comparison orders them correctly.
 type Relatable = { slug: string; date: string; tags: string[] };
 
 /** For each post: up to 3 other posts sharing ≥1 tag, most shared first, then newest. */
