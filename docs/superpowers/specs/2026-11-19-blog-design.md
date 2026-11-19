@@ -41,8 +41,9 @@ Author ──► lidr.io/admin (Decap CMS, static)
              ▼
         GitHub API: branch cms/blog/<slug> + PR
              │
-             ├─► Cloudflare Pages preview build ──► preview URL
-             ├─► GitHub Action: validate + build + post preview status
+             ├─► GitHub Action: validate + build (every push, free)
+             ├─► On "In review": Action builds + direct-uploads to the
+             │   preview project ──► preview URL shown in the CMS
              ▼
         Approver clicks Publish in CMS (merge to main)
              ▼
@@ -235,11 +236,23 @@ loaded from `app/fonts/`.
 - Preview pane: `CMS.registerPreviewStyle` with a small built CSS file
   (fonts + prose styles) so the preview looks like the live site.
 - **Deploy-preview links:** Decap reads GitHub commit statuses whose context
-  contains "deploy" (or `preview_context`). **Verify first** whether
-  Cloudflare Pages' GitHub status or check run satisfies this. If not, the
-  GitHub Action (§8) posts a commit status with context `deploy/preview`
-  and target URL `https://<branch-alias>.<pages-project>.pages.dev`,
-  where the alias follows Cloudflare's branch-name sanitisation.
+  contains "deploy". Set `preview_context: deploy/preview`. The status is
+  posted by the review-preview Action (§8), not by Cloudflare Pages.
+
+### Build budget: only publishing uses a Cloudflare build
+Cloudflare Pages Free allows 500 builds/month. To keep CMS saves from
+consuming builds:
+- **Cloudflare Pages → Settings → Builds → Branch control:** keep
+  production = `main` and automatic preview deployments on, but **exclude**
+  `cms/*` and `blog/*`. A CMS save is then just a commit with no Cloudflare
+  build. Other branches keep their previews.
+- **While writing:** authors use Decap's built-in live preview pane
+  (instant, free).
+- **For review:** the review-preview Action (§8) builds in GitHub Actions
+  and uploads with `wrangler pages deploy out --branch=<slug>` to a
+  **separate Direct Upload Pages project** (`lidr-blog-preview`), then
+  posts the URL as a commit status. Production is untouched.
+- Result: **one Cloudflare build per publish** (merge to `main`).
 
 ### OAuth Worker
 A Cloudflare Worker at e.g. `cms-auth.lidr.io`, based on `sveltia-cms-auth`
@@ -256,7 +269,21 @@ minimal Decap-compatible OAuth proxy Worker (`/auth`, `/callback`,
 1. `npm ci` → `next build`. Schema validation runs inside the build.
 2. Lint posts: every image has alt text, no broken internal `/blog/` links,
    cover images under 500 KB (warn above 300 KB).
-3. Post the preview commit status if needed (§7).
+
+`.github/workflows/blog-review-preview.yml`: the review preview.
+- Trigger: `pull_request` events `labeled` and `synchronize`. Runs only
+  when the PR has the Decap label `decap-cms/pending_review` or
+  `decap-cms/pending_publish`, or when the head branch matches `blog/*`
+  (Claude Code PRs). Drafts get no preview build.
+- Same-repo branches only (`github.event.pull_request.head.repo.full_name == github.repository`),
+  so secrets never reach fork code. Never uses `pull_request_target`.
+- Steps: `npm ci` → `next build` → `wrangler pages deploy out
+  --project-name=lidr-blog-preview --branch=<sanitised slug>` → post commit
+  status `deploy/preview` with the deployment URL.
+- Secrets: `CLOUDFLARE_API_TOKEN` (scoped to Pages: Edit on the account) and
+  `CLOUDFLARE_ACCOUNT_ID`.
+- Preview project responses carry `X-Robots-Tag: noindex` via its own
+  `_headers` (an Action step appends it to `out/_headers` before upload).
 
 Branch protection on `main`: require this check to pass and one approval.
 Owner/admins may bypass.
@@ -311,8 +338,11 @@ troubleshooting section ("my post failed checks" → what the error means).
    `cms-auth.lidr.io`.
 3. Add authors as collaborators (Write). Designate approvers.
 4. Enable branch protection on `main` (§8).
-5. Confirm Cloudflare Pages preview deployments are on for non-production
-   branches.
+5. Cloudflare Pages branch control: exclude `cms/*` and `blog/*` from
+   preview builds (§7).
+6. Create the Direct Upload Pages project `lidr-blog-preview` and a
+   Cloudflare API token (Pages: Edit). Add `CLOUDFLARE_API_TOKEN` and
+   `CLOUDFLARE_ACCOUNT_ID` as GitHub repo secrets.
 
 ## Costs
 
@@ -322,10 +352,9 @@ All on free tiers:
   on public repos.
 - **Cloudflare Workers:** free tier (100k requests/day); login traffic is
   tiny.
-- **Cloudflare Pages:** free plan allows **500 builds/month** and 1
-  concurrent build. Every CMS save on a post triggers a preview build, so
-  heavy editing uses builds faster (about 10 posts × 5 saves ≈ 50 builds).
-  Watch this only if the team publishes at high volume.
+- **Cloudflare Pages:** free plan allows **500 builds/month**. With the
+  §7 build budget, CMS saves cost 0 builds, review previews are built in
+  GitHub Actions and direct-uploaded, and each publish costs 1 build.
 
 ## Out of scope (v1)
 
@@ -337,8 +366,11 @@ newsletter signup, i18n, tag-page pagination, Cloudflare Access email login
 
 1. Static OG image generation under `output: "export"` (§6) has a fallback
    ready.
-2. Decap deploy-preview detection with Cloudflare Pages (§7) has a fallback
-   ready.
+2. Decap shows the `deploy/preview` status posted by our Action (§7, §8).
+   Confirm on a test PR.
 3. `sveltia-cms-auth` compatibility with Decap (§7) has a fallback ready.
-4. Extracting the shared prose styles must not move legal-page pixels
+4. Confirm in Cloudflare docs that Direct Upload deployments do not count
+   toward the 500 builds/month limit. If they do, the cost is still one
+   build per review round, not per save.
+5. Extracting the shared prose styles must not move legal-page pixels
    (visual gate).
