@@ -10,6 +10,16 @@
     var m = MONTHS[Number(p[1]) - 1];
     return m ? Number(p[2]) + " " + m + " " + p[0] : String(v);
   }
+  // A photo uploaded in this session isn't on lidr.io yet, so preview it from
+  // the uploaded file itself; published photos use their normal address.
+  var objectUrls = new WeakMap();
+  function coverSrc(asset) {
+    if (asset.fileObj) {
+      if (!objectUrls.has(asset.fileObj)) objectUrls.set(asset.fileObj, URL.createObjectURL(asset.fileObj));
+      return objectUrls.get(asset.fileObj);
+    }
+    return asset.toString();
+  }
   var PostPreview = createClass({
     render: function () {
       var entry = this.props.entry;
@@ -26,7 +36,7 @@
         h("h1", { className: "title" }, get("title") || "Untitled post"),
         h("div", { className: "bar" }),
         h("p", { className: "meta" }, formatDate(get("date")), updated ? h("span", null, "Updated " + formatDate(updated)) : null),
-        coverAsset ? h("img", { className: "cover", src: coverAsset.toString(), alt: get("coverAlt") || "" }) : null,
+        coverAsset ? h("img", { className: "cover", src: coverSrc(coverAsset), alt: get("coverAlt") || "" }) : null,
         h("div", { className: "prose" }, this.props.widgetFor("body"))
       );
     },
