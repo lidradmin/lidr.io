@@ -53,7 +53,7 @@ export async function renderOgImage(opts: { title: string; tagName?: string }): 
     },
     [
       el("div", { display: "flex", flexDirection: "column" }, [
-        el("div", { display: "flex", fontSize, lineHeight: 1.15, maxHeight: Math.ceil(fontSize * 1.15 * 3), overflow: "hidden" }, opts.title),
+        el("div", { display: "block", fontSize, lineHeight: 1.15, lineClamp: 3 }, opts.title),
         el("div", { width: 96, height: 8, background: ACCENT, marginTop: 32 }),
       ]),
       el("div", { display: "flex", justifyContent: "space-between", alignItems: "center" }, [
