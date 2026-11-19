@@ -30,26 +30,38 @@ export function findLastGood(contentDir: string, slug: string, isGood: (raw: str
 
 /** Same walk as findLastGood, for any safe repo-relative file (e.g. tags.yml). */
 export function findLastGoodFile(contentDir: string, relPath: string, isGood: (raw: string) => boolean): string | null {
-  if (!PATH_RE.test(relPath) || relPath.includes("..") || relPath.startsWith("/")) return null;
+  for (const raw of historyVersions(contentDir, relPath, MAX_VERSIONS)) {
+    if (isGood(raw)) return raw;
+  }
+  return null;
+}
+
+/** Raw versions of a file from git history, newest first. Throws if a blob can't be read. */
+export function listHistoryVersions(contentDir: string, relPath: string, max = MAX_VERSIONS): string[] {
+  return [...historyVersions(contentDir, relPath, max)];
+}
+
+function* historyVersions(contentDir: string, relPath: string, max: number): Generator<string> {
+  if (!PATH_RE.test(relPath) || relPath.includes("..") || relPath.startsWith("/")) return;
   const path = relPath;
-  const slug = relPath;
+  const label = relPath;
   try {
     run(contentDir, ["rev-parse", "--is-inside-work-tree"]);
   } catch {
-    return null;
+    return;
   }
   try {
     run(contentDir, ["rev-parse", "--verify", "-q", "HEAD"]);
   } catch {
-    return null; // repo has no commits yet
+    return; // repo has no commits yet
   }
   let shas: string[];
   try {
-    shas = run(contentDir, ["log", "--topo-order", `--max-count=${MAX_VERSIONS}`, "--format=%H", "--", path])
+    shas = run(contentDir, ["log", "--topo-order", `--max-count=${max}`, "--format=%H", "--", path])
       .split("\n")
       .filter(Boolean);
   } catch (err) {
-    throw new Error(`Could not read history for ${slug}: ${(err as Error).message}`);
+    throw new Error(`Could not read history for ${label}: ${(err as Error).message}`);
   }
   for (const sha of shas) {
     // Trees are local even in blob:none clones; only blobs may need a fetch.
@@ -57,13 +69,10 @@ export function findLastGoodFile(contentDir: string, relPath: string, isGood: (r
     if (!tree) continue; // file absent in that commit
     const oid = /^\d+ blob ([0-9a-f]+)\t/.exec(tree)?.[1];
     if (!oid) continue;
-    let raw: string;
     try {
-      raw = run(contentDir, ["cat-file", "blob", oid]);
+      yield run(contentDir, ["cat-file", "blob", oid]);
     } catch (err) {
-      throw new Error(`Could not read history for ${slug}: ${(err as Error).message}`);
+      throw new Error(`Could not read history for ${label}: ${(err as Error).message}`);
     }
-    if (isGood(raw)) return raw;
   }
-  return null;
 }

@@ -3,7 +3,7 @@ import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { expect, test } from "vitest";
-import { findLastGood, findLastGoodFile } from "./history";
+import { findLastGood, findLastGoodFile, listHistoryVersions } from "./history";
 import { resolveContentDir } from "./source";
 
 const git = (cwd: string, ...args: string[]) =>
@@ -108,4 +108,12 @@ test("findLastGoodFile reads any safe path and rejects unsafe ones", () => {
   expect(findLastGoodFile(dir, "posts/../p.md", () => true)).toBeNull();
   expect(findLastGoodFile(dir, "/etc/passwd", () => true)).toBeNull();
   expect(findLastGoodFile(dir, "Posts/P.md", () => true)).toBeNull();
+});
+
+test("listHistoryVersions returns versions newest first and honours max", () => {
+  const dir = repoWith(["v1\n", "v2\n", "v3\n"]);
+  expect(listHistoryVersions(dir, "posts/p.md")).toEqual(["v3\n", "v2\n", "v1\n"]);
+  expect(listHistoryVersions(dir, "posts/p.md", 2)).toEqual(["v3\n", "v2\n"]);
+  expect(listHistoryVersions(dir, "../p.md")).toEqual([]);
+  expect(listHistoryVersions(mkdtempSync(join(tmpdir(), "nogit-")), "posts/p.md")).toEqual([]);
 });

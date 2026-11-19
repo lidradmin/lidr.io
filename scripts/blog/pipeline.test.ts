@@ -2,9 +2,30 @@ import { execFileSync } from "node:child_process";
 import { copyFileSync, existsSync, mkdirSync, mkdtempSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
-import { beforeAll, describe, expect, test } from "vitest";
+import { beforeAll, describe, expect, test, vi } from "vitest";
 import type { BlogData, BlogReport } from "../../lib/blog/types";
 import { buildBlogData, countProblems, formatProblems } from "./pipeline";
+
+vi.mock("../../lib/blog/markdown", async (orig) => {
+  const actual = await orig<typeof import("../../lib/blog/markdown")>();
+  return {
+    ...actual,
+    renderMarkdown: (md: string, o: Parameters<typeof actual.renderMarkdown>[1]) => {
+      if (md.includes("BOOM")) throw new Error("boom failure");
+      return actual.renderMarkdown(md, o);
+    },
+  };
+});
+vi.mock("./og", async (orig) => {
+  const actual = await orig<typeof import("./og")>();
+  return {
+    ...actual,
+    renderOgImage: (o: { title: string; tagName?: string }) => {
+      if (o.title.includes("NOOG")) throw new Error("og failure");
+      return actual.renderOgImage(o);
+    },
+  };
+});
 
 const FIXTURES = resolve("tests/fixtures/blog");
 let data: BlogData;
@@ -237,5 +258,78 @@ describe("last-good and tags history", () => {
   test("missing tags.yml adds a _tags problem", async () => {
     const r = await build(mkContent({ "p.md": post("A perfectly fine post") }, false));
     expect(msgs(r.report, "_tags")[0]).toMatch(/tags\.yml is missing/);
+  });
+});
+
+describe("render failures", () => {
+  const postBody = (title: string, text: string) => post(title).replace(BODY, text);
+  function repo() {
+    const dir = mkContent({});
+    git(dir, "init", "-q");
+    return dir;
+  }
+  const commit = (dir: string, m: string) => {
+    git(dir, "add", ".");
+    git(dir, "commit", "-q", "-m", m);
+  };
+  test("v1 good, v2 fails to render: stays live from v1 with exactly one hard problem", async () => {
+    const dir = repo();
+    writeFileSync(join(dir, "posts", "p.md"), postBody("A perfectly fine post", BODY));
+    writeFileSync(join(dir, "posts", "q.md"), postBody("Another fine post here", BODY));
+    commit(dir, "v1");
+    writeFileSync(join(dir, "posts", "p.md"), postBody("A perfectly fine post", `BOOM ${BODY}`));
+    commit(dir, "v2");
+    const r = await build(dir);
+    const p = r.data.posts.find((x) => x.slug === "p")!;
+    expect(p.source).toBe("last-good");
+    expect(p.html).not.toContain("BOOM");
+    const hard = r.report.problems["p"].filter((x) => x.level === "hard");
+    expect(hard).toHaveLength(1);
+    expect(hard[0].detail).toBe("boom failure");
+    expect(msgs(r.report, "p").some((m) => /still live/.test(m))).toBe(true);
+  });
+  test("v1 and v2 both fail to render: post dropped", async () => {
+    const dir = repo();
+    writeFileSync(join(dir, "posts", "p.md"), postBody("A perfectly fine post", `BOOM ${BODY}`));
+    writeFileSync(join(dir, "posts", "q.md"), postBody("Another fine post here", BODY));
+    writeFileSync(join(dir, "posts", "r.md"), postBody("Third fine post here", BODY));
+    commit(dir, "v1");
+    writeFileSync(join(dir, "posts", "p.md"), postBody("A perfectly fine post", `BOOM again ${BODY}`));
+    commit(dir, "v2");
+    const r = await build(dir);
+    expect(r.data.posts.map((x) => x.slug).sort()).toEqual(["q", "r"]);
+  });
+  test("every post failing aborts the build; 1 of 13 does not", async () => {
+    await expect(build(mkContent({ "a.md": postBody("A perfectly fine post", `BOOM ${BODY}`), "b.md": postBody("Another fine post here", `BOOM ${BODY}`) }))).rejects.toThrow(
+      /Blog build aborted: 2 of 2 posts failed to render — likely a code problem\. First error: boom failure/
+    );
+    const posts: Record<string, string> = { "bad.md": postBody("A perfectly fine post", `BOOM ${BODY}`) };
+    for (let i = 0; i < 12; i++) posts[`ok-${i}.md`] = post(`A perfectly fine post ${i}`);
+    const r = await build(mkContent(posts));
+    expect(r.data.posts).toHaveLength(12);
+  });
+  test("systematic OG failure aborts the build", async () => {
+    await expect(build(mkContent({ "a.md": post("NOOG one title"), "b.md": post("NOOG two title") }))).rejects.toThrow(/share images failed to generate/);
+  });
+  test("single OG failure falls back to the default image", async () => {
+    const posts: Record<string, string> = { "bad.md": post("NOOG one title") };
+    for (let i = 0; i < 3; i++) posts[`ok-${i}.md`] = post(`A perfectly fine post ${i}`);
+    const r = await build(mkContent(posts));
+    expect(r.data.posts.find((x) => x.slug === "bad")!.ogImage).toBe("/images/Group-198.webp");
+  });
+  test("redirect into a removed loop is flagged", async () => {
+    const rd = (to: string) => `---\nredirectTo: ${to}\n---\n`;
+    const r = await build(mkContent({ "a.md": rd("/blog/b/"), "b.md": rd("/blog/a/"), "c.md": rd("/blog/a/") }));
+    expect(r.data.redirects).toEqual([{ from: "/blog/c/", to: "/blog/a/" }]);
+    expect(msgs(r.report, "c")).toContain("This post redirects to /blog/a/, which is part of a redirect loop and isn't published.");
+  });
+  test("restored tags.yml re-enables unknown-tag warnings", async () => {
+    const dir = repo();
+    writeFileSync(join(dir, "posts", "p.md"), post("A perfectly fine post").replace("[safety]", "[nope]"));
+    commit(dir, "v1");
+    writeFileSync(join(dir, "tags.yml"), "tags: [\n");
+    commit(dir, "v2");
+    const r = await build(dir);
+    expect((r.report.problems["p"] ?? []).some((p) => p.field === "tags")).toBe(true);
   });
 });

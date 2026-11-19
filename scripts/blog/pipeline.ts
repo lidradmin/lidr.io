@@ -5,7 +5,7 @@ import { computeRelated } from "../../lib/blog/related";
 import { RULES } from "../../lib/blog/rules";
 import { EMPTY_BLOG, type BlogData, type BlogReport, type BuiltPost, type PostMeta, type Problem, type TagDef } from "../../lib/blog/types";
 import { parsePostFile, parseTags, validatePost } from "../../lib/blog/validate";
-import { findLastGood, findLastGoodFile } from "./history";
+import { findLastGoodFile, listHistoryVersions } from "./history";
 import { processImages } from "./images";
 import { ogUnsupportedChars, renderOgImage } from "./og";
 
@@ -51,21 +51,24 @@ export async function buildBlogData(opts: {
   const tagsFile = join(contentDir, "tags.yml");
   let tags = new Map<string, TagDef>();
   let tagsBroken = false;
-  if (existsSync(tagsFile)) {
+  const tagsExist = existsSync(tagsFile);
+  let needFallback = !tagsExist;
+  if (tagsExist) {
     const parsed = parseTags(readFileSync(tagsFile, "utf8"));
     tags = parsed.tags;
     add("_tags", parsed.problems);
-    if (parsed.problems.length && tags.size === 0) {
-      tagsBroken = true;
-      const prev = findLastGoodFile(contentDir, "tags.yml", (raw) => parseTags(raw).tags.size > 0);
-      if (prev) {
-        tags = parseTags(prev).tags;
-        add("_tags", [soft("tags.yml", "tags.yml has a problem, so the previous tag list is still in use.")]);
-      }
-    }
-  } else {
+    needFallback = parsed.problems.length > 0 && tags.size === 0;
+  }
+  if (needFallback) {
     tagsBroken = true;
-    add("_tags", [soft("tags.yml", "tags.yml is missing, so no tags are available.")]);
+    const prev = findLastGoodFile(contentDir, "tags.yml", (raw) => parseTags(raw).tags.size > 0);
+    if (prev) {
+      tags = parseTags(prev).tags;
+      tagsBroken = false;
+      add("_tags", [soft("tags.yml", tagsExist ? "tags.yml has a problem, so the previous tag list is still in use." : "tags.yml is missing, so the previous tag list is still in use.")]);
+    } else if (!tagsExist) {
+      add("_tags", [soft("tags.yml", "tags.yml is missing, so no tags are available.")]);
+    }
   }
 
   // Post files.
@@ -85,45 +88,65 @@ export async function buildBlogData(opts: {
 
   const ogDir = join(opts.publicDir, "images", "blog", "_og");
   mkdirSync(ogDir, { recursive: true });
-  const today = new Date().toISOString().slice(0, 10);
+  const tomorrow = new Date(Date.now() + 86_400_000).toISOString().slice(0, 10); // 1 day of slack
 
   const built: Omit<BuiltPost, "related">[] = [];
   const redirects: BlogData["redirects"] = [];
 
-  const tryRender = async (slug: string, body: string) => {
+  type Rendered = Awaited<ReturnType<typeof renderMarkdown>>;
+  const render = async (body: string): Promise<{ rendered: Rendered } | { error: string }> => {
     try {
-      return await renderMarkdown(body, { images: manifest });
-    } catch {
-      add(slug, [{ level: "hard", field: "body", message: "This post's text couldn't be processed. Check it for unusual content and publish again." }]);
-      return null;
+      return { rendered: await renderMarkdown(body, { images: manifest }) };
+    } catch (err) {
+      return { error: err instanceof Error ? err.message : String(err) };
     }
   };
   const publishable = (m: PostMeta | null): m is PostMeta => !!m && !m.redirectTo && !m.draft;
+  let renderAttempts = 0;
+  let renderFailures = 0;
+  let firstRenderError = "";
+  let ogAttempts = 0;
+  let ogFailures = 0;
+  let firstOgError = "";
 
   for (const file of files) {
     const slug = basename(file, ".md");
-    const cur = analyse(slug, readFileSync(join(postsDir, file), "utf8"), tags);
+    const curRaw = readFileSync(join(postsDir, file), "utf8");
+    const cur = analyse(slug, curRaw, tags);
     add(slug, tagsBroken ? cur.problems.filter((p) => p.field !== "tags") : cur.problems);
     let { meta, body } = cur;
     let source: BuiltPost["source"] = "current";
-    let rendered: Awaited<ReturnType<typeof renderMarkdown>> | null = null;
+    let rendered: Rendered | null = null;
 
     if (publishable(meta)) {
-      rendered = await tryRender(slug, body);
-      if (!rendered) meta = null;
+      renderAttempts++;
+      const r = await render(body);
+      if ("rendered" in r) rendered = r.rendered;
+      else {
+        renderFailures++;
+        firstRenderError ||= r.error;
+        add(slug, [{ level: "hard", field: "body", message: "This post's text couldn't be processed. Check it for unusual content and publish again.", detail: r.error }]);
+        meta = null;
+      }
     }
 
     if (!meta) {
-      const lastGood = findLastGood(contentDir, slug, (raw) => analyse(slug, raw, tags).meta !== null);
-      if (!lastGood) continue;
-      ({ meta, body } = analyse(slug, lastGood, tags));
-      if (!meta) continue;
-      source = "last-good";
-      if (publishable(meta)) {
-        rendered = await tryRender(slug, body);
-        if (!rendered) continue;
-        add(slug, [soft("post", "Your latest change has a problem, so the previous version is still live. Fix the problem above and publish again.")]);
+      for (const raw of listHistoryVersions(contentDir, `posts/${slug}.md`)) {
+        if (raw === curRaw) continue;
+        const a = analyse(slug, raw, tags);
+        if (!a.meta) continue;
+        if (publishable(a.meta)) {
+          const r = await render(a.body);
+          if (!("rendered" in r)) continue;
+          rendered = r.rendered;
+          add(slug, [soft("post", "Your latest change has a problem, so the previous version is still live. Fix the problem above and publish again.")]);
+        }
+        meta = a.meta;
+        body = a.body;
+        source = "last-good";
+        break;
       }
+      if (!meta) continue;
     }
 
     if (meta.redirectTo) {
@@ -133,7 +156,7 @@ export async function buildBlogData(opts: {
     if (meta.draft || !rendered) continue;
 
     add(slug, rendered.warnings);
-    if (meta.date > today) {
+    if (meta.date > tomorrow) {
       add(slug, [soft("date", `The publish date is in the future (${meta.date}). Posts go live immediately; did you mean a different date?`)]);
     }
 
@@ -150,11 +173,14 @@ export async function buildBlogData(opts: {
       if (unsupported.length) {
         add(slug, [soft("cover", `The share image can't show these characters from the title: ${unsupported.join(" ")}. Add a cover photo so the post looks right when shared.`)]);
       }
+      ogAttempts++;
       try {
         const png = await renderOgImage({ title: meta.title, tagName: meta.tags[0] ? tags.get(meta.tags[0])?.name : undefined });
         writeFileSync(join(ogDir, `${slug}.png`), png);
         ogImage = `/images/blog/_og/${slug}.png`;
-      } catch {
+      } catch (err) {
+        ogFailures++;
+        firstOgError ||= err instanceof Error ? err.message : String(err);
         ogImage = "/images/Group-198.webp";
         add(slug, [soft("cover", "The share image couldn't be generated, so a default image is used. Add a cover photo to fix this.")]);
       }
@@ -174,6 +200,14 @@ export async function buildBlogData(opts: {
       ogImage,
       source,
     });
+  }
+
+  const systematic = (fails: number, total: number) => fails >= 2 && fails / total >= 0.5;
+  if (systematic(renderFailures, renderAttempts)) {
+    throw new Error(`Blog build aborted: ${renderFailures} of ${renderAttempts} posts failed to render — likely a code problem. First error: ${firstRenderError}`);
+  }
+  if (systematic(ogFailures, ogAttempts)) {
+    throw new Error(`Blog build aborted: ${ogFailures} of ${ogAttempts} share images failed to generate — likely a code problem. First error: ${firstOgError}`);
   }
 
   // Redirects: normalise, drop loops, flag dead targets, collapse chains.
@@ -206,7 +240,9 @@ export async function buildBlogData(opts: {
     let target = to;
     while (rmap.has(target) && !inCycle.has(target)) target = rmap.get(target)!;
     const m = BLOG_PATH.exec(target);
-    if (m && !live.has(m[1])) {
+    if (inCycle.has(target)) {
+      add(slugOf(from), [soft("redirectTo", `This post redirects to ${target}, which is part of a redirect loop and isn't published.`)]);
+    } else if (m && !live.has(m[1])) {
       add(slugOf(from), [soft("redirectTo", `This post redirects to ${target}, which isn't published.`)]);
     }
     finalRedirects.push({ from, to: target });
