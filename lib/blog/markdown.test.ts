@@ -98,6 +98,26 @@ describe("renderMarkdown", () => {
     const r = await renderMarkdown(`[t](${href})`, { images: {} });
     expect(r.html.includes('rel="noopener noreferrer"')).toBe(ext);
   });
+  test("link emptied by a removed image is dropped with its paragraph", async () => {
+    const r = await renderMarkdown("[![a](/images/blog/p/nope.jpg)](https://x.com)", { images: IMAGES });
+    expect(r.html).not.toContain("<a");
+    expect(r.html).not.toContain("<p></p>");
+  });
+  test.each(["HTTPS://example.com", "javascript:alert(1)"])("link with disallowed href %s is unwrapped with a warning", async (href) => {
+    const r = await renderMarkdown(`[x](${href})`, { images: {} });
+    expect(r.html).not.toContain("<a");
+    expect(r.html).toContain("x");
+    expect(r.warnings).toHaveLength(1);
+    expect(r.warnings[0].message).toBe(
+      `A link was removed because its address isn't allowed: "x". Use a normal web address starting with https://.`
+    );
+  });
+  test("every id is namespaced", async () => {
+    const r = await renderMarkdown("Hi[^__proto__]\n\n## __proto__\n\n## Main\n\n[^__proto__]: Note.", { images: {} });
+    const ids = [...r.html.matchAll(/ id="([^"]*)"/g)].map((m) => m[1]);
+    expect(ids.length).toBeGreaterThan(2);
+    for (const id of ids) expect(id.startsWith("user-content-") || id.startsWith("h-") || id === "footnote-label").toBe(true);
+  });
   test("alt warning only for kept images", async () => {
     const r = await renderMarkdown("![](/images/blog/p/missing.jpg)", { images: IMAGES });
     expect(r.warnings).toHaveLength(1);

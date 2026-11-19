@@ -92,6 +92,14 @@ function rehypeBlogImages(opts: { images: ImageManifest; warnings: Problem[] }) 
       return SKIP;
     });
     if (removed) {
+      // Drop links left empty by a removed image, then paragraphs left empty.
+      visit(tree, "element", (node: Element, index, parent) => {
+        if (node.tagName !== "a" || !parent || index === undefined) return;
+        if (node.children.every(isBlank)) {
+          parent.children.splice(index, 1);
+          return [SKIP, index];
+        }
+      });
       // Drop paragraphs left empty by a removed image.
       visit(tree, "element", (node: Element, index, parent) => {
         if (node.tagName !== "p" || !parent || index === undefined) return;
@@ -101,6 +109,21 @@ function rehypeBlogImages(opts: { images: ImageManifest; warnings: Problem[] }) 
         }
       });
     }
+  };
+}
+
+/** Links whose href was stripped by sanitize: keep the text, drop the <a>, warn. */
+function rehypeUnwrapDeadLinks(opts: { warnings: Problem[] }) {
+  return (tree: Root) => {
+    visit(tree, "element", (node: Element, index, parent) => {
+      if (node.tagName !== "a" || !parent || index === undefined || node.properties.href) return;
+      const text = mdToString(node);
+      opts.warnings.push(
+        soft("body", `A link was removed because its address isn't allowed: "${text}". Use a normal web address starting with https://.`)
+      );
+      parent.children.splice(index, 1, ...node.children);
+      return [SKIP, index];
+    });
   };
 }
 
@@ -147,6 +170,7 @@ export async function renderMarkdown(
     // Default GitHub schema: no scripts, handlers, javascript: URLs. remark-rehype already
     // prefixes footnote ids, so don't let sanitize prefix them a second time.
     .use(rehypeSanitize, { ...defaultSchema, clobberPrefix: "" })
+    .use(rehypeUnwrapDeadLinks, { warnings })
     .use(rehypeSlug, { prefix: "h-" }) // avoids colliding with the layout's id="main"
     .use(rehypeAutolinkHeadings, {
       behavior: "append",
