@@ -326,7 +326,7 @@ describe("render failures", () => {
     const posts: Record<string, string> = { "bad.md": post("NOOG one title") };
     for (let i = 0; i < 3; i++) posts[`ok-${i}.md`] = post(`A perfectly fine post ${i}`);
     const r = await build(mkContent(posts));
-    expect(r.data.posts.find((x) => x.slug === "bad")!.ogImage).toBe("/images/Group-198.webp");
+    expect(r.data.posts.find((x) => x.slug === "bad")!.ogImage).toBe("/images/blog/_og/_blog.png");
   });
   test("redirect into a removed loop is flagged", async () => {
     const rd = (to: string) => `---\nredirectTo: ${to}\n---\n`;

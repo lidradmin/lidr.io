@@ -196,7 +196,7 @@ under export, drop the placeholder.
 bottom-right. The cover is used instead when present.
 
 Generated in prebuild with `satori` + `sharp` into
-`public/images/blog/_og/<slug>.png` (gitignored, cached by title hash). This is
+`public/images/blog/_og/<slug>.png` (gitignored; regenerated each build, no cache). This is
 deterministic under static export, and it avoids the unverified
 `opengraph-image` + dynamic-segment + `trailingSlash` combination entirely.
 
