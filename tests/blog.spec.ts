@@ -48,6 +48,24 @@ test("redirect is written to _redirects", () => {
   expect(readFileSync("out/_redirects", "utf8")).toContain("/blog/old-url/  /blog/welcome-to-the-lidr-blog/  301");
 });
 
+test("a redirected post keeps a noindex 'moved' page in the build", async ({ page }) => {
+  // Cloudflare applies _redirects first; the page is the fallback that replaces any cached copy.
+  const html = readFileSync("out/blog/old-url/index.html", "utf8");
+  expect(html).toContain("no longer available");
+  expect(html).toMatch(/<meta name="robots" content="noindex, follow"/);
+  expect(html).toContain('http-equiv="refresh" content="0;url=/blog/welcome-to-the-lidr-blog/"');
+  // The retired page meta-refreshes to its target; answer that navigation with
+  // 204 No Content so the browser stays on the retired page itself.
+  await page.route("**/blog/welcome-to-the-lidr-blog/", (r) =>
+    r.request().isNavigationRequest() ? r.fulfill({ status: 204 }) : r.continue()
+  );
+  await page.goto("/blog/old-url/", { waitUntil: "domcontentloaded" });
+  await expect(page.locator("h1")).toHaveText("This post is no longer available");
+  await expect(page.locator('link[rel="canonical"]')).toHaveAttribute("href", "https://lidr.io/blog/welcome-to-the-lidr-blog/");
+  await expect(page.locator('script[type="application/ld+json"]')).toHaveCount(1); // the layout's Organization only
+  await expect(page).toHaveURL(/\/blog\/old-url\/$/);
+});
+
 test("tag page lists only its posts", async ({ page }) => {
   await page.goto("/blog/tag/reporting/");
   await expect(page.locator("h1")).toHaveText("Reporting");
@@ -60,6 +78,7 @@ test("sitemap includes posts and excludes drafts", async ({ request }) => {
   expect(xml).toContain("https://lidr.io/blog/welcome-to-the-lidr-blog/");
   expect(xml).toContain("https://lidr.io/blog/tag/safety/");
   expect(xml).not.toContain("draft-post");
+  expect(xml).not.toContain("old-url");
   expect(xml).not.toContain("/blog/page/");
 });
 
@@ -69,6 +88,7 @@ test("RSS feed lists published posts", async ({ request }) => {
   expect(xml).toContain('<atom:link href="https://lidr.io/blog/rss.xml" rel="self" type="application/rss+xml"/>');
   expect(xml).toMatch(/<lastBuildDate>[^<]+<\/lastBuildDate>/);
   expect(xml.match(/<item>/g)).toHaveLength(13);
+  expect(xml).not.toContain("old-url");
 });
 
 test("footer shows the Blog link", async ({ page }) => {
