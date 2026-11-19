@@ -223,6 +223,10 @@
 }
 
 .pagination a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px; /* comfortable thumb target */
+  padding: 0 var(--space-4);
   color: var(--color-heading);
   font-weight: var(--font-semibold);
   text-decoration: underline;

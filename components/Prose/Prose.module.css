@@ -110,6 +110,19 @@
   margin: 0;
 }
 
+/* Photos inside the text: a tall portrait shot shouldn't fill several phone
+   screens. Cap the height and centre it; landscape photos are unaffected. */
+.rich > p > img,
+.rich > p > picture img,
+.rich > img {
+  width: auto;
+  max-width: 100%;
+  max-height: 80vh;
+  max-height: 80svh;
+  margin-left: auto;
+  margin-right: auto;
+}
+
 .rich blockquote {
   margin: var(--space-24) 0;
   padding: var(--space-4) 0 var(--space-4) var(--space-20);
@@ -123,9 +136,18 @@
   margin-bottom: 0;
 }
 
+/* Wide tables scroll sideways on phones instead of crushing every column
+   into a sliver. The edge shadows (which scroll away at each end) show
+   readers there's more to swipe to. */
 .rich :global(.table-wrap) {
   overflow-x: auto;
   margin: var(--space-24) 0;
+  -webkit-overflow-scrolling: touch;
+  background:
+    linear-gradient(to right, var(--color-bg) 30%, transparent) left center / 24px 100% no-repeat local,
+    linear-gradient(to left, var(--color-bg) 30%, transparent) right center / 24px 100% no-repeat local,
+    radial-gradient(farthest-side at 0 50%, rgb(0 0 0 / 0.14), transparent) left center / 12px 100% no-repeat scroll,
+    radial-gradient(farthest-side at 100% 50%, rgb(0 0 0 / 0.14), transparent) right center / 12px 100% no-repeat scroll;
 }
 
 .rich table {
@@ -142,6 +164,11 @@
   vertical-align: top;
 }
 
+.rich th,
+.rich td {
+  min-width: 7.5rem;
+}
+
 .rich th {
   background: var(--color-gray-100);
   font-weight: var(--font-semibold);
@@ -154,12 +181,30 @@
   font-size: 0.9em;
 }
 
+/* Authors use code blocks for example text (snag descriptions, notes), so
+   wrap lines rather than cutting them off at the screen edge. */
 .rich pre {
   background: var(--color-gray-100);
   border-radius: var(--radius-md);
   padding: var(--space-16);
   overflow-x: auto;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
   margin: var(--space-24) 0;
+}
+
+/* Checklists ("- [ ] item"): the checkbox is the marker, so drop the bullet. */
+.rich :global(.task-list-item) {
+  list-style: none;
+}
+
+.rich :global(.contains-task-list) {
+  padding-left: 0.5em;
+}
+
+.rich li > input[type="checkbox"] {
+  margin: 0 0.5em 0 0;
+  vertical-align: middle;
 }
 
 .rich pre code {
