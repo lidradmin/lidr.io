@@ -5,15 +5,20 @@ import type { BlogData, BuiltPost, TagPage } from "./types";
 /** Param used when a dynamic route has nothing to build; removed by scripts/blog/finalize.ts. */
 export const PLACEHOLDER = "__empty";
 
+// Cached per process; in `next dev` a rebuilt data.json needs a server restart.
 let cache: BlogData | null = null;
 
 /** Reads the output of `npm run blog:prepare`. Fails loudly if prepare didn't run. */
 export function getBlogData(): BlogData {
   if (cache) return cache;
   try {
+    // process.cwd() is the project root for `next build`/`next dev`.
     cache = JSON.parse(readFileSync(join(process.cwd(), ".blog/data.json"), "utf8")) as BlogData;
-  } catch {
-    throw new Error(".blog/data.json is missing. Run `npm run build` (not `next build`) so `npm run blog:prepare` runs first.");
+  } catch (err) {
+    if ((err as NodeJS.ErrnoException).code === "ENOENT") {
+      throw new Error(".blog/data.json is missing. Run `npm run build` (not `next build`) so `npm run blog:prepare` runs first.");
+    }
+    throw new Error("Failed to read or parse .blog/data.json", { cause: err });
   }
   return cache;
 }

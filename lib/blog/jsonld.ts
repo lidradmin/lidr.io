@@ -1,10 +1,11 @@
 import type { BuiltPost } from "./types";
 
 export const SITE = "https://lidr.io";
+export const LOGO_URL = `${SITE}/favicon-270x270.png`;
 const ORG = { "@type": "Organization", name: "Lidr.io", url: SITE } as const;
 
 export const postUrl = (slug: string) => `${SITE}/blog/${slug}/`;
-export const absolute = (path: string) => (path.startsWith("http") ? path : `${SITE}${path}`);
+export const absolute = (path: string) => (/^https?:\/\//.test(path) ? path : `${SITE}${path}`);
 
 export function blogPostingJsonLd(post: BuiltPost) {
   return {
@@ -16,8 +17,8 @@ export function blogPostingJsonLd(post: BuiltPost) {
     datePublished: post.date,
     dateModified: post.updated ?? post.date,
     author: ORG,
-    publisher: { "@type": "Organization", name: "Lidr.io", logo: { "@type": "ImageObject", url: `${SITE}/images/Group-198.webp` } },
-    mainEntityOfPage: post.canonical ?? postUrl(post.slug),
+    publisher: { ...ORG, logo: { "@type": "ImageObject", url: LOGO_URL } },
+    mainEntityOfPage: { "@type": "WebPage", "@id": post.canonical ?? postUrl(post.slug) },
   };
 }
 

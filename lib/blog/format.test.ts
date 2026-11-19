@@ -9,3 +9,9 @@ test("formats date-only strings without timezone shifts", () => {
 test("returns an empty string for an empty date", () => {
   expect(formatDate("")).toBe("");
 });
+
+test("returns malformed input unchanged", () => {
+  expect(formatDate("garbage")).toBe("garbage");
+  expect(formatDate("2026-13-01")).toBe("2026-13-01");
+  expect(formatDate("2026-11")).toBe("2026-11");
+});

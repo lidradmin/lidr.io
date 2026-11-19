@@ -6,6 +6,7 @@ import { Header } from "../components/Header/Header";
 import { Footer } from "../components/Footer/Footer";
 import { GoogleAnalytics } from "../components/Analytics/GoogleAnalytics";
 import { CookieConsent } from "../components/CookieConsent/CookieConsent";
+import { LOGO_URL } from "../lib/blog/jsonld";
 
 // Heading face. Live site loads Amenti 500 + 700 (see app/fonts/SOURCES.md);
 // computed weights 300/400 also resolve to the 500 face, as on the live site.
@@ -91,7 +92,7 @@ export default function RootLayout({
                   "@type": "Organization",
                   name: "Lidr.io",
                   url: "https://lidr.io",
-                  logo: "https://lidr.io/images/Group-198.webp",
+                  logo: LOGO_URL,
                   sameAs: [
                     "https://www.facebook.com/lidr.io",
                     "https://www.linkedin.com/company/lidr-io",
