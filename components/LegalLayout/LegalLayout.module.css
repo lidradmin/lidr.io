@@ -48,65 +48,6 @@
 
 .content {
   padding-bottom: 60px;
-  color: var(--color-text);
-  font-size: var(--text-base);
-  line-height: var(--leading-normal);
-}
-
-.content h2 {
-  font-family: var(--font-heading);
-  font-weight: var(--font-medium);
-  color: var(--color-heading);
-  line-height: var(--leading-heading);
-  margin-top: 1.5em;
-  margin-bottom: 0.5em;
-}
-
-.content h3 {
-  font-family: var(--font-heading);
-  font-weight: var(--font-medium);
-  color: var(--color-heading);
-  line-height: var(--leading-heading);
-  margin-top: 1.5em;
-  margin-bottom: 0.5em;
-}
-
-.content h4 {
-  font-family: var(--font-heading);
-  font-weight: var(--font-medium);
-  color: var(--color-heading);
-  line-height: var(--leading-heading);
-  margin-top: 1.2em;
-  margin-bottom: 0.4em;
-}
-
-.content p {
-  margin-top: 0;
-  margin-bottom: 1em;
-}
-
-.content ul,
-.content ol {
-  margin-top: 0;
-  margin-bottom: 1em;
-  padding-left: 2em;
-}
-
-.content li {
-  margin-bottom: 0.3em;
-}
-
-.content li p {
-  margin-bottom: 0.3em;
-}
-
-.content a {
-  color: var(--color-heading);
-  text-decoration: underline;
-}
-
-.content strong {
-  font-weight: var(--font-bold);
 }
 
 @media (max-width: 801px) {

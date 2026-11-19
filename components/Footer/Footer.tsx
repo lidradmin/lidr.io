@@ -1,6 +1,7 @@
 import Link from "next/link";
 import styles from "./Footer.module.css";
 import { NAV_ITEMS } from "../../lib/nav-items";
+import { hasPosts } from "../../lib/blog/data";
 
 // Live footer "Quick Links" mirror the main nav exactly.
 const QUICK_LINKS = NAV_ITEMS;
@@ -84,6 +85,16 @@ export function Footer() {
                 <Link href={item.href}>{item.label}</Link>
               </li>
             ))}
+            {/* Blog is post-WordPress, so it's footer-only (header unchanged).
+                data-blog-link lets tests/visual hide it so WordPress reference
+                screenshots stay valid. Hidden while the blog has no posts. */}
+            {hasPosts() && (
+              <li>
+                <Link href="/blog/" data-blog-link="">
+                  Blog
+                </Link>
+              </li>
+            )}
           </ul>
         </nav>
         <nav className={styles.column} aria-label="Legal">

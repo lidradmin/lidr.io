@@ -134,11 +134,11 @@ the tag page 404s.
    an empty blog.
 2. **Validate** all posts (§2). Write `.blog-content/report.json`.
 3. **Optimise images** with `sharp` (already a dependency): accept
-   jpg/png/webp/**heic**, auto-rotate, strip EXIF and GPS (site photos can
+   jpg/png/webp (HEIC is rejected with a "share as JPEG" message: sharp's
+   prebuilt binaries can't decode HEVC), auto-rotate, strip EXIF and GPS (site photos can
    leak locations), output WebP at 480/960/1600w plus a 1600w JPEG fallback
    into `public/images/blog/<slug>/` (gitignored). Record intrinsic
-   width/height. Cache by content hash in `node_modules/.cache/blog-images`
-   (persisted by Cloudflare's build cache) to keep builds fast.
+   width/height. No cache in v1 (one decode per image keeps builds fast enough).
 4. **Generate** `public/admin/config.yml` from `rules.ts`, and
    `public/_redirects` = the committed base file + `redirectTo` entries.
 5. **OG images** (§6).
@@ -196,7 +196,7 @@ under export, drop the placeholder.
 bottom-right. The cover is used instead when present.
 
 Generated in prebuild with `satori` + `sharp` into
-`public/images/blog/og/<slug>.png` (gitignored, cached by title hash). This is
+`public/images/blog/_og/<slug>.png` (gitignored; regenerated each build, no cache). This is
 deterministic under static export, and it avoids the unverified
 `opengraph-image` + dynamic-segment + `trailingSlash` combination entirely.
 
@@ -362,7 +362,7 @@ content.
 - **Unit:** rules ↔ zod ↔ generated CMS config parity; hard vs soft
   classification; tag deletion drops tags without removing posts;
   last-good fallback; sanitizer strips `javascript:` links; related posts;
-  reading time; HEIC → WebP with EXIF stripped.
+  reading time; JPEG/PNG → WebP with EXIF stripped; HEIC rejected.
 - **Lighthouse CI:** `/blog/` and a fixture post at existing thresholds.
 
 ## 12. Risks and verify-first items

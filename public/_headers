@@ -7,3 +7,7 @@
 
 /.well-known/assetlinks.json
   Content-Type: application/json
+
+# The RSS feed is a static file under `output: "export"`; route handler headers don't apply.
+/blog/rss.xml
+  Content-Type: application/rss+xml; charset=utf-8

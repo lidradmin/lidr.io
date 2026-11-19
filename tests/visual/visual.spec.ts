@@ -48,6 +48,12 @@ for (const slug of ENABLED) {
       await page.addStyleTag({
         content: `html:not(#\\9):not(#\\9):not(#\\9) *, html:not(#\\9):not(#\\9):not(#\\9) *::before, html:not(#\\9):not(#\\9):not(#\\9) *::after { animation: none !important; transition: none !important; caret-color: transparent !important; }`,
       });
+      // The footer "Blog" link was added after the WordPress site was
+      // captured, so the reference screenshots don't contain it. Hide its
+      // list item (display:none collapses it as if it didn't exist) so every
+      // page's footer still matches the references. See spec
+      // docs/superpowers/specs/2026-11-19-blog-design.md §11.
+      await page.addStyleTag({ content: `li:has(> [data-blog-link]) { display: none !important; }` });
 
       mkdirSync("test-results/actual", { recursive: true });
       const actualPath = `test-results/actual/${slug}-${bp.name}.png`;
