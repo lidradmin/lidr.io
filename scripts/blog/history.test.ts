@@ -3,7 +3,7 @@ import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { expect, test } from "vitest";
-import { findLastGood, findLastGoodFile, listHistoryVersions } from "./history";
+import { findLastGood, findLastGoodFile, historyVersions, listHistoryVersions } from "./history";
 import { resolveContentDir } from "./source";
 
 const git = (cwd: string, ...args: string[]) =>
@@ -116,4 +116,14 @@ test("listHistoryVersions returns versions newest first and honours max", () => 
   expect(listHistoryVersions(dir, "posts/p.md", 2)).toEqual(["v3\n", "v2\n"]);
   expect(listHistoryVersions(dir, "../p.md")).toEqual([]);
   expect(listHistoryVersions(mkdtempSync(join(tmpdir(), "nogit-")), "posts/p.md")).toEqual([]);
+});
+
+test("historyVersions is lazy: stopping early never reads older blobs", () => {
+  const dir = repoWith(["v1\n", "v2\n"]);
+  const oid1 = git(dir, "rev-parse", "HEAD~1:posts/p.md").trim();
+  rmSync(join(dir, ".git", "objects", oid1.slice(0, 2), oid1.slice(2)));
+  const it = historyVersions(dir, "posts/p.md");
+  expect(it.next().value).toBe("v2\n");
+  it.return(undefined);
+  expect(() => listHistoryVersions(dir, "posts/p.md")).toThrow(/Could not read history/);
 });

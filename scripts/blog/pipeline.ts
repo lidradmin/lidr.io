@@ -5,7 +5,7 @@ import { computeRelated } from "../../lib/blog/related";
 import { RULES } from "../../lib/blog/rules";
 import { EMPTY_BLOG, type BlogData, type BlogReport, type BuiltPost, type PostMeta, type Problem, type TagDef } from "../../lib/blog/types";
 import { parsePostFile, parseTags, validatePost } from "../../lib/blog/validate";
-import { findLastGoodFile, listHistoryVersions } from "./history";
+import { findLastGoodFile, historyVersions } from "./history";
 import { processImages } from "./images";
 import { ogUnsupportedChars, renderOgImage } from "./og";
 
@@ -131,7 +131,7 @@ export async function buildBlogData(opts: {
     }
 
     if (!meta) {
-      for (const raw of listHistoryVersions(contentDir, `posts/${slug}.md`)) {
+      for (const raw of historyVersions(contentDir, `posts/${slug}.md`, 25)) {
         if (raw === curRaw) continue;
         const a = analyse(slug, raw, tags);
         if (!a.meta) continue;
@@ -205,6 +205,9 @@ export async function buildBlogData(opts: {
   const systematic = (fails: number, total: number) => fails >= 2 && fails / total >= 0.5;
   if (systematic(renderFailures, renderAttempts)) {
     throw new Error(`Blog build aborted: ${renderFailures} of ${renderAttempts} posts failed to render — likely a code problem. First error: ${firstRenderError}`);
+  }
+  if (renderFailures > 0 && built.length === 0) {
+    throw new Error(`Blog build aborted: ${renderFailures} of ${renderAttempts} posts failed to render and nothing is left to publish — likely a code problem. First error: ${firstRenderError}`);
   }
   if (systematic(ogFailures, ogAttempts)) {
     throw new Error(`Blog build aborted: ${ogFailures} of ${ogAttempts} share images failed to generate — likely a code problem. First error: ${firstOgError}`);

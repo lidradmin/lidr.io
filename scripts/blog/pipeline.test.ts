@@ -1,5 +1,5 @@
 import { execFileSync } from "node:child_process";
-import { copyFileSync, existsSync, mkdirSync, mkdtempSync, writeFileSync } from "node:fs";
+import { copyFileSync, existsSync, mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
 import { beforeAll, describe, expect, test, vi } from "vitest";
@@ -331,5 +331,23 @@ describe("render failures", () => {
     commit(dir, "v2");
     const r = await build(dir);
     expect((r.report.problems["p"] ?? []).some((p) => p.field === "tags")).toBe(true);
+  });
+  test("a one-post blog whose only post fails to render aborts", async () => {
+    await expect(build(mkContent({ "a.md": postBody("A perfectly fine post", `BOOM ${BODY}`) }))).rejects.toThrow(/nothing is left to publish/);
+  });
+  test("history is walked lazily: an unreadable older blob doesn't matter once a newer good version is found", async () => {
+    const dir = repo();
+    const file = join(dir, "posts", "p.md");
+    writeFileSync(file, postBody("A perfectly fine post", BODY));
+    commit(dir, "v1");
+    const oid1 = git(dir, "rev-parse", "HEAD:posts/p.md").toString().trim();
+    writeFileSync(file, postBody("A perfectly fine post", `${BODY} second`));
+    commit(dir, "v2");
+    writeFileSync(file, postBody("A perfectly fine post", `BOOM ${BODY}`));
+    commit(dir, "v3");
+    rmSync(join(dir, ".git", "objects", oid1.slice(0, 2), oid1.slice(2)));
+    const r = await build(dir);
+    expect(r.data.posts[0]).toMatchObject({ slug: "p", source: "last-good" });
+    expect(r.data.posts[0].html).toContain("second");
   });
 });

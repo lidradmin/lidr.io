@@ -41,7 +41,7 @@ export function listHistoryVersions(contentDir: string, relPath: string, max = M
   return [...historyVersions(contentDir, relPath, max)];
 }
 
-function* historyVersions(contentDir: string, relPath: string, max: number): Generator<string> {
+export function* historyVersions(contentDir: string, relPath: string, max: number = MAX_VERSIONS): Generator<string> {
   if (!PATH_RE.test(relPath) || relPath.includes("..") || relPath.startsWith("/")) return;
   const path = relPath;
   const label = relPath;
