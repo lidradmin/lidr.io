@@ -50,7 +50,7 @@ export function buildCmsConfig(o: CmsOptions = DEFAULT_CMS_OPTIONS) {
     },
     site_url: o.siteUrl,
     display_url: o.siteUrl,
-    logo: { src: `${o.siteUrl}/favicon-270x270.png` },
+    logo: { src: "/favicon-270x270.png" },
     locale: "en",
     media_folder: "images",
     public_folder: "/images/blog",

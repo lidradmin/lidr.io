@@ -34,12 +34,14 @@ Things to know:
 ```sh
 cd workers/cms-auth
 npx wrangler@4 login
+npx wrangler@4 deploy
 npx wrangler@4 secret put GITHUB_CLIENT_ID
 npx wrangler@4 secret put GITHUB_CLIENT_SECRET
-npx wrangler@4 deploy
 ```
 
-Then add the custom domain `cms-auth.lidr.io` under the Worker's **Settings → Domains & Routes**.
+`deploy` creates the Worker and its custom domain `cms-auth.lidr.io` from `wrangler.toml` (the `routes` entry with
+`custom_domain = true`), so there's no dashboard step. Deploy first: `secret put` needs the Worker to exist. Until
+both secrets are set, every request returns 500 `cms-auth is misconfigured`.
 
 ## Test
 

@@ -21,6 +21,10 @@ if [ -n "$SLUG" ] && ! [[ "$SLUG" =~ ^[a-z0-9]+(-[a-z0-9]+)*$ ]]; then
   echo "check-content: invalid slug \"$SLUG\" (lowercase letters and numbers joined by single hyphens)" >&2
   exit 2
 fi
+if [ -n "$SLUG" ] && [ ! -f "$CONTENT_DIR/posts/$SLUG.md" ]; then
+  echo "check-content: $CONTENT_DIR/posts/$SLUG.md not found" >&2
+  exit 2
+fi
 
 SITE_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 cd "$SITE_DIR"

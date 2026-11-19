@@ -57,7 +57,7 @@ describe("CMS config mirrors RULES (single source of truth)", () => {
       expect(f).not.toHaveProperty("picker_utc");
       expect(f).not.toHaveProperty("date_format");
     }
-    expect(cfg).toMatchObject({ logo: { src: "https://lidr.io/favicon-270x270.png" } });
+    expect(cfg).toMatchObject({ logo: { src: "/favicon-270x270.png" } });
     expect(cfg).not.toHaveProperty("logo_url");
     expect(cfg.backend.commit_messages.update).toBe('Update {{collection}} "{{slug}}"');
   });

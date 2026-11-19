@@ -76,8 +76,8 @@ From now on, **never use `cd`**. Every command uses `git -C <wt> …` or absolut
   - `description`: 50–160 characters.
   - `date`: today, as `YYYY-MM-DD`.
   - `tags`: 1–3 tag slugs that exist in `tags.yml`. Never invent tags.
-  - Optional cover: `cover: /images/blog/<slug>/<name>.jpg` plus `coverAlt: what the photo shows`.
-- **Images**: use only photos the user gives you. Never invent, generate or download images. Save each one at `<wt>/images/<slug>/<name>.jpg` (lowercase name with hyphens; JPEG, PNG or WebP). Reference it in the post as `/images/blog/<slug>/<name>.jpg`. The site publishes `images/<slug>/` under `/images/blog/<slug>/`.
+  - Optional cover: `cover: /images/blog/<slug>/<name>.<ext>` plus `coverAlt: what the photo shows`.
+- **Images**: use only photos the user gives you. Never invent, generate or download images. Save each one at `<wt>/images/<slug>/<name>.<ext>`, keeping its original extension (`.jpg`, `.png` or `.webp`; lowercase name with hyphens). Reference it in the post as `/images/blog/<slug>/<name>.<ext>` with the same extension. The site publishes `images/<slug>/` under `/images/blog/<slug>/`.
 - Every image needs alt text describing what it shows: `![Scaffold tag photographed beside the date board](/images/blog/<slug>/scaffold-tag.jpg)`.
 - Body: Markdown. Start with the answer, not a preamble. Use `##` and `###` headings only (never `#`). 700–1,400 words.
 - Links: at least one to `/features/` or `/pricing/`. If an existing post is genuinely related, link it too as `/blog/<its-slug>/`. If none is related, don't force one.
