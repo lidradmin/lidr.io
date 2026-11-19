@@ -1,6 +1,7 @@
 import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
+import { staleUpdatedProblems } from "./changes";
 import { renderOgImage } from "./og";
 import { buildBlogData, countProblems, formatProblems } from "./pipeline";
 import { resolveContentDir } from "./source";
@@ -33,6 +34,14 @@ async function main() {
   }
   const { data, report } = result;
 
+  const si = process.argv.indexOf("--since");
+  const since = si >= 0 ? process.argv[si + 1] : undefined;
+  if (since && contentDir) {
+    for (const [slug, ps] of Object.entries(staleUpdatedProblems(contentDir, since))) {
+      if (data.posts.some((p) => p.slug === slug)) (report.problems[slug] ??= []).push(...ps);
+    }
+  }
+
   if (!check) {
     mkdirSync(join(cwd, ".blog"), { recursive: true });
     writeFileSync(join(cwd, ".blog/data.json"), JSON.stringify(data));
@@ -60,6 +69,11 @@ async function main() {
   if (strict && problemCount > 0) {
     console.error(`blog: ${problemCount} problem(s) found and BLOG_STRICT=1`);
     process.exit(1);
+  }
+  const hard = Object.values(report.problems).flat().filter((p) => p.level === "hard").length;
+  if (process.env.BLOG_FAIL_ON === "hard" && hard > 0) {
+    console.error(`blog: ${hard} problem(s) keep posts offline (BLOG_FAIL_ON=hard)`);
+    process.exitCode = 1;
   }
 }
 
