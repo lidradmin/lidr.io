@@ -30,7 +30,12 @@ function fromBase64Utf8(b64: string): string {
 }
 
 export class GitHub {
-  constructor(private token: string, private fetcher: typeof fetch = fetch) {}
+  private fetcher: typeof fetch;
+  // Workers throw "Illegal invocation" if the global fetch is called as a method
+  // of another object (this.fetcher(...)), so always call it through a wrapper.
+  constructor(private token: string, fetcher: typeof fetch = fetch) {
+    this.fetcher = (input, init) => fetcher(input, init);
+  }
 
   private async req<T>(method: string, path: string, body?: unknown): Promise<T> {
     const res = await this.fetcher(`https://api.github.com${path}`, {

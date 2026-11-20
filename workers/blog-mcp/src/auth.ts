@@ -137,7 +137,8 @@ export async function handleAuth(req: Request, env: Env, fetcher: typeof fetch =
     try {
       who = await gh.whoAmI();
       if (!(await gh.canWrite(env.REPO))) return notInvitedPage(who.login, env.OWNER_NAME);
-    } catch {
+    } catch (e) {
+      console.error("sign-in access check failed", e instanceof Error ? e.message : e);
       return errorPage("GitHub didn't answer properly while checking your access. Try again in a minute.", 502);
     }
     const { redirectTo } = await oauth.completeAuthorization({
