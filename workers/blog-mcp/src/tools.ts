@@ -115,6 +115,13 @@ export const TOOL_DEFS: ToolDef[] = [
     annotations: { readOnlyHint: false, destructiveHint: false, idempotentHint: false, openWorldHint: true },
   },
   {
+    name: "get_post",
+    title: "Read a post",
+    description: "Returns an existing post's exact settings and Markdown text. Call this before updating a post, then send the changed version to publish_post with update: true.",
+    inputSchema: { type: "object", properties: { slug: { type: "string", description: "The post's web-address part, e.g. snagging-photos" } }, required: ["slug"], additionalProperties: false },
+    annotations: { readOnlyHint: true, openWorldHint: false },
+  },
+  {
     name: "hide_post",
     title: "Hide a post",
     description: "Takes a post off lidr.io by turning on 'Hide this post'. Nothing is deleted; publishing it again with update: true brings it back.",
@@ -323,6 +330,40 @@ export function createTools(ctx: ToolsCtx): Tools {
         `If anything needs attention after the site builds, ${user.login} gets a GitHub email ("Post needs attention").`,
       ].filter(Boolean).join("\n");
       return { text, structured: { url, slug, commit: sha, photos: pending.map((p) => p.path), warnings: soft.map((p) => p.message) } };
+    },
+
+    async get_post(args) {
+      const slug = str(args, "slug").trim().replace(/^.*\/blog\//, "").replace(/\/+$/, "");
+      if (!isValidSlug(slug)) throw new InputError(`"${slug}" isn't a post address.`);
+      const raw = await gh.readFile(repo, postRepoPath(slug));
+      if (raw === null) return { text: `There's no post at ${site}/blog/${slug}/.`, isError: true };
+      const p = parsePostFile(raw);
+      if (!p.ok) return { text: "That post's settings block can't be read. Open it in lidr.io/admin instead.", isError: true };
+      const d = p.data;
+      const dateStr = (v: unknown) => (v instanceof Date ? v.toISOString().slice(0, 10) : v ? String(v).slice(0, 10) : undefined);
+      const post = {
+        slug,
+        url: `${site}/blog/${slug}/`,
+        title: String(d.title ?? ""),
+        description: String(d.description ?? ""),
+        tags: Array.isArray(d.tags) ? d.tags.map(String) : [],
+        cover: d.cover ? String(d.cover) : undefined,
+        coverAlt: d.coverAlt ? String(d.coverAlt) : undefined,
+        date: dateStr(d.date),
+        updated: dateStr(d.updated),
+        hidden: d.draft === true,
+        body: p.body.trim(),
+      };
+      const text = [
+        `${post.title} — ${post.url}${post.hidden ? " [hidden]" : ""}`,
+        `description: ${post.description}`,
+        `tags: ${JSON.stringify(post.tags)}`,
+        post.cover ? `cover: ${post.cover} (coverAlt: ${JSON.stringify(post.coverAlt ?? "")})` : "cover: none",
+        "",
+        "Markdown text:",
+        post.body,
+      ].join("\n");
+      return { text, structured: post };
     },
 
     async hide_post(args) {

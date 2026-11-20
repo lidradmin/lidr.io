@@ -165,6 +165,15 @@ describe("tools", () => {
     expect(r.text).toMatch(/under 300/);
   });
 
+  test("get_post returns the exact text and settings, accepting a full URL", async () => {
+    await call("publish_post", DRAFT);
+    const r = await call("get_post", { slug: `https://lidr.io/blog/${SLUG}/` });
+    expect(r.isError).toBeFalsy();
+    expect(r.structured).toMatchObject({ slug: SLUG, title: DRAFT.title, tags: ["site-photos"], body: BODY, hidden: false });
+    expect(r.text).toContain(BODY);
+    expect((await call("get_post", { slug: "missing-post" })).isError).toBe(true);
+  });
+
   test("rate limit stops runaway publishing", async () => {
     for (let i = 0; i < RATE_LIMIT_PER_HOUR; i++) {
       expect((await call("publish_post", { ...DRAFT, slug: `post-${i}` })).isError).toBeFalsy();
