@@ -46,8 +46,12 @@ export async function signUploadToken(c: UploadClaims, key: string): Promise<str
   return `${payload}.${b64url(await hmac(payload, key))}`;
 }
 
-/** Checks signature and expiry, then marks the link used (single use). */
-export async function verifyUploadToken(token: string, key: string, kv: KV): Promise<UploadClaims> {
+/**
+ * Checks signature, expiry and that the link hasn't been used. With
+ * `consume: true` (the default) it also marks the link used; handleUpload
+ * passes false and consumes only after the photo is safely stored.
+ */
+export async function verifyUploadToken(token: string, key: string, kv: KV, opts: { consume?: boolean } = {}): Promise<UploadClaims> {
   const invalid = new UploadError(403, "This upload link isn't valid. Ask Claude for a new one (start_photo_upload).");
   const [payload, sig, extra] = token.split(".");
   if (!payload || !sig || extra !== undefined) throw invalid;
@@ -63,11 +67,16 @@ export async function verifyUploadToken(token: string, key: string, kv: KV): Pro
   if (typeof claims.exp !== "number" || claims.exp < Date.now()) {
     throw new UploadError(403, "This upload link has expired (links last 15 minutes). Ask Claude for a new one.");
   }
-  const usedKey = `used:${sig}`;
-  if (await kv.get(usedKey)) throw new UploadError(403, "This upload link has already been used. Ask Claude for a new one.");
-  await kv.put(usedKey, "1", { expirationTtl: 3600 });
+  if (await kv.get(usedKey(token))) throw new UploadError(403, "This upload link has already been used. Ask Claude for a new one.");
+  if (opts.consume !== false) await consumeUploadToken(token, kv);
   return claims;
 }
+
+const usedKey = (token: string) => `used:${token.split(".")[1]}`;
+export const consumeUploadToken = (token: string, kv: KV) => kv.put(usedKey(token), "1", { expirationTtl: 3600 });
+
+/** KV metadata is capped at 1 KB, so photo descriptions are too. */
+export const MAX_ALT = 300;
 
 export const photoKey = (u: number, slug: string, file: string) => `photo:${u}:${slug}:${file}`;
 
@@ -92,7 +101,7 @@ export async function handleUpload(req: Request, token: string, deps: { kv: KV; 
     if (req.method !== "POST") throw new UploadError(405, "Send the photo with POST.");
     const declared = Number(req.headers.get("Content-Length") ?? "0");
     if (declared > MAX_PHOTO_BYTES) throw new UploadError(413, "The photo is over 15 MB. Use the command from start_photo_upload, which shrinks it first.");
-    const claims = await verifyUploadToken(token, deps.signingKey, deps.kv);
+    const claims = await verifyUploadToken(token, deps.signingKey, deps.kv, { consume: false });
     const bytes = new Uint8Array(await req.arrayBuffer());
     if (bytes.length === 0) throw new UploadError(400, "No photo was sent.");
     if (bytes.length > MAX_PHOTO_BYTES) throw new UploadError(413, "The photo is over 15 MB. Use the command from start_photo_upload, which shrinks it first.");
@@ -105,8 +114,9 @@ export async function handleUpload(req: Request, token: string, deps: { kv: KV; 
     }
     await deps.kv.put(photoKey(claims.u, claims.s, claims.f), clean, {
       expirationTtl: PHOTO_TTL_S,
-      metadata: { kind: claims.k, alt: claims.alt },
+      metadata: { kind: claims.k, alt: claims.alt?.slice(0, MAX_ALT) },
     });
+    await consumeUploadToken(token, deps.kv);
     const path = imagePublicPath(claims.s, claims.f);
     return reply(200, { ok: true, path, message: `Uploaded. It will be published with the post. Use ${path} in the post.` });
   } catch (e) {

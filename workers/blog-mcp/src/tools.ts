@@ -16,7 +16,7 @@ import {
 } from "./content";
 import type { FileChange } from "./github";
 import type { ToolDef, ToolResult, Tools } from "./mcp";
-import { listPendingPhotos, signUploadToken, UPLOAD_LINK_TTL_MS, type KV } from "./upload";
+import { MAX_ALT, photoKey, signUploadToken, UPLOAD_LINK_TTL_MS, type KV } from "./upload";
 
 /** The parts of the GitHub client the tools use (faked in tests). */
 export type Repo = {
@@ -178,8 +178,26 @@ export function createTools(ctx: ToolsCtx): Tools {
     return parseTags(raw ?? "").tags;
   }
 
-  async function knownImages(slug: string): Promise<Set<string>> {
-    const pending = await listPendingPhotos(kv, user.id, slug);
+  /**
+   * Photos the draft points at that were uploaded for this post and are waiting
+   * in KV. Looked up by key (KV reads of a key just written are reliable;
+   * listing isn't), so a photo uploaded seconds ago is never missed.
+   */
+  async function pendingPhotos(d: Draft, slug: string): Promise<{ file: string; path: string; key: string; bytes: ArrayBuffer }[]> {
+    const prefix = imagePublicPath(slug, "");
+    const re = new RegExp(`${prefix.replace(/[.*+?^${}()|[\]\\/]/g, "\\$&")}([a-z0-9-]+\\.jpg)`, "g");
+    const files = new Set([...`${d.cover ?? ""}\n${d.body}`.matchAll(re)].map((m) => m[1]));
+    const found = [];
+    for (const file of files) {
+      const key = photoKey(user.id, slug, file);
+      const bytes = await kv.get(key, "arrayBuffer");
+      if (bytes) found.push({ file, path: imagePublicPath(slug, file), key, bytes });
+    }
+    return found;
+  }
+
+  async function knownImages(d: Draft, slug: string): Promise<Set<string>> {
+    const pending = await pendingPhotos(d, slug);
     const inRepo = await gh.listDir(repo, `images/${slug}`);
     return new Set([...pending.map((p) => p.path), ...inRepo.map((f) => imagePublicPath(slug, f))]);
   }
@@ -231,7 +249,7 @@ export function createTools(ctx: ToolsCtx): Tools {
       const d = readDraft(args);
       const slug = resolveSlug(args, d.title);
       const exists = (await gh.readFile(repo, postRepoPath(slug))) !== null;
-      const { hard, soft } = await checkDraft(d, { slug, tags: await loadTags(), knownImages: await knownImages(slug) });
+      const { hard, soft } = await checkDraft(d, { slug, tags: await loadTags(), knownImages: await knownImages(d, slug) });
       const url = `${site}/blog/${slug}/`;
       const text = [
         `Address: ${url}${exists ? " (a post already exists here: publishing needs update: true and will replace it)" : ""}`,
@@ -246,6 +264,7 @@ export function createTools(ctx: ToolsCtx): Tools {
       const kind = str(args, "kind");
       if (kind !== "cover" && kind !== "inline") throw new InputError('"kind" must be "cover" or "inline".');
       const alt = str(args, "alt").trim();
+      if (alt.length > MAX_ALT) throw new InputError(`Keep the photo description under ${MAX_ALT} characters (it's ${alt.length}).`);
       const file = safeFileName(str(args, "filename"));
       const sourcePath = str(args, "source_path");
       const token = await signUploadToken({ u: user.id, s: slug, f: file, k: kind, alt, exp: Date.now() + UPLOAD_LINK_TTL_MS }, ctx.signingKey);
@@ -285,16 +304,15 @@ export function createTools(ctx: ToolsCtx): Tools {
       }
       d.draft = false;
 
-      const { hard, soft } = await checkDraft(d, { slug, tags: await loadTags(), knownImages: await knownImages(slug) });
+      const { hard, soft } = await checkDraft(d, { slug, tags: await loadTags(), knownImages: await knownImages(d, slug) });
       if (hard.length) return { text: `Not published. ${describeProblems(hard, soft)}`, isError: true };
 
       await rateLimit();
-      const pending = (await listPendingPhotos(kv, user.id, slug)).filter((p) => p.path === d.cover || d.body.includes(p.path));
-      const files: FileChange[] = [{ path: postRepoPath(slug), content: buildPostFile(d, extra) }];
-      for (const p of pending) {
-        const bytes = await kv.get(p.key, "arrayBuffer");
-        if (bytes) files.push({ path: imageRepoPath(slug, p.file), content: new Uint8Array(bytes) });
-      }
+      const pending = await pendingPhotos(d, slug);
+      const files: FileChange[] = [
+        { path: postRepoPath(slug), content: buildPostFile(d, extra) },
+        ...pending.map((p) => ({ path: imageRepoPath(slug, p.file), content: new Uint8Array(p.bytes) })),
+      ];
       const verb = existingRaw === null ? "Publish" : "Update";
       const { sha } = await gh.commit(repo, files, `${verb} blog post "${slug}"`);
       for (const p of pending) await kv.delete(p.key);
@@ -312,14 +330,19 @@ export function createTools(ctx: ToolsCtx): Tools {
       if (!isValidSlug(slug)) throw new InputError(`"${slug}" isn't a post address.`);
       const raw = await gh.readFile(repo, postRepoPath(slug));
       if (raw === null) return { text: `There's no post at ${site}/blog/${slug}/.`, isError: true };
-      const m = /^---\r?\n([\s\S]*?)\r?\n---\r?\n?([\s\S]*)$/.exec(raw);
-      if (!m) return { text: "That post's settings block can't be read, so it wasn't changed. Hide it in lidr.io/admin instead.", isError: true };
-      const doc = parseDocument(m[1]);
-      if (doc.errors.length || typeof parseYaml(m[1]) !== "object") return { text: "That post's settings block can't be read, so it wasn't changed. Hide it in lidr.io/admin instead.", isError: true };
+      // Split exactly the way the site's parser does (lib/blog/validate.ts).
+      const lines = raw.replace(/^\uFEFF/, "").split(/\r\n|\n/);
+      const close = lines.findIndex((l, i) => i > 0 && l.trimEnd() === "---");
+      const unreadable = { text: "That post's settings block can't be read, so it wasn't changed. Hide it in lidr.io/admin instead.", isError: true };
+      if (lines[0].trimEnd() !== "---" || close === -1) return unreadable;
+      const fm = lines.slice(1, close).join("\n");
+      const rest = lines.slice(close + 1).join("\n");
+      const doc = parseDocument(fm);
+      if (doc.errors.length || typeof parseYaml(fm) !== "object") return unreadable;
       if (doc.get("draft") === true) return { text: `${site}/blog/${slug}/ is already hidden.` };
       doc.set("draft", true);
       await rateLimit();
-      const { sha } = await gh.commit(repo, [{ path: postRepoPath(slug), content: `---\n${doc.toString({ lineWidth: 0 })}---\n${m[2]}` }], `Hide blog post "${slug}"`);
+      const { sha } = await gh.commit(repo, [{ path: postRepoPath(slug), content: `---\n${doc.toString({ lineWidth: 0 })}---\n${rest}` }], `Hide blog post "${slug}"`);
       return { text: `Hidden: ${site}/blog/${slug}/ will disappear from lidr.io in about 3 minutes. Nothing was deleted.`, structured: { slug, commit: sha } };
     },
   };

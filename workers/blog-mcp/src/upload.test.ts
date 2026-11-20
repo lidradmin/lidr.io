@@ -26,6 +26,38 @@ describe("stripJpegMetadata", () => {
     expect([meta.width, meta.height, meta.format]).toEqual([64, 48, "jpeg"]);
     expect(out.length).toBeLessThan(gpsJpeg.length);
   });
+  test("drops images appended after the end marker (phone depth/gain maps with their own GPS)", async () => {
+    const plain = new Uint8Array(await sharp({ create: { width: 32, height: 24, channels: 3, background: "#333" } }).jpeg().toBuffer());
+    const combined = new Uint8Array(plain.length + gpsJpeg.length);
+    combined.set(plain);
+    combined.set(gpsJpeg, plain.length);
+    const out = stripJpegMetadata(combined);
+    expect(out.length).toBeLessThanOrEqual(plain.length);
+    expect(Buffer.from(out).includes(Buffer.from("Exif"))).toBe(false);
+    expect((await sharp(out).metadata()).width).toBe(32);
+  });
+  test("drops MPF/C2PA-style APP segments but keeps the ICC profile", async () => {
+    const withIcc = new Uint8Array(await sharp({ create: { width: 16, height: 16, channels: 3, background: "#a33" } }).jpeg().withIccProfile("srgb").toBuffer());
+    const seg = (marker: number, payload: string) => {
+      const body = new TextEncoder().encode(payload);
+      return new Uint8Array([0xff, marker, (body.length + 2) >> 8, (body.length + 2) & 0xff, ...body]);
+    };
+    const mpf = seg(0xe2, "MPF\0secret-gps");
+    const c2pa = seg(0xeb, "JP\0\0secret-gps");
+    const input = new Uint8Array([...withIcc.subarray(0, 2), ...mpf, ...c2pa, ...withIcc.subarray(2)]);
+    const out = stripJpegMetadata(input);
+    expect(Buffer.from(out).includes(Buffer.from("secret-gps"))).toBe(false);
+    expect(Buffer.from(out).includes(Buffer.from("ICC_PROFILE"))).toBe(true);
+    expect((await sharp(out).metadata()).icc).toBeDefined();
+  });
+  test("progressive JPEGs (several scans) survive intact", async () => {
+    const prog = new Uint8Array(await sharp(Buffer.from(gpsJpeg)).jpeg({ progressive: true }).withExif({ IFD3: { GPSLatitudeRef: "N", GPSLatitude: "1/1 2/1 3/1" } }).toBuffer());
+    const out = stripJpegMetadata(prog);
+    const before = await sharp(Buffer.from(prog)).raw().toBuffer();
+    const after = await sharp(out).raw().toBuffer();
+    expect(Buffer.compare(before, after)).toBe(0);
+    expect((await sharp(out).metadata()).exif).toBeUndefined();
+  });
   test("rejects anything that isn't a JPEG", () => {
     expect(() => stripJpegMetadata(new TextEncoder().encode("GIF89a..."))).toThrow(NotJpegError);
     expect(() => stripJpegMetadata(new Uint8Array([0xff, 0xd8]))).toThrow(NotJpegError);
@@ -87,6 +119,16 @@ describe("handleUpload", () => {
     expect(res.status).toBe(400);
     res = await up("", await signUploadToken(claims(), KEY), kv, "GET");
     expect(res.status).toBe(405);
+  });
+
+  test("if storing fails, the link isn't used up", async () => {
+    const kv = new MemoryKV();
+    const t = await signUploadToken(claims(), KEY);
+    const realPut = kv.put.bind(kv);
+    kv.put = async () => { throw new Error("KV down"); };
+    expect((await up(gpsJpeg, t, kv)).status).toBe(500);
+    kv.put = realPut;
+    expect((await up(gpsJpeg, t, kv)).status).toBe(200);
   });
 
   test("a used or bad link is refused before reading the photo", async () => {

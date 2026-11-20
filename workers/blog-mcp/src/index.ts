@@ -1,7 +1,7 @@
 import { OAuthProvider } from "@cloudflare/workers-oauth-provider";
 import { ACCESS_TOKEN_TTL_S, handleAuth, refreshUpstream } from "./auth";
 import type { Env, Props } from "./env";
-import { GitHub } from "./github";
+import { GitHub, GitHubAuthError } from "./github";
 import { INSTRUCTIONS } from "./instructions";
 import { handleMcp } from "./mcp";
 import { createTools } from "./tools";
@@ -20,7 +20,20 @@ const mcpHandler = {
       publicUrl: env.PUBLIC_URL,
       signingKey: env.UPLOAD_SIGNING_KEY,
     });
-    return handleMcp(req, tools, { instructions: INSTRUCTIONS });
+    try {
+      return await handleMcp(req, tools, { instructions: INSTRUCTIONS });
+    } catch (e) {
+      if (!(e instanceof GitHubAuthError)) throw e;
+      // GitHub rejected the stored token: make Claude refresh, which re-checks
+      // GitHub and, if access is really gone, sends the user back to sign in.
+      return new Response(JSON.stringify({ error: "invalid_token", error_description: e.message }), {
+        status: 401,
+        headers: {
+          "Content-Type": "application/json",
+          "WWW-Authenticate": `Bearer error="invalid_token", error_description="GitHub sign-in expired", resource_metadata="${env.PUBLIC_URL}/.well-known/oauth-protected-resource/mcp"`,
+        },
+      });
+    }
   },
 };
 
@@ -57,6 +70,8 @@ const provider = new OAuthProvider<Env>({
     resource_name: "Lidr Blog",
   },
   accessTokenTTL: ACCESS_TOKEN_TTL_S,
+  // GitHub refresh tokens last 6 months; don't force a reconnect every 30 days.
+  refreshTokenTTL: 180 * 24 * 3600,
   tokenExchangeCallback: async (opts) => refreshUpstream({ grantType: opts.grantType, props: opts.props as Props, env: opts.env }),
 });
 

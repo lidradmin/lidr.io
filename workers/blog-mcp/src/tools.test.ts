@@ -150,6 +150,21 @@ describe("tools", () => {
     expect((await call("hide_post", { slug: "missing" })).isError).toBe(true);
   });
 
+  test("hide_post splits the settings block exactly like the site (trailing spaces, --- rules in the text)", async () => {
+    gh.files.set("posts/odd.md", "---\ntitle: Odd post title here\ndate: 2026-11-01\ntags: [reporting]\ndraft: false\n--- \nIntro\n\n---\n\nAfter a rule.\n");
+    const r = await call("hide_post", { slug: "odd" });
+    expect(r.isError).toBeFalsy();
+    const parsed = parsePostFile(String(gh.commits[0].files[0].content));
+    expect(parsed.ok && parsed.data.draft).toBe(true);
+    expect(parsed.ok && parsed.body).toContain("---\n\nAfter a rule.");
+  });
+
+  test("very long photo descriptions are refused up front", async () => {
+    const r = await call("start_photo_upload", { slug: "a", source_path: "x", filename: "a.jpg", kind: "cover", alt: "x".repeat(301) });
+    expect(r.isError).toBe(true);
+    expect(r.text).toMatch(/under 300/);
+  });
+
   test("rate limit stops runaway publishing", async () => {
     for (let i = 0; i < RATE_LIMIT_PER_HOUR; i++) {
       expect((await call("publish_post", { ...DRAFT, slug: `post-${i}` })).isError).toBeFalsy();

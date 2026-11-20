@@ -75,6 +75,16 @@ describe("handleMcp", () => {
     expect((await rpc({ id: 7, method: "ping" })).json!.error.code).toBe(-32600);
   });
 
+  test("responses sent by the client get 202", async () => {
+    const { res } = await rpc({ jsonrpc: "2.0", id: 9, result: {} });
+    expect(res.status).toBe(202);
+  });
+
+  test("auth failures escape so the caller can answer 401", async () => {
+    const failing: Tools = { defs: [], call: async () => { throw Object.assign(new Error("expired"), { authFailure: true }); } };
+    await expect(handleMcp(post({ jsonrpc: "2.0", id: 1, method: "tools/call", params: { name: "x" } }), failing, info)).rejects.toThrow("expired");
+  });
+
   test("GET and DELETE are not supported (stateless server)", async () => {
     for (const method of ["GET", "DELETE"]) {
       const res = await handleMcp(new Request("https://mcp.example/mcp", { method }), tools, info);

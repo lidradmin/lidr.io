@@ -1,6 +1,6 @@
 import { authorizationErrorRedirect, type ConsentDescription, OAuthError } from "@cloudflare/workers-oauth-provider";
 import type { Env, Props } from "./env";
-import { GitHub } from "./github";
+import { GitHub, GitHubAuthError } from "./github";
 
 export const ACCESS_TOKEN_TTL_S = 3600;
 /** Refresh GitHub's token when it would expire before our next access token does. */
@@ -11,7 +11,7 @@ const esc = (s: string) => s.replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&
 function page(title: string, body: string, status = 200, headers = new Headers()): Response {
   headers.set("Content-Type", "text/html; charset=utf-8");
   headers.set("Cache-Control", "no-store");
-  headers.set("Content-Security-Policy", "default-src 'none'; style-src 'unsafe-inline'; form-action 'self' https://github.com; frame-ancestors 'none'");
+  headers.set("Content-Security-Policy", "default-src 'none'; style-src 'unsafe-inline'; frame-ancestors 'none'");
   headers.set("X-Frame-Options", "DENY");
   headers.set("Referrer-Policy", "no-referrer");
   return new Response(
@@ -133,8 +133,13 @@ export async function handleAuth(req: Request, env: Env, fetcher: typeof fetch =
     const tokens = await githubToken(env, { code, redirect_uri: `${env.PUBLIC_URL}/callback`, code_verifier: data.verifier }, fetcher);
     if (!tokens.access_token) return errorPage(tokens.error_description || "GitHub didn't return a sign-in token.", 502);
     const gh = new GitHub(tokens.access_token, fetcher);
-    const who = await gh.whoAmI();
-    if (!(await gh.canWrite(env.REPO))) return notInvitedPage(who.login, env.OWNER_NAME);
+    let who: { id: number; login: string };
+    try {
+      who = await gh.whoAmI();
+      if (!(await gh.canWrite(env.REPO))) return notInvitedPage(who.login, env.OWNER_NAME);
+    } catch {
+      return errorPage("GitHub didn't answer properly while checking your access. Try again in a minute.", 502);
+    }
     const { redirectTo } = await oauth.completeAuthorization({
       request: original,
       userId: String(who.id),
@@ -149,19 +154,38 @@ export async function handleAuth(req: Request, env: Env, fetcher: typeof fetch =
   return new Response("Not found", { status: 404 });
 }
 
-/** Keeps the GitHub token fresh when Claude refreshes its access token. */
+/**
+ * Keeps the GitHub token fresh when Claude refreshes its access token (hourly).
+ * Also checks the token still works, so a revoked one leads to a clean
+ * re-sign-in instead of Claude retrying forever.
+ */
 export async function refreshUpstream(
   opts: { grantType: string; props: Props; env: Env },
   fetcher: typeof fetch = fetch,
   now = Date.now(),
 ): Promise<{ newProps: Props } | undefined> {
   const { props } = opts;
-  if (opts.grantType !== "refresh_token" || !props.refresh || !props.expiresAt) return undefined;
-  if (props.expiresAt - now > REFRESH_MARGIN_MS) return undefined;
+  if (opts.grantType !== "refresh_token") return undefined;
+  const nearExpiry = !!props.expiresAt && props.expiresAt - now <= REFRESH_MARGIN_MS;
+  if (!nearExpiry) {
+    try {
+      await new GitHub(props.token, fetcher).whoAmI();
+      return undefined; // still valid
+    } catch (e) {
+      if (!(e instanceof GitHubAuthError)) return undefined; // GitHub hiccup: keep going
+    }
+  }
+  if (!props.refresh) {
+    throw new OAuthError("invalid_grant", { description: "GitHub access ended. Reconnect the Lidr Blog connector." });
+  }
   const t = await githubToken(opts.env, { grant_type: "refresh_token", refresh_token: props.refresh }, fetcher);
-  if (t.error === "bad_refresh_token" || t.error === "incorrect_client_credentials") {
+  if (t.error === "bad_refresh_token") {
     throw new OAuthError("invalid_grant", { description: "GitHub access was revoked. Reconnect the Lidr Blog connector." });
   }
-  if (!t.access_token) throw new OAuthError("temporarily_unavailable", { description: "GitHub is unavailable", statusCode: 503 });
+  if (!t.access_token) {
+    // Includes incorrect_client_credentials (a mis-rotated secret): don't sign everyone out over our own mistake.
+    console.error("GitHub token refresh failed", t.error);
+    throw new OAuthError("temporarily_unavailable", { description: "GitHub is unavailable", statusCode: 503 });
+  }
   return { newProps: { ...toProps(t, props, now), refresh: t.refresh_token ?? props.refresh } };
 }

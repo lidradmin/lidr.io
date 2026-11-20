@@ -40,6 +40,8 @@ export async function handleMcp(req: Request, tools: Tools, info: { instructions
     return rpcError(null, -32600, "Invalid request");
   }
   const { id, method, params } = msg as { id?: Id; method?: unknown; params?: Record<string, unknown> };
+  // A response from the client (to a request we never send) needs no answer.
+  if (method === undefined && ("result" in msg || "error" in msg)) return new Response(null, { status: 202 });
   if (typeof method !== "string") return rpcError(id ?? null, -32600, "Invalid request");
 
   // Notifications (no id) need no answer.
@@ -66,6 +68,7 @@ export async function handleMcp(req: Request, tools: Tools, info: { instructions
       try {
         r = await tools.call(name, args);
       } catch (e) {
+        if (e && typeof e === "object" && (e as { authFailure?: boolean }).authFailure) throw e; // caller answers 401
         r = { text: e instanceof Error ? e.message : "Something went wrong.", isError: true };
       }
       const result: Record<string, unknown> = { content: [{ type: "text", text: r.text }] };

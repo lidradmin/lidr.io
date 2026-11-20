@@ -100,6 +100,14 @@ describe("GitHub", () => {
     await expect(gh.commit(REPO, [{ path: "posts/a.md", content: "x" }], "m")).rejects.toThrow(/changed while saving/);
   });
 
+  test("a 422 before the final step is not mistaken for a race", async () => {
+    const routes = commitRoutes(() => ok({}));
+    routes[`POST /repos/${REPO}/git/trees`] = () => new Response("bad tree", { status: 422 });
+    const { gh, calls } = fake(routes);
+    await expect(gh.commit(REPO, [{ path: "posts/a.md", content: "x" }], "m")).rejects.toThrow(/failed \(422\)/);
+    expect(calls.filter((c) => c.path.endsWith("/git/trees"))).toHaveLength(1);
+  });
+
   test("403 (no access) explains itself", async () => {
     const { gh } = fake({ [`GET /repos/${REPO}/git/ref/heads/main`]: () => new Response("forbidden", { status: 403 }) });
     await expect(gh.commit(REPO, [{ path: "posts/a.md", content: "x" }], "m")).rejects.toThrow(/permission/);

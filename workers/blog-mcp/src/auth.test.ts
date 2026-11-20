@@ -53,6 +53,7 @@ describe("consent page", () => {
     expect(html).toContain("claude.ai");
     expect(res.headers.get("X-Frame-Options")).toBe("DENY");
     expect(res.headers.get("Content-Security-Policy")).toContain("frame-ancestors 'none'");
+    expect(res.headers.get("Content-Security-Policy")).not.toContain("form-action"); // would block redirects back to Claude
   });
 });
 
@@ -88,6 +89,15 @@ describe("/callback", () => {
     expect(env.OAUTH_PROVIDER.completeAuthorization).not.toHaveBeenCalled();
   });
 
+  test("a GitHub outage while checking access shows a friendly page, not a crash", async () => {
+    const f = vi.fn(async (input: RequestInfo | URL) =>
+      String(input).includes("access_token") ? json({ access_token: "gho_x" }) : new Response("boom", { status: 502 }),
+    ) as unknown as typeof fetch;
+    const res = await handleAuth(cb("code=c1&state=x"), makeEnv(), f);
+    expect(res.status).toBe(502);
+    expect(await res.text()).toMatch(/Try again/);
+  });
+
   test("declining on GitHub sends the client an access_denied redirect", async () => {
     const res = await handleAuth(cb("error=access_denied&state=x"), makeEnv(), github(true));
     expect(res.status).toBe(302);
@@ -99,10 +109,24 @@ describe("refreshUpstream", () => {
   const props: Props = { id: 42, login: "eoin", token: "old", refresh: "r1", expiresAt: 1_000_000 };
   const env = makeEnv();
 
-  test("does nothing when the GitHub token has plenty of time left", async () => {
-    const f = vi.fn();
-    expect(await refreshUpstream({ grantType: "refresh_token", props, env }, f as never, 1_000_000 - 3 * 3600_000)).toBeUndefined();
-    expect(f).not.toHaveBeenCalled();
+  test("does nothing when the GitHub token still works and has time left", async () => {
+    const f = vi.fn(async () => json({ id: 42, login: "eoin" })) as unknown as typeof fetch;
+    expect(await refreshUpstream({ grantType: "refresh_token", props, env }, f, 1_000_000 - 3 * 3600_000)).toBeUndefined();
+    expect(f).toHaveBeenCalledTimes(1); // just the /user check
+  });
+
+  test("a revoked GitHub token is refreshed even if it isn't due to expire", async () => {
+    const f = vi.fn(async (u: RequestInfo | URL) =>
+      String(u).endsWith("/user") ? new Response("", { status: 401 }) : json({ access_token: "new", refresh_token: "r2", expires_in: 28800 }),
+    ) as unknown as typeof fetch;
+    const r = await refreshUpstream({ grantType: "refresh_token", props, env }, f, 1_000_000 - 3 * 3600_000);
+    expect(r!.newProps.token).toBe("new");
+  });
+
+  test("a wrong client secret is treated as an outage, not a sign-out", async () => {
+    const f = vi.fn(async () => json({ error: "incorrect_client_credentials" })) as unknown as typeof fetch;
+    const err = await refreshUpstream({ grantType: "refresh_token", props, env }, f, 999_000).catch((e) => e);
+    expect(err.code).toBe("temporarily_unavailable");
   });
 
   test("refreshes when it's close to expiry", async () => {

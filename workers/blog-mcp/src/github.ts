@@ -1,6 +1,8 @@
 /** Thin GitHub REST client acting as the signed-in teammate. */
 
 export class GitHubAuthError extends Error {
+  /** Tells the MCP layer to answer 401 so Claude re-authenticates. */
+  readonly authFailure = true;
   constructor() {
     super("Your GitHub sign-in has expired or was removed. Reconnect the Lidr Blog connector in Claude's settings, then try again.");
   }
@@ -85,6 +87,7 @@ export class GitHub {
   /** One commit on main containing every file. Retries once if main moved meanwhile. */
   async commit(repo: string, files: FileChange[], message: string): Promise<{ sha: string }> {
     for (let attempt = 1; ; attempt++) {
+      let stage = "prepare";
       try {
         const ref = await this.req<{ object: { sha: string } }>("GET", `/repos/${repo}/git/ref/heads/main`);
         const base = ref.object.sha;
@@ -100,11 +103,13 @@ export class GitHub {
         }
         const newTree = await this.req<{ sha: string }>("POST", `/repos/${repo}/git/trees`, { base_tree: baseCommit.tree.sha, tree });
         const commit = await this.req<{ sha: string }>("POST", `/repos/${repo}/git/commits`, { message, tree: newTree.sha, parents: [base] });
+        stage = "update-ref";
         await this.req("PATCH", `/repos/${repo}/git/refs/heads/main`, { sha: commit.sha, force: false });
         return { sha: commit.sha };
       } catch (e) {
-        if (e instanceof GitHubError && e.status === 422 && attempt < 2) continue;
-        if (e instanceof GitHubError && e.status === 422) throw new Error("The blog changed while saving (someone else published at the same moment). Try publishing again.");
+        const raced = e instanceof GitHubError && e.status === 422 && stage === "update-ref";
+        if (raced && attempt < 2) continue;
+        if (raced) throw new Error("The blog changed while saving (someone else published at the same moment). Try publishing again.");
         if (e instanceof GitHubError && (e.status === 403 || e.status === 404)) {
           throw new Error("GitHub refused the save: your account doesn't have permission to publish to the blog. Ask the site owner to invite you to lidr-blog.");
         }
