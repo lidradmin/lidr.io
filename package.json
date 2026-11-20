@@ -17,7 +17,8 @@
     "capture": "node scripts/capture/capture.mjs",
     "test:visual": "npm run build:fixtures && playwright test tests/visual --project=chromium",
     "test:a11y": "npm run build:fixtures && playwright test tests/a11y.spec.ts tests/functional.spec.ts tests/blog.spec.ts --project=chromium",
-    "test:lighthouse": "npm run build:fixtures && lhci autorun"
+    "test:lighthouse": "npm run build:fixtures && lhci autorun",
+    "typecheck:blog-mcp": "tsc -p workers/blog-mcp"
   },
   "dependencies": {
     "next": "16.2.10",
@@ -29,6 +30,8 @@
   },
   "devDependencies": {
     "@axe-core/playwright": "^4.12.1",
+    "@cloudflare/workers-oauth-provider": "^1.2.4",
+    "@cloudflare/workers-types": "^5.20261120.1",
     "@lhci/cli": "^0.15.1",
     "@playwright/test": "^1.61.1",
     "@types/hast": "^3.0.5",
