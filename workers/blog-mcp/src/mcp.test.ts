@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any -- JSON-RPC responses in tests */
 import { describe, expect, test } from "vitest";
 import { handleMcp, SUPPORTED_VERSIONS, type Tools } from "./mcp";
 

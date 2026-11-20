@@ -3,9 +3,11 @@ import { GitHub, GitHubAuthError } from "./github";
 
 const REPO = "lidradmin/lidr-blog";
 const ok = (body: unknown, status = 200) => new Response(JSON.stringify(body), { status, headers: { "Content-Type": "application/json" } });
+// eslint-disable-next-line @typescript-eslint/no-explicit-any -- loose JSON fixtures
 type Call = { method: string; path: string; body: any; auth: string | null };
 
 /** Fake GitHub: routes by "METHOD path", records every call. */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any -- loose JSON fixtures
 function fake(routes: Record<string, (body: any, n: number) => Response>) {
   const calls: Call[] = [];
   const counts: Record<string, number> = {};

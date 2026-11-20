@@ -49,7 +49,7 @@ export function isValidSlug(slug: string): boolean {
 }
 
 /** The post file exactly as the site reads it: a YAML settings block, then Markdown. */
-export function buildPostFile(d: Draft): string {
+export function buildPostFile(d: Draft, extra: Record<string, unknown> = {}): string {
   const data: Record<string, unknown> = {
     title: d.title,
     description: d.description,
@@ -60,6 +60,8 @@ export function buildPostFile(d: Draft): string {
   if (d.cover) data.cover = d.cover;
   if (d.cover && d.coverAlt) data.coverAlt = d.coverAlt;
   data.draft = !!d.draft;
+  // Settings only the editor sets (canonical, redirect) survive an update.
+  for (const [k, v] of Object.entries(extra)) if (!(k in data) && v !== undefined && v !== null && v !== "") data[k] = v;
   return `---\n${stringify(data, { lineWidth: 0 })}---\n${d.body.trim()}\n`;
 }
 

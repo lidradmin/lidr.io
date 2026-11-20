@@ -1,4 +1,5 @@
 /* In-memory stand-in for a Workers KV namespace (tests only). */
+/* eslint-disable @typescript-eslint/no-explicit-any -- mirrors KV's overloaded return types */
 
 type Entry = { value: ArrayBuffer; metadata?: unknown; expiresAt?: number };
 
