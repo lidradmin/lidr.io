@@ -100,3 +100,12 @@ Where a GitHub or Cloudflare screen may be worded differently from this runbook,
 - **"Could not fetch blog content"** means the content repo URL or GitHub was unreachable. Retry the deploy.
 - **Authors can't log in:** allow pop-ups for `lidr.io` in the browser. Then check the Worker's custom domain, the GitHub App callback URL, and that the App is installed on `lidr-blog`.
 - **The editor suddenly asks to log in again or saves fail:** GitHub App sign-ins expire after 8 hours. Sign in again.
+
+## 9. Claude connector (mcp.lidr.io)
+
+Teammates can publish from Claude.ai with the Lidr Blog connector (setup for them:
+`lidr-blog/docs/claude-connector.md`). The worker lives in `workers/blog-mcp`; its
+README covers deploying, secrets (`GITHUB_CLIENT_ID`, `GITHUB_CLIENT_SECRET`,
+`UPLOAD_SIGNING_KEY`), removing someone's access and revoking sessions. The
+"Lidr Blog Editor" GitHub App must keep `https://mcp.lidr.io/callback` as a
+redirect URI.

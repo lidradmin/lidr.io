@@ -1,0 +1,22 @@
+name = "lidr-blog-mcp"
+main = "src/index.ts"
+compatibility_date = "2026-11-01"
+# Needed by the OAuth provider to fetch Client ID Metadata Documents safely.
+compatibility_flags = ["nodejs_compat", "global_fetch_strictly_public"]
+workers_dev = false
+routes = [{ pattern = "mcp.lidr.io", custom_domain = true }]
+
+[[kv_namespaces]]
+binding = "OAUTH_KV"
+id = "5479ea4fb4b44b419b690575f99fb8f3"
+
+[vars]
+PUBLIC_URL = "https://mcp.lidr.io"
+REPO = "lidradmin/lidr-blog"
+SITE = "https://lidr.io"
+OWNER_NAME = "Conor"
+
+# Secrets (set with `npx wrangler@4 secret put …`, never committed):
+#   GITHUB_CLIENT_ID      – the "Lidr Blog Editor" GitHub App client ID
+#   GITHUB_CLIENT_SECRET  – a client secret of that App
+#   UPLOAD_SIGNING_KEY    – random 48+ bytes; signs one-time photo upload links
