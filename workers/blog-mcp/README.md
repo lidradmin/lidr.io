@@ -34,7 +34,7 @@ photos, rate limits) and plain settings. Secrets (never committed):
 | `GITHUB_CLIENT_SECRET` | A client secret of that App (Settings → Developer settings → GitHub Apps → Lidr Blog Editor → Credentials). The editor's login worker uses a different secret of the same App. |
 | `UPLOAD_SIGNING_KEY` | Random value that signs photo upload links: `openssl rand -base64 48 \| tr -d '\n' \| npx wrangler@4 secret put UPLOAD_SIGNING_KEY` |
 
-The GitHub App must list `https://mcp.lidr.io/callback` as a redirect URI.
+The GitHub App must list `https://mcp.lidr.io/callback` as a redirect URI, and must be **public** (App settings → Advanced). A private GitHub App shows a 404 to everyone except its owner (lidradmin) when they sign in, which breaks both this connector and the lidr.io/admin editor for teammates.
 
 ## Operations
 

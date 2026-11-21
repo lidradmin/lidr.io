@@ -20,3 +20,8 @@ OWNER_NAME = "Conor"
 #   GITHUB_CLIENT_ID      – the "Lidr Blog Editor" GitHub App client ID
 #   GITHUB_CLIENT_SECRET  – a client secret of that App
 #   UPLOAD_SIGNING_KEY    – random 48+ bytes; signs one-time photo upload links
+
+# Keep request logs (free tier, 3 days) so connection problems can be diagnosed later.
+[observability]
+enabled = true
+head_sampling_rate = 1
